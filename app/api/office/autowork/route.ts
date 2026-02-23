@@ -10,11 +10,26 @@ const AUTOWORK_FILE = join(STATUS_DIR, 'autowork.json');
 const DEFAULT_PROMPT =
   'Auto-work check-in. Continue any in-progress tasks, or find and start your highest priority task based on your role and current assignments. If truly idle with nothing to do, briefly report your status.';
 
+// Max agents to send work to in a single tick. Remaining agents queue
+// for the next tick (~15s later). Prevents hitting API rate limits when
+// many agents have auto-work enabled on similar intervals.
+const MAX_SENDS_PER_TICK = 2;
+
+// After sending to an agent, enforce a minimum gap before the same agent
+// can be auto-sent again, regardless of configured interval. Prevents
+// rapid re-sends if the tick fires faster than the interval resolves.
+const MIN_GAP_MS = 30_000;
+
 interface AutoworkPolicy {
   enabled: boolean;
   intervalMs: number;
   prompt: string;
   lastSentAt: number;
+}
+
+interface AutoworkConfig {
+  maxSendsPerTick?: number;
+  policies: Record<string, AutoworkPolicy>;
 }
 
 function findOpenclawBin(): string {
@@ -35,18 +50,21 @@ function findOpenclawBin(): string {
 
 const OPENCLAW_BIN = findOpenclawBin();
 
-function readPolicies(): Record<string, AutoworkPolicy> {
+function readConfig(): AutoworkConfig {
   try {
     if (existsSync(AUTOWORK_FILE)) {
-      return JSON.parse(readFileSync(AUTOWORK_FILE, 'utf-8'));
+      const raw = JSON.parse(readFileSync(AUTOWORK_FILE, 'utf-8'));
+      // Support both old format (flat policies) and new format (with config)
+      if (raw.policies) return raw as AutoworkConfig;
+      return { policies: raw };
     }
   } catch {}
-  return {};
+  return { policies: {} };
 }
 
-function writePolicies(policies: Record<string, AutoworkPolicy>): void {
+function writeConfig(config: AutoworkConfig): void {
   if (!existsSync(STATUS_DIR)) mkdirSync(STATUS_DIR, { recursive: true });
-  writeFileSync(AUTOWORK_FILE, JSON.stringify(policies, null, 2));
+  writeFileSync(AUTOWORK_FILE, JSON.stringify(config, null, 2));
 }
 
 function sendToAgent(agentId: string, message: string): void {
@@ -59,48 +77,61 @@ function sendToAgent(agentId: string, message: string): void {
 }
 
 /**
- * GET — return all auto-work policies
+ * GET — return all auto-work policies and config
  */
 export async function GET() {
-  return NextResponse.json(readPolicies());
+  const config = readConfig();
+  return NextResponse.json({
+    maxSendsPerTick: config.maxSendsPerTick ?? MAX_SENDS_PER_TICK,
+    ...config.policies,
+  });
 }
 
 /**
  * POST — create or update an agent's auto-work policy
- * Body: { agentId, enabled?, intervalMs?, prompt? }
+ * Body: { agentId, enabled?, intervalMs?, prompt?, maxSendsPerTick? }
  */
 export async function POST(request: Request) {
   try {
-    const { agentId, enabled, intervalMs, prompt } = await request.json();
+    const { agentId, enabled, intervalMs, prompt, maxSendsPerTick } = await request.json();
 
-    if (!agentId || typeof agentId !== 'string') {
-      return NextResponse.json({ error: 'agentId required' }, { status: 400 });
+    const config = readConfig();
+
+    // Allow updating global concurrency limit
+    if (typeof maxSendsPerTick === 'number' && maxSendsPerTick >= 1 && maxSendsPerTick <= 10) {
+      config.maxSendsPerTick = maxSendsPerTick;
     }
 
-    const policies = readPolicies();
-    const existing = policies[agentId] || {
-      enabled: false,
-      intervalMs: 600_000,
-      prompt: DEFAULT_PROMPT,
-      lastSentAt: 0,
-    };
+    if (agentId && typeof agentId === 'string') {
+      const existing = config.policies[agentId] || {
+        enabled: false,
+        intervalMs: 600_000,
+        prompt: DEFAULT_PROMPT,
+        lastSentAt: 0,
+      };
 
-    if (typeof enabled === 'boolean') existing.enabled = enabled;
-    if (typeof intervalMs === 'number' && intervalMs >= 60_000) existing.intervalMs = intervalMs;
-    if (typeof prompt === 'string') existing.prompt = prompt || DEFAULT_PROMPT;
+      if (typeof enabled === 'boolean') existing.enabled = enabled;
+      if (typeof intervalMs === 'number' && intervalMs >= 60_000) existing.intervalMs = intervalMs;
+      if (typeof prompt === 'string') existing.prompt = prompt || DEFAULT_PROMPT;
 
-    policies[agentId] = existing;
-    writePolicies(policies);
+      config.policies[agentId] = existing;
+      writeConfig(config);
+      return NextResponse.json({ success: true, policy: existing });
+    }
 
-    return NextResponse.json({ success: true, policy: existing });
+    writeConfig(config);
+    return NextResponse.json({ success: true });
   } catch (err: any) {
     return NextResponse.json({ error: err.message || 'Failed to update' }, { status: 500 });
   }
 }
 
 /**
- * PUT — tick: check all enabled policies and send work where interval has elapsed.
- * Optionally pass { agentId } to force-send to one agent immediately.
+ * PUT — tick: check all enabled policies and send work where interval has
+ * elapsed, respecting the concurrency limit. Agents that don't fit in this
+ * tick are queued for the next one (~15s).
+ *
+ * Pass { agentId } to force-send to one agent immediately (bypasses limit).
  */
 export async function PUT(request: Request) {
   try {
@@ -110,38 +141,60 @@ export async function PUT(request: Request) {
       forceAgent = body?.agentId;
     } catch {}
 
-    const policies = readPolicies();
+    const config = readConfig();
+    const policies = config.policies;
+    const limit = config.maxSendsPerTick ?? MAX_SENDS_PER_TICK;
     const now = Date.now();
-    const sent: string[] = [];
 
-    for (const [agentId, policy] of Object.entries(policies)) {
-      if (!policy.enabled && agentId !== forceAgent) continue;
-
-      const elapsed = now - (policy.lastSentAt || 0);
-      const shouldSend = agentId === forceAgent || elapsed >= policy.intervalMs;
-
-      if (shouldSend) {
-        sendToAgent(agentId, policy.prompt || DEFAULT_PROMPT);
-        policy.lastSentAt = now;
-        sent.push(agentId);
-      }
-    }
-
-    // Handle force-send for an agent that has no policy yet
-    if (forceAgent && !policies[forceAgent]) {
-      policies[forceAgent] = {
+    // Force-send always goes through immediately (manual user action)
+    if (forceAgent) {
+      const policy = policies[forceAgent] || {
         enabled: false,
         intervalMs: 600_000,
         prompt: DEFAULT_PROMPT,
-        lastSentAt: now,
+        lastSentAt: 0,
       };
-      sendToAgent(forceAgent, DEFAULT_PROMPT);
-      sent.push(forceAgent);
+      sendToAgent(forceAgent, policy.prompt || DEFAULT_PROMPT);
+      policy.lastSentAt = now;
+      policies[forceAgent] = policy;
+      writeConfig(config);
+      return NextResponse.json({ sent: [forceAgent], queued: [], tick: now });
     }
 
-    if (sent.length > 0) writePolicies(policies);
+    // Collect agents whose timer has elapsed
+    const due: [string, AutoworkPolicy][] = [];
+    for (const [agentId, policy] of Object.entries(policies)) {
+      if (!policy.enabled) continue;
+      const elapsed = now - (policy.lastSentAt || 0);
+      if (elapsed >= policy.intervalMs && elapsed >= MIN_GAP_MS) {
+        due.push([agentId, policy]);
+      }
+    }
 
-    return NextResponse.json({ sent, tick: now });
+    if (due.length === 0) {
+      return NextResponse.json({ sent: [], queued: [], tick: now });
+    }
+
+    // Prioritize: agents waiting the longest get sent first
+    due.sort((a, b) => (a[1].lastSentAt || 0) - (b[1].lastSentAt || 0));
+
+    const toSend = due.slice(0, limit);
+    const queued = due.slice(limit);
+    const sent: string[] = [];
+
+    for (const [agentId, policy] of toSend) {
+      sendToAgent(agentId, policy.prompt || DEFAULT_PROMPT);
+      policy.lastSentAt = now;
+      sent.push(agentId);
+    }
+
+    writeConfig(config);
+
+    return NextResponse.json({
+      sent,
+      queued: queued.map(([id]) => id),
+      tick: now,
+    });
   } catch (err: any) {
     return NextResponse.json({ error: err.message || 'Tick failed' }, { status: 500 });
   }

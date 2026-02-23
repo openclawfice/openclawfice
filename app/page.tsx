@@ -942,12 +942,16 @@ export default function HomePage() {
     fetchConfig();
   }, []);
 
-  // Load autowork policies and tick every 15s
+  // Load autowork policies every 15s
   useEffect(() => {
     const fetchAutowork = async () => {
       try {
         const res = await fetch('/api/office/autowork');
-        if (res.ok) setAutoworkPolicies(await res.json());
+        if (res.ok) {
+          const data = await res.json();
+          const { maxSendsPerTick: _, ...policies } = data;
+          setAutoworkPolicies(policies);
+        }
       } catch {}
     };
     fetchAutowork();
@@ -969,9 +973,12 @@ export default function HomePage() {
         if (res.ok) {
           const data = await res.json();
           if (data.sent?.length > 0) {
-            // Refresh policies to get updated lastSentAt
             const polRes = await fetch('/api/office/autowork');
-            if (polRes.ok) setAutoworkPolicies(await polRes.json());
+            if (polRes.ok) {
+              const polData = await polRes.json();
+              const { maxSendsPerTick: _, ...policies } = polData;
+              setAutoworkPolicies(policies);
+            }
           }
         }
       } catch {}
