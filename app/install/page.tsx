@@ -386,7 +386,7 @@ export default function InstallPage() {
             Open source • MIT licensed
           </p>
           <div style={{ display: 'flex', gap: 16, justifyContent: 'center', fontSize: 13 }}>
-            <a href="https://github.com/openclaw/openclawfice" style={{ color: '#6366f1', textDecoration: 'none' }}>
+            <a href="https://github.com/openclawfice/openclawfice" style={{ color: '#6366f1', textDecoration: 'none' }}>
               GitHub
             </a>
             <a href="https://docs.openclaw.ai" style={{ color: '#6366f1', textDecoration: 'none' }}>

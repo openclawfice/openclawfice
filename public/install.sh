@@ -2,7 +2,7 @@
 set -e
 
 INSTALL_DIR="$HOME/openclawfice"
-REPO_URL="https://github.com/openclaw/openclawfice.git"
+REPO_URL="https://github.com/openclawfice/openclawfice.git"
 LAUNCHER="$HOME/.local/bin/openclawfice"
 
 echo ""

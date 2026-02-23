@@ -40,7 +40,7 @@ That's it! The installer will:
 ### Manual Install
 
 ```bash
-git clone https://github.com/openclaw/openclawfice.git ~/openclawfice
+git clone https://github.com/openclawfice/openclawfice.git ~/openclawfice
 cd ~/openclawfice
 npm install
 npm run dev
@@ -103,7 +103,7 @@ See [STATUS-FILES.md](./STATUS-FILES.md) for the full spec.
 ## 🛠️ Development
 
 ```bash
-git clone https://github.com/openclaw/openclawfice.git
+git clone https://github.com/openclawfice/openclawfice.git
 cd openclawfice
 npm install
 npm run dev
@@ -272,4 +272,4 @@ MIT © [OpenClaw Community](https://openclaw.ai)
 - Website: [openclawfice.com](https://openclawfice.com) *(coming soon)*
 - Docs: [docs.openclaw.ai](https://docs.openclaw.ai)
 - Discord: [openclaw.ai/discord](https://openclaw.ai/discord)
-- GitHub: [github.com/openclaw/openclawfice](https://github.com/openclaw/openclawfice)
+- GitHub: [github.com/openclawfice/openclawfice](https://github.com/openclawfice/openclawfice)

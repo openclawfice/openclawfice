@@ -196,6 +196,19 @@ function readStatusFile(agentId: string): { task?: string; status?: string; mood
 /**
  * Read cron jobs and find the next scheduled run per agent.
  */
+function resolveJobTarget(job: any): string {
+  const name = (job.name || '').toLowerCase();
+  const payload = (job.payload?.message || '').toLowerCase();
+  const combined = name + ' ' + payload;
+
+  // More specific matches first
+  if (combined.includes('ocf-pm') || combined.includes('nova')) return 'ocf-pm';
+  if (combined.includes('ocf-dev') || combined.includes('forge')) return 'ocf-dev';
+  if (combined.includes('scout') || combined.includes('outreach')) return 'outreach';
+  if (combined.includes('pixel') || combined.includes('openclawfice')) return 'openclawfice';
+  return job.agentId || 'main';
+}
+
 function getNextCronRuns(): Record<string, number> {
   const result: Record<string, number> = {};
   try {
@@ -209,13 +222,47 @@ function getNextCronRuns(): Record<string, number> {
       const nextRun = job.state?.nextRunAtMs;
       if (!nextRun || nextRun < now) continue;
 
-      const agentId = job.agentId;
-      if (agentId && (!result[agentId] || nextRun < result[agentId])) {
-        result[agentId] = nextRun;
+      const targetAgent = resolveJobTarget(job);
+      if (targetAgent && (!result[targetAgent] || nextRun < result[targetAgent])) {
+        result[targetAgent] = nextRun;
       }
     }
   } catch (err) {
     console.error('Failed to read cron jobs:', err);
+  }
+  return result;
+}
+
+function getAgentCooldowns(): Record<string, { jobId: string; jobName: string; intervalMs: number; enabled: boolean; nextRunAt?: number }> {
+  const result: Record<string, any> = {};
+  try {
+    if (!existsSync(CRON_JOBS_FILE)) return result;
+    const data = JSON.parse(readFileSync(CRON_JOBS_FILE, 'utf-8'));
+    const jobs: any[] = data.jobs || [];
+
+    // Map of agent names/ids to look for in job names
+    const agentKeywords: Record<string, string[]> = {};
+
+    for (const job of jobs) {
+      if (!job.schedule?.everyMs) continue; // only interval-based jobs
+      const name = (job.name || '').toLowerCase();
+      const isSelfWork = name.includes('self-assign') || name.includes('self-check') || name.includes('cooldown');
+      if (!isSelfWork) continue;
+
+      const targetAgent = resolveJobTarget(job);
+
+      if (!result[targetAgent]) {
+        result[targetAgent] = {
+          jobId: job.id,
+          jobName: job.name || 'Unnamed',
+          intervalMs: job.schedule.everyMs,
+          enabled: job.enabled !== false,
+          nextRunAt: job.state?.nextRunAtMs,
+        };
+      }
+    }
+  } catch (err) {
+    console.error('Failed to read cooldowns:', err);
   }
   return result;
 }
@@ -371,6 +418,7 @@ export async function GET() {
   
   // Get next cron run times for cooldown timers
   const nextCronRuns = getNextCronRuns();
+  const agentCooldowns = getAgentCooldowns();
 
   // Build agent statuses
   const agents = agentConfigs.map(cfg => {
@@ -456,6 +504,7 @@ export async function GET() {
         ? (hasEverRun ? formatTime(updatedAt) : 'Not yet active') 
         : undefined,
       nextTaskAt: status === 'idle' && nextCronRuns[cfg.id] ? nextCronRuns[cfg.id] : undefined,
+      cooldown: agentCooldowns[cfg.id] || undefined,
       isNew: !hasEverRun,
       hasIdentity: cfg.hasIdentity !== false,
     };

@@ -83,6 +83,34 @@ if (!fs.existsSync(firstRunMarker)) {
     console.log('  ✅ Activity log ready');
   }
 
+  // Deploy OFFICE.md to each agent's workspace
+  try {
+    const config = JSON.parse(fs.readFileSync(openclawConfig, 'utf-8'));
+    const agents = config.agents?.list || [];
+    const defaultWorkspace = config.agents?.defaults?.workspace || '';
+    const templatePath = join(packageRoot, 'templates', 'OFFICE.md');
+
+    if (fs.existsSync(templatePath)) {
+      let template = fs.readFileSync(templatePath, 'utf-8');
+      const officeUrl = `http://localhost:${process.env.PORT || portArg?.split('=')[1] || '3333'}`;
+      template = template.replace(/\{\{OFFICE_URL\}\}/g, officeUrl);
+
+      let deployed = 0;
+      for (const agent of agents) {
+        const workspace = agent.workspace || defaultWorkspace;
+        if (!workspace || !fs.existsSync(workspace)) continue;
+        const targetPath = join(workspace, 'OFFICE.md');
+        fs.writeFileSync(targetPath, template);
+        deployed++;
+      }
+      if (deployed > 0) {
+        console.log(`  ✅ OFFICE.md deployed to ${deployed} agent workspace${deployed > 1 ? 's' : ''}`);
+      }
+    }
+  } catch (err) {
+    // Non-fatal — office still works without OFFICE.md
+  }
+
   // Write first-run marker
   fs.writeFileSync(firstRunMarker, JSON.stringify({ setupAt: new Date().toISOString(), version: '0.1.0' }));
 
@@ -93,11 +121,145 @@ if (!fs.existsSync(firstRunMarker)) {
   console.log('  🎉 Setup complete!\n');
 }
 
+// ─── Auto-upgrade on every start ────────────────────────────────────
+
+// Check if OFFICE.md template is newer than deployed version
+const versionFile = join(statusDir, '.openclawfice-version');
+const pkg = JSON.parse(fs.readFileSync(join(packageRoot, 'package.json'), 'utf-8'));
+const currentVersion = pkg.version || '0.0.0';
+let lastVersion = '0.0.0';
+try { lastVersion = fs.readFileSync(versionFile, 'utf-8').trim(); } catch {}
+
+if (currentVersion !== lastVersion) {
+  console.log(`🔄 OpenClawfice updated (${lastVersion} → ${currentVersion}), running migrations...\n`);
+
+  // Re-deploy OFFICE.md to all workspaces
+  try {
+    const config = JSON.parse(fs.readFileSync(openclawConfig, 'utf-8'));
+    const agents = config.agents?.list || [];
+    const defaultWorkspace = config.agents?.defaults?.workspace || '';
+    const templatePath = join(packageRoot, 'templates', 'OFFICE.md');
+
+    if (fs.existsSync(templatePath)) {
+      let template = fs.readFileSync(templatePath, 'utf-8');
+      const pArg = process.argv.find(a => a.startsWith('--port='));
+      const p = pArg ? pArg.split('=')[1] : (process.env.PORT || '3333');
+      template = template.replace(/\{\{OFFICE_URL\}\}/g, `http://localhost:${p}`);
+
+      let deployed = 0;
+      for (const agent of agents) {
+        const workspace = agent.workspace || defaultWorkspace;
+        if (!workspace || !fs.existsSync(workspace)) continue;
+        fs.writeFileSync(join(workspace, 'OFFICE.md'), template);
+        deployed++;
+      }
+      if (deployed > 0) console.log(`  ✅ OFFICE.md updated in ${deployed} workspace${deployed > 1 ? 's' : ''}`);
+    }
+  } catch {}
+
+  // Set up default cron jobs if none exist
+  try {
+    const cronFile = join(openclawDir, 'cron', 'jobs.json');
+    if (fs.existsSync(cronFile)) {
+      const cronData = JSON.parse(fs.readFileSync(cronFile, 'utf-8'));
+      const jobs = cronData.jobs || [];
+      const hasLounge = jobs.some(j => (j.name || '').toLowerCase().includes('lounge') || (j.name || '').toLowerCase().includes('water cooler'));
+
+      if (!hasLounge) {
+        // Read agent names for the chat prompt
+        const config = JSON.parse(fs.readFileSync(openclawConfig, 'utf-8'));
+        const agentList = config.agents?.list || [];
+        const defaultWs = config.agents?.defaults?.workspace || '';
+        const names = [];
+        for (const a of agentList) {
+          const ws = a.workspace || defaultWs;
+          const idFile = join(ws, 'IDENTITY.md');
+          let name = a.id;
+          try {
+            if (fs.existsSync(idFile)) {
+              const c = fs.readFileSync(idFile, 'utf-8');
+              const m = c.match(/\*\*Name:\*\*\s*(.+)/);
+              if (m) name = m[1].trim();
+            }
+          } catch {}
+          if (a.id !== '_owner' && name !== '_owner') names.push(name);
+        }
+        const nameList = names.length > 0 ? names.join(', ') : 'your agents';
+
+        const loungeJob = {
+          id: require('crypto').randomUUID(),
+          agentId: 'main',
+          name: 'openclawfice-lounge-chat',
+          enabled: true,
+          createdAtMs: Date.now(),
+          updatedAtMs: Date.now(),
+          schedule: { kind: 'every', everyMs: 300000, anchorMs: Date.now() },
+          sessionTarget: 'isolated',
+          wakeMode: 'now',
+          payload: {
+            kind: 'agentTurn',
+            message: `Generate a water cooler chat message for the virtual office. Read ${join(statusDir, 'chat.json')} for recent messages. Append ONE new casual message from one of: ${nameList} (rotate — pick whoever spoke least recently). Messages should be casual coworker chat that naturally surfaces ideas, observations, or suggestions that could become real tasks. Format as JSON, append to array, keep last 20 messages.`,
+            model: 'anthropic/claude-haiku-4-5',
+            timeoutSeconds: 30,
+          },
+          delivery: { mode: 'none' },
+          state: {},
+        };
+
+        cronData.jobs = jobs;
+        cronData.jobs.push(loungeJob);
+        fs.writeFileSync(cronFile, JSON.stringify(cronData, null, 2));
+        console.log(`  ✅ Lounge chat cron created (every 5 min)`);
+      }
+    }
+  } catch {}
+
+  // Save version
+  fs.mkdirSync(statusDir, { recursive: true });
+  fs.writeFileSync(versionFile, currentVersion);
+  console.log(`  ✅ Version ${currentVersion} recorded\n`);
+}
+
 // ─── Command Router ─────────────────────────────────────────────────
 
 const command = process.argv[2];
 
 // Handle subcommands
+if (command === 'sync' || command === 'deploy') {
+  console.log('📋 Deploying OFFICE.md to all agent workspaces...\n');
+  try {
+    const config = JSON.parse(fs.readFileSync(openclawConfig, 'utf-8'));
+    const agents = config.agents?.list || [];
+    const defaultWorkspace = config.agents?.defaults?.workspace || '';
+    const templatePath = join(packageRoot, 'templates', 'OFFICE.md');
+
+    if (!fs.existsSync(templatePath)) {
+      console.error('❌ Template not found:', templatePath);
+      process.exit(1);
+    }
+
+    let template = fs.readFileSync(templatePath, 'utf-8');
+    const pArg = process.argv.find(a => a.startsWith('--port='));
+    const p = pArg ? pArg.split('=')[1] : (process.env.PORT || '3333');
+    template = template.replace(/\{\{OFFICE_URL\}\}/g, `http://localhost:${p}`);
+
+    let deployed = 0;
+    for (const agent of agents) {
+      const workspace = agent.workspace || defaultWorkspace;
+      if (!workspace || !fs.existsSync(workspace)) continue;
+      const targetPath = join(workspace, 'OFFICE.md');
+      fs.writeFileSync(targetPath, template);
+      console.log(`  ✅ ${workspace}/OFFICE.md`);
+      deployed++;
+    }
+    console.log(`\n🎉 Deployed to ${deployed} workspace${deployed > 1 ? 's' : ''}.`);
+  } catch (err) {
+    console.error('❌ Failed:', err.message);
+    process.exit(1);
+  }
+  process.exit(0);
+}
+
 if (command === 'sync-cooldowns') {
   console.log('🔄 Running cooldown sync...\n');
   const syncScript = join(__dirname, 'sync-cooldowns.ts');
@@ -125,6 +287,7 @@ Usage:
 
 Commands:
   (default)         Start the office dashboard server
+  deploy            Deploy OFFICE.md to all agent workspaces
   sync-cooldowns    Sync cooldown config to OpenClaw cron jobs
   help              Show this help
 

@@ -24,6 +24,7 @@ interface Accomplishment {
   detail?: string;
   who: string;
   timestamp: number;
+  screenshot?: string;
 }
 
 interface Skill {
@@ -55,6 +56,13 @@ interface Agent {
   thought?: string;
   lastActive?: string;
   nextTaskAt?: number;
+  cooldown?: {
+    jobId?: string;
+    jobName?: string;
+    intervalMs?: number;
+    enabled?: boolean;
+    nextRunAt?: number;
+  };
   isNew?: boolean;
   hasIdentity?: boolean;
   needs: Needs;
@@ -431,7 +439,25 @@ function SkillBadge({ skill }: { skill: Skill }) {
   );
 }
 
-function AgentPanel({ agent, onClose }: { agent: Agent; onClose: () => void }) {
+const COOLDOWN_PRESETS = [
+  { label: '1m', ms: 60000 },
+  { label: '5m', ms: 300000 },
+  { label: '10m', ms: 600000 },
+  { label: '15m', ms: 900000 },
+  { label: '30m', ms: 1800000 },
+  { label: '1h', ms: 3600000 },
+];
+
+function formatInterval(ms: number): string {
+  if (ms < 60000) return `${Math.round(ms / 1000)}s`;
+  if (ms < 3600000) return `${Math.round(ms / 60000)}m`;
+  return `${(ms / 3600000).toFixed(1)}h`;
+}
+
+function AgentPanel({ agent, onClose, onCooldownUpdate }: { agent: Agent; onClose: () => void; onCooldownUpdate?: (agentId: string, patch: { intervalMs?: number; enabled?: boolean; nextRunAt?: number }) => void }) {
+  const [cooldownSaving, setCooldownSaving] = useState(false);
+  const [cooldownEnabled, setCooldownEnabled] = useState(agent.cooldown?.enabled ?? false);
+  const [cooldownMs, setCooldownMs] = useState(agent.cooldown?.intervalMs ?? 600000);
   const [dmMessage, setDmMessage] = useState('');
   const [sending, setSending] = useState(false);
   const [sentConfirm, setSentConfirm] = useState(false);
@@ -618,6 +644,110 @@ function AgentPanel({ agent, onClose }: { agent: Agent; onClose: () => void }) {
         </div>
       )}
 
+      {/* Auto-Work Cooldown */}
+      {agent.id !== '_owner' && (
+        <div style={{
+          background: '#1e293b', borderRadius: 8, padding: 12, marginBottom: 16,
+          border: '1px solid #334155',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <div style={{ fontSize: 9, color: '#64748b', textTransform: 'uppercase' as const, fontFamily: '"Press Start 2P", monospace' }}>
+              ⏰ Auto-Work
+            </div>
+            {agent.cooldown?.jobId ? (
+              <button
+                onClick={async () => {
+                  setCooldownSaving(true);
+                  try {
+                    const res = await fetch('/api/office/cooldown', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ jobId: agent.cooldown!.jobId, enabled: !cooldownEnabled }),
+                    });
+                    if (res.ok) {
+                      const data = await res.json();
+                      const newEnabled = !cooldownEnabled;
+                      setCooldownEnabled(newEnabled);
+                      const nextRun = data.job?.state?.nextRunAtMs ?? (newEnabled ? Date.now() + cooldownMs : undefined);
+                      onCooldownUpdate?.(agent.id, { enabled: newEnabled, nextRunAt: nextRun });
+                    }
+                  } catch {}
+                  setCooldownSaving(false);
+                }}
+                disabled={cooldownSaving}
+                style={{
+                  background: cooldownEnabled ? '#10b981' : '#475569',
+                  border: 'none', borderRadius: 12, padding: '3px 10px',
+                  color: '#fff', fontSize: 9, cursor: 'pointer',
+                  fontFamily: '"Press Start 2P", monospace',
+                  opacity: cooldownSaving ? 0.5 : 1,
+                  transition: 'background 0.2s',
+                }}
+              >
+                {cooldownEnabled ? 'ON' : 'OFF'}
+              </button>
+            ) : (
+              <span style={{ fontSize: 8, color: '#475569', fontStyle: 'italic' }}>no cron job</span>
+            )}
+          </div>
+
+          <div style={{ fontSize: 10, color: '#94a3b8', lineHeight: 1.5, marginBottom: 10 }}>
+            When enabled, {agent.name} automatically gets sent to work on a recurring timer.
+            {cooldownEnabled
+              ? ` Currently running every ${formatInterval(cooldownMs)}.`
+              : ` Currently paused — ${agent.name} will idle until manually tasked.`}
+          </div>
+
+          {agent.cooldown?.jobId && (
+            <>
+              <div style={{ fontSize: 8, color: '#64748b', marginBottom: 6, textTransform: 'uppercase' as const }}>Interval</div>
+              <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+                {COOLDOWN_PRESETS.map(p => (
+                  <button
+                    key={p.ms}
+                    onClick={async () => {
+                      setCooldownSaving(true);
+                      try {
+                        const res = await fetch('/api/office/cooldown', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ jobId: agent.cooldown!.jobId, intervalMs: p.ms }),
+                        });
+                        if (res.ok) {
+                          const data = await res.json();
+                          setCooldownMs(p.ms);
+                          const nextRun = data.job?.state?.nextRunAtMs ?? (Date.now() + p.ms);
+                          onCooldownUpdate?.(agent.id, { intervalMs: p.ms, nextRunAt: nextRun });
+                        }
+                      } catch {}
+                      setCooldownSaving(false);
+                    }}
+                    disabled={cooldownSaving || !cooldownEnabled}
+                    style={{
+                      background: cooldownMs === p.ms ? '#6366f1' : '#0f172a',
+                      border: `1px solid ${cooldownMs === p.ms ? '#6366f1' : '#334155'}`,
+                      borderRadius: 6, padding: '4px 8px',
+                      color: cooldownMs === p.ms ? '#fff' : (cooldownEnabled ? '#94a3b8' : '#475569'),
+                      fontSize: 9, cursor: cooldownEnabled ? 'pointer' : 'default',
+                      fontFamily: '"Press Start 2P", monospace',
+                      opacity: cooldownSaving ? 0.5 : 1,
+                      transition: 'all 0.15s',
+                    }}
+                  >
+                    {p.label}
+                  </button>
+                ))}
+              </div>
+              {agent.cooldown.jobName && (
+                <div style={{ fontSize: 8, color: '#475569', marginTop: 8, fontStyle: 'italic' }}>
+                  Job: {agent.cooldown.jobName}
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      )}
+
       <div style={{ marginBottom: 16 }}>
         <div style={{
           fontSize: 9,
@@ -747,6 +877,7 @@ export default function HomePage() {
   const [time, setTime] = useState(new Date());
   const [pendingActions, setPendingActions] = useState<PendingAction[]>([]);
   const [accomplishments, setAccomplishments] = useState<Accomplishment[]>([]);
+  const [selectedAccomplishment, setSelectedAccomplishment] = useState<Accomplishment | null>(null);
   const [expandedAction, setExpandedAction] = useState<string | null>(null);
   const [expandedTask, setExpandedTask] = useState<string | null>(null);
   const [chatLog, setChatLog] = useState<ChatMessage[]>([]);
@@ -1197,13 +1328,13 @@ export default function HomePage() {
       {/* Office Floor — only show if agents exist */}
       {agents.length > 0 && (
       <div style={{
-        padding: isMobile ? '6px' : '8px 12px',
+        padding: isMobile ? '6px' : '8px 12px 16px',
         display: 'grid',
         gridTemplateColumns: isMobile ? '1fr' : isTablet ? '1fr 240px' : '1fr 260px',
         gap: roomGap,
         maxWidth: isMobile ? '100%' : 1400,
         margin: '0 auto',
-        height: isMobile ? 'auto' : 'calc(100vh - 48px)',
+        height: isMobile ? 'auto' : 'calc(100vh - 56px)',
         overflow: isMobile ? 'auto' : 'hidden',
       }}>
         {/* LEFT COLUMN */}
@@ -1229,7 +1360,7 @@ export default function HomePage() {
               gap: 24,
               justifyContent: 'center',
               padding: '12px 0 4px',
-              minHeight: 100,
+              minHeight: 80,
             }}>
               {working.length > 0 ? (
                 working.map(a => (
@@ -1519,11 +1650,10 @@ export default function HomePage() {
                       medium: 'rgba(245,158,11,0.1)',
                       low: 'rgba(99,102,241,0.1)',
                     };
-                    const isExpanded = expandedAction === action.id;
                     return (
                       <div
                         key={action.id}
-                        onClick={() => setExpandedAction(isExpanded ? null : action.id)}
+                        onClick={() => setExpandedAction(action.id)}
                         style={{
                           background: priorityGlow[action.priority],
                           border: `1px solid ${priorityColors[action.priority]}44`,
@@ -1571,30 +1701,8 @@ export default function HomePage() {
                               </span>
                             </div>
                           </div>
-                          <span style={{
-                            fontSize: 10,
-                            color: '#475569',
-                            transform: isExpanded ? 'rotate(90deg)' : 'rotate(0)',
-                            transition: 'transform 0.2s',
-                          }}>
-                            ▶
-                          </span>
+                          <span style={{ fontSize: 10, color: '#475569' }}>▶</span>
                         </div>
-                        {isExpanded && (
-                          <div style={{
-                            marginTop: 6,
-                            paddingTop: 6,
-                            borderTop: '1px solid #1e293b',
-                          }}>
-                            <div style={{
-                              fontSize: 10,
-                              color: '#94a3b8',
-                              lineHeight: 1.4,
-                            }}>
-                              {action.description}
-                            </div>
-                          </div>
-                        )}
                       </div>
                     );
                   })
@@ -1690,42 +1798,34 @@ export default function HomePage() {
                     if (hours < 24) return `${hours}h ago`;
                     return `${Math.floor(hours / 24)}d ago`;
                   })();
+                  const hasMedia = a.screenshot && (a.screenshot.endsWith('.mp4') || a.screenshot.endsWith('.webm') || a.screenshot.endsWith('.mov'));
                   return (
                     <div
                       key={a.id || i}
+                      onClick={() => setSelectedAccomplishment(a)}
                       style={{
                         display: 'flex',
-                        alignItems: 'flex-start',
+                        alignItems: 'center',
                         gap: 8,
                         padding: '5px 8px',
                         background: 'rgba(16,185,129,0.04)',
                         border: '1px solid rgba(16,185,129,0.1)',
                         borderRadius: 6,
+                        cursor: 'pointer',
                         animation: i === 0 ? 'fadeSlideIn 0.5s ease-out' : undefined,
                       }}
                     >
-                      <span style={{ fontSize: 16, flexShrink: 0, marginTop: 1 }}>
+                      <span style={{ fontSize: 16, flexShrink: 0 }}>
                         {a.icon}
                       </span>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{
-                          fontSize: 10,
-                          fontWeight: 700,
-                          color: '#e2e8f0',
-                        }}>
+                      <div style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        <span style={{ fontSize: 10, fontWeight: 700, color: '#e2e8f0' }}>
                           {a.title}
-                        </div>
-                        {a.detail && (
-                          <div style={{
-                            fontSize: 9,
-                            color: '#64748b',
-                            marginTop: 1,
-                            lineHeight: 1.3,
-                          }}>
-                            {a.detail}
-                          </div>
-                        )}
+                        </span>
                       </div>
+                      {hasMedia && (
+                        <span style={{ fontSize: 10, flexShrink: 0 }}>🎬</span>
+                      )}
                       <div style={{
                         display: 'flex',
                         flexDirection: 'column',
@@ -1982,9 +2082,293 @@ export default function HomePage() {
       )}
 
       {/* Agent Detail Panel */}
+      {/* Quest Detail Modal */}
+      {expandedAction && (() => {
+        const action = pendingActions.find(a => a.id === expandedAction);
+        if (!action) return null;
+        const priorityColors: Record<string, string> = { high: '#ef4444', medium: '#f59e0b', low: '#6366f1' };
+        const respondAction = async (response: string) => {
+          await fetch('/api/office/actions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ type: 'respond_action', id: action.id, response }),
+          });
+          setPendingActions(prev => prev.filter(a => a.id !== action.id));
+          setExpandedAction(null);
+        };
+        return (
+          <div onClick={() => setExpandedAction(null)} style={{
+            position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 1000,
+            display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20,
+          }}>
+            <div onClick={(e) => e.stopPropagation()} style={{
+              background: '#0f172a', border: `2px solid ${priorityColors[action.priority]}`,
+              borderRadius: 12, padding: 20, maxWidth: 520, width: '100%',
+              maxHeight: '80vh', overflowY: 'auto',
+              boxShadow: `0 0 40px ${priorityColors[action.priority]}33, 0 20px 60px rgba(0,0,0,0.8)`,
+            }}>
+              {/* Header */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+                <span style={{ fontSize: 24 }}>{action.icon}</span>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: '#e2e8f0' }}>{action.title}</div>
+                  <div style={{ fontSize: 10, color: '#64748b', marginTop: 2 }}>
+                    from <span style={{ color: action.from === 'Scout' ? '#f59e0b' : action.from === 'Cipher' ? '#6366f1' : '#10b981' }}>{action.from}</span>
+                    <span style={{ marginLeft: 8, color: priorityColors[action.priority], fontWeight: 600, textTransform: 'uppercase' as const, fontFamily: '"Press Start 2P", monospace', fontSize: 8 }}>
+                      {action.priority === 'high' ? '❗ URGENT' : action.priority === 'medium' ? '⚡ SOON' : '📋 WHEN FREE'}
+                    </span>
+                  </div>
+                </div>
+                <button onClick={() => setExpandedAction(null)} style={{
+                  background: 'none', border: 'none', color: '#475569', fontSize: 18, cursor: 'pointer',
+                }}>✕</button>
+              </div>
+
+              {/* Description */}
+              <div style={{ fontSize: 12, color: '#94a3b8', lineHeight: 1.6, marginBottom: 12 }}>{action.description}</div>
+
+              {/* Email body */}
+              {action.data?.body && (
+                <div style={{
+                  background: '#1e293b', borderRadius: 8, padding: 12, marginBottom: 12,
+                  fontSize: 11, color: '#cbd5e1', whiteSpace: 'pre-wrap' as const, lineHeight: 1.6,
+                  border: '1px solid #334155',
+                }}>
+                  {action.data.subject && <div style={{ fontWeight: 700, marginBottom: 4, color: '#e2e8f0', fontSize: 12 }}>Subject: {action.data.subject}</div>}
+                  {action.data.to && <div style={{ color: '#64748b', marginBottom: 8 }}>To: {action.data.to}</div>}
+                  {action.data.body}
+                </div>
+              )}
+
+              {/* Options buttons */}
+              {action.data?.options && (
+                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                  {(action.data.options as string[]).map((opt: string, i: number) => (
+                    <button key={i} onClick={() => respondAction(opt)} style={{
+                      background: i === 0 ? '#166534' : '#1e293b',
+                      border: `1px solid ${i === 0 ? '#22c55e' : '#334155'}`,
+                      borderRadius: 6, padding: '8px 16px', fontSize: 11,
+                      color: i === 0 ? '#4ade80' : '#94a3b8',
+                      cursor: 'pointer', fontWeight: i === 0 ? 700 : 400,
+                    }}>{opt}</button>
+                  ))}
+                </div>
+              )}
+
+              {/* Approve/Reject/Edit for emails */}
+              {(action.type === 'approve_email' || action.type === 'approve_send') && !action.data?.options && (
+                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                  <button onClick={() => respondAction('approved')} style={{
+                    background: '#166534', border: '1px solid #22c55e', borderRadius: 6,
+                    padding: '8px 20px', color: '#4ade80', cursor: 'pointer',
+                    fontWeight: 700, fontFamily: '"Press Start 2P", monospace', fontSize: 9,
+                  }}>✅ APPROVE</button>
+                  <button onClick={() => respondAction('rejected')} style={{
+                    background: '#450a0a', border: '1px solid #ef4444', borderRadius: 6,
+                    padding: '8px 20px', color: '#f87171', cursor: 'pointer',
+                    fontWeight: 700, fontFamily: '"Press Start 2P", monospace', fontSize: 9,
+                  }}>❌ REJECT</button>
+                  <button onClick={() => {
+                    const edit = prompt('Edit instructions:');
+                    if (edit) respondAction(`edit: ${edit}`);
+                  }} style={{
+                    background: '#1e293b', border: '1px solid #334155', borderRadius: 6,
+                    padding: '8px 20px', color: '#94a3b8', cursor: 'pointer',
+                    fontFamily: '"Press Start 2P", monospace', fontSize: 9,
+                  }}>✏️ EDIT</button>
+                </div>
+              )}
+
+              {/* Text input for decisions/input_needed without options */}
+              {((action.type === 'input_needed' || action.type === 'decision') && !action.data?.options) && (
+                <div style={{ display: 'flex', gap: 6 }}>
+                  <input
+                    type="text"
+                    autoFocus
+                    placeholder={action.type === 'decision' ? 'Your decision...' : 'Type your response...'}
+                    id={`quest-input-${action.id}`}
+                    style={{
+                      flex: 1, background: '#1e293b', border: '1px solid #334155',
+                      borderRadius: 6, padding: '8px 12px', color: '#e2e8f0',
+                      fontSize: 12, outline: 'none',
+                    }}
+                    onKeyDown={async (e) => {
+                      if (e.key === 'Enter') {
+                        const val = (e.target as HTMLInputElement).value.trim();
+                        if (val) respondAction(val);
+                      }
+                    }}
+                  />
+                  <button onClick={() => {
+                    const input = document.getElementById(`quest-input-${action.id}`) as HTMLInputElement;
+                    const val = input?.value.trim();
+                    if (val) respondAction(val);
+                  }} style={{
+                    background: '#4f46e5', border: 'none', borderRadius: 6,
+                    padding: '8px 16px', color: '#fff', cursor: 'pointer',
+                    fontFamily: '"Press Start 2P", monospace', fontSize: 9,
+                  }}>SEND</button>
+                </div>
+              )}
+
+              {/* Review — acknowledge + notes */}
+              {(action.type === 'review_data' || action.type === 'review') && !action.data?.options && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  <button onClick={() => respondAction('acknowledged')} style={{
+                    background: '#1e293b', border: '1px solid #334155', borderRadius: 6,
+                    padding: '8px 20px', color: '#94a3b8', cursor: 'pointer',
+                    fontFamily: '"Press Start 2P", monospace', fontSize: 9, alignSelf: 'flex-start',
+                  }}>👀 ACKNOWLEDGED</button>
+                  <div style={{ display: 'flex', gap: 6 }}>
+                    <input
+                      type="text"
+                      placeholder="Or add notes..."
+                      id={`quest-input-${action.id}`}
+                      style={{
+                        flex: 1, background: '#1e293b', border: '1px solid #334155',
+                        borderRadius: 6, padding: '8px 12px', color: '#e2e8f0',
+                        fontSize: 12, outline: 'none',
+                      }}
+                      onKeyDown={async (e) => {
+                        if (e.key === 'Enter') {
+                          const val = (e.target as HTMLInputElement).value.trim();
+                          if (val) respondAction(val);
+                        }
+                      }}
+                    />
+                    <button onClick={() => {
+                      const input = document.getElementById(`quest-input-${action.id}`) as HTMLInputElement;
+                      const val = input?.value.trim();
+                      if (val) respondAction(val);
+                    }} style={{
+                      background: '#4f46e5', border: 'none', borderRadius: 6,
+                      padding: '8px 16px', color: '#fff', cursor: 'pointer',
+                      fontFamily: '"Press Start 2P", monospace', fontSize: 9,
+                    }}>SEND</button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      })()}
+
+      {selectedAccomplishment && (
+        <div
+          onClick={() => setSelectedAccomplishment(null)}
+          style={{
+            position: 'fixed',
+            top: 0, left: 0, right: 0, bottom: 0,
+            background: 'rgba(0,0,0,0.7)',
+            zIndex: 1000,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              background: '#1e293b',
+              border: '1px solid #334155',
+              borderRadius: 12,
+              padding: 24,
+              maxWidth: 500,
+              width: '90%',
+              maxHeight: '80vh',
+              overflowY: 'auto',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+              <span style={{ fontSize: 32 }}>{selectedAccomplishment.icon}</span>
+              <div>
+                <div style={{ fontSize: 16, fontWeight: 700, color: '#e2e8f0' }}>
+                  {selectedAccomplishment.title}
+                </div>
+                <div style={{ fontSize: 11, color: '#6366f1', fontWeight: 600 }}>
+                  {selectedAccomplishment.who} · {new Date(selectedAccomplishment.timestamp).toLocaleString()}
+                </div>
+              </div>
+            </div>
+            {selectedAccomplishment.detail && (
+              <div style={{ fontSize: 13, color: '#94a3b8', lineHeight: 1.6, marginBottom: 16 }}>
+                {selectedAccomplishment.detail}
+              </div>
+            )}
+            {selectedAccomplishment.screenshot && (
+              <div>
+                {selectedAccomplishment.screenshot.endsWith('.mp4') || selectedAccomplishment.screenshot.endsWith('.webm') || selectedAccomplishment.screenshot.endsWith('.mov') ? (
+                  <video
+                    src={`/api/office/screenshot?file=${encodeURIComponent(selectedAccomplishment.screenshot)}`}
+                    controls
+                    autoPlay
+                    style={{
+                      width: '100%',
+                      borderRadius: 8,
+                      border: '1px solid #334155',
+                      background: '#000',
+                    }}
+                  />
+                ) : (
+                  <img
+                    src={`/api/office/screenshot?file=${encodeURIComponent(selectedAccomplishment.screenshot)}`}
+                    alt={selectedAccomplishment.title}
+                    style={{
+                      width: '100%',
+                      borderRadius: 8,
+                      border: '1px solid #334155',
+                    }}
+                  />
+                )}
+              </div>
+            )}
+            <button
+              onClick={() => setSelectedAccomplishment(null)}
+              style={{
+                marginTop: 16,
+                width: '100%',
+                padding: '8px 16px',
+                background: '#334155',
+                color: '#e2e8f0',
+                border: 'none',
+                borderRadius: 6,
+                cursor: 'pointer',
+                fontSize: 12,
+              }}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
       {selectedAgent && (
         <>
-          <AgentPanel agent={selectedAgent} onClose={() => setSelectedAgent(null)} />
+          <AgentPanel agent={selectedAgent} onClose={() => setSelectedAgent(null)} onCooldownUpdate={(agentId, patch) => {
+            setAgents(prev => prev.map(a => {
+              if (a.id !== agentId) return a;
+              return {
+                ...a,
+                nextTaskAt: patch.nextRunAt ?? a.nextTaskAt,
+                cooldown: a.cooldown ? {
+                  ...a.cooldown,
+                  intervalMs: patch.intervalMs ?? a.cooldown.intervalMs,
+                  enabled: patch.enabled ?? a.cooldown.enabled,
+                  nextRunAt: patch.nextRunAt ?? a.cooldown.nextRunAt,
+                } : a.cooldown,
+              };
+            }));
+            // Also update selectedAgent so panel reflects change
+            setSelectedAgent(prev => prev && prev.id === agentId ? {
+              ...prev,
+              nextTaskAt: patch.nextRunAt ?? prev.nextTaskAt,
+              cooldown: prev.cooldown ? {
+                ...prev.cooldown,
+                intervalMs: patch.intervalMs ?? prev.cooldown.intervalMs,
+                enabled: patch.enabled ?? prev.cooldown.enabled,
+                nextRunAt: patch.nextRunAt ?? prev.cooldown.nextRunAt,
+              } : prev.cooldown,
+            } : prev);
+          }} />
           <div
             onClick={() => setSelectedAgent(null)}
             style={{

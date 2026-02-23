@@ -12,6 +12,7 @@
     }
   },
   "owner": {
+    "name": "Your Name",
     "role": "CEO",
     "emoji": "👑",
     "color": "#10b981",
