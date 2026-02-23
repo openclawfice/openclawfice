@@ -1211,6 +1211,7 @@ export default function HomePage() {
   const [activityLog, setActivityLog] = useState<any[]>([]);
   const [activeThought, setActiveThought] = useState<{ agentId: string; text: string } | null>(null);
   const [lastSeenChatCount, setLastSeenChatCount] = useState(0);
+  const [nextChatIn, setNextChatIn] = useState(0);
   const chatRef = useRef<HTMLDivElement>(null);
   const [groupMessage, setGroupMessage] = useState('');
   const [sendingGroup, setSendingGroup] = useState(false);
@@ -1458,8 +1459,11 @@ export default function HomePage() {
     
     const baseFreq = parseInterval(waterCoolerConfig.frequency || '45s');
     const delay = baseFreq + (Math.random() - 0.5) * baseFreq * 0.5;
+    const delaySec = Math.round(delay / 1000);
+    setNextChatIn(delaySec);
     
     const timer = setTimeout(async () => {
+      setNextChatIn(-1); // -1 = generating
       try {
         const allAgentData = agents
           .filter(a => a.id !== '_owner')
@@ -1473,9 +1477,17 @@ export default function HomePage() {
           }),
         });
       } catch {}
+      setNextChatIn(0);
     }, delay);
     return () => clearTimeout(timer);
   }, [agents, chatLog, config]);
+
+  // Countdown tick
+  useEffect(() => {
+    if (nextChatIn <= 0) return;
+    const tick = setInterval(() => setNextChatIn(p => Math.max(0, p - 1)), 1000);
+    return () => clearInterval(tick);
+  }, [nextChatIn > 0]);
 
   // Fluctuate needs slightly
   useEffect(() => {
@@ -2396,6 +2408,18 @@ export default function HomePage() {
                 color: '#f59e0b',
               }}>
                 Water Cooler
+              </span>
+              <span style={{
+                marginLeft: 'auto',
+                fontSize: 8,
+                color: nextChatIn === -1 ? '#f59e0b' : '#475569',
+                fontVariantNumeric: 'tabular-nums',
+              }}>
+                {nextChatIn === -1
+                  ? '✨ generating...'
+                  : nextChatIn > 0
+                    ? `next in ${nextChatIn >= 60 ? `${Math.floor(nextChatIn / 60)}:${String(nextChatIn % 60).padStart(2, '0')}` : `${nextChatIn}s`}`
+                    : ''}
               </span>
             </div>
             <div
