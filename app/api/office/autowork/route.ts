@@ -15,7 +15,9 @@ const CONFIG_PATHS = [
 ];
 
 const DEFAULT_DIRECTIVE =
-  'Continue any in-progress tasks, or find and start your highest priority task based on your role and current assignments.';
+  'Check your memory and recent work, then pick up where you left off or start the next highest-impact task for your role. ' +
+  'Do NOT just report status — actually open files, write code, create documents, or run commands. ' +
+  'If your previous tasks are done, look at the mission and priorities and find something new to build or improve.';
 
 const MAX_SENDS_PER_TICK = 2;
 const MIN_GAP_MS = 30_000;
@@ -185,14 +187,17 @@ function composePrompt(agentId: string, directive: string, mission: Mission, tea
 
   parts.push(
     '---\n' +
-    'Work on your highest priority task that advances the mission above. ' +
-    'If you finish something, record it as an accomplishment (a Loom-style screen recording is automatically captured):\n\n' +
+    'IMPORTANT: You must DO actual work right now — use tools to read/write files, run commands, create deliverables. ' +
+    'Do NOT just reply with a status update or say you are idle. ' +
+    'Pick a concrete task and execute it.\n\n' +
+    'When you finish something, record it as an accomplishment (a Loom-style screen recording is automatically captured):\n\n' +
     '```bash\n' +
     'curl -s -X POST http://localhost:3333/api/office/actions \\\n' +
     '  -H "Content-Type: application/json" \\\n' +
     '  -d \'{"type":"add_accomplishment","accomplishment":{"icon":"✅","title":"<what you did>","detail":"<brief detail>","who":"<your name>"}}\'\n' +
     '```\n\n' +
-    'If blocked or need a decision, raise a quest instead. If nothing to do, report idle briefly.'
+    'If blocked on something specific, raise a quest. But "nothing to do" is never acceptable — ' +
+    'there is always something to improve, document, test, review, or plan for the mission.'
   );
 
   return parts.join('\n\n');
