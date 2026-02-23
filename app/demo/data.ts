@@ -61,7 +61,7 @@ export const DEMO_AGENTS = [
     color: '#06b6d4',
     status: 'idle',
     mood: 'good',
-    nextTaskAt: Date.now() + 180000, // 3 minutes
+    task: '',
     needs: {
       energy: 80,
       output: 75,

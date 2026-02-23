@@ -7,6 +7,9 @@ import { spawn } from 'child_process';
 const OPENCLAW_DIR = join(homedir(), '.openclaw');
 const STATUS_DIR = join(OPENCLAW_DIR, '.status');
 const AUTOWORK_FILE = join(STATUS_DIR, 'autowork.json');
+const CHAT_FILE = join(STATUS_DIR, 'chat.json');
+const ACTIONS_FILE = join(STATUS_DIR, 'actions.json');
+const ACCOMPLISHMENTS_FILE = join(STATUS_DIR, 'accomplishments.json');
 const OPENCLAW_CONFIG = join(OPENCLAW_DIR, 'openclaw.json');
 
 const CONFIG_PATHS = [
@@ -158,8 +161,39 @@ function getTeamStatus(): { id: string; name: string; status: string; task?: str
   return result;
 }
 
+function readJsonSafe(path: string): any[] {
+  try {
+    if (existsSync(path)) return JSON.parse(readFileSync(path, 'utf-8'));
+  } catch {}
+  return [];
+}
+
+function getRecentChat(limit = 15): { from: string; text: string; ts: number }[] {
+  const msgs = readJsonSafe(CHAT_FILE);
+  return msgs.slice(-limit);
+}
+
+function getOpenQuests(): { title: string; from: string; priority: string; description?: string }[] {
+  return readJsonSafe(ACTIONS_FILE).map((a: any) => ({
+    title: a.title,
+    from: a.from,
+    priority: a.priority || 'medium',
+    description: a.description,
+  }));
+}
+
+function getRecentAccomplishments(limit = 10): { title: string; who: string; detail?: string }[] {
+  const accs = readJsonSafe(ACCOMPLISHMENTS_FILE);
+  return accs.slice(-limit).map((a: any) => ({
+    title: a.title,
+    who: a.who,
+    detail: a.detail,
+  }));
+}
+
 /**
- * Build a mission-driven prompt for an agent.
+ * Build a mission-driven prompt for an agent, including water cooler chat,
+ * open quests, and recent accomplishments so work is contextual.
  */
 function composePrompt(agentId: string, directive: string, mission: Mission, team: { id: string; name: string; status: string; task?: string }[]): string {
   const parts: string[] = [];
@@ -185,11 +219,40 @@ function composePrompt(agentId: string, directive: string, mission: Mission, tea
     parts.push('## Team Status\n' + lines.join('\n'));
   }
 
+  const quests = getOpenQuests();
+  if (quests.length > 0) {
+    const lines = quests.map(q => {
+      const desc = q.description ? ` — ${q.description}` : '';
+      return `- [${q.priority}] ${q.title} (from ${q.from})${desc}`;
+    });
+    parts.push('## Open Quests (needs attention)\n' + lines.join('\n'));
+  }
+
+  const recentAccomplishments = getRecentAccomplishments();
+  if (recentAccomplishments.length > 0) {
+    const lines = recentAccomplishments.map(a => {
+      const detail = a.detail ? ` — ${a.detail}` : '';
+      return `- ${a.who}: ${a.title}${detail}`;
+    });
+    parts.push('## Recent Accomplishments (already done — don\'t repeat)\n' + lines.join('\n'));
+  }
+
+  const recentChat = getRecentChat();
+  if (recentChat.length > 0) {
+    const lines = recentChat.map(m => `- ${m.from}: ${m.text}`);
+    parts.push(
+      '## Recent Water Cooler Chat\n' +
+      'Review this conversation for action items, requests, blockers, or ideas that you can help with:\n' +
+      lines.join('\n')
+    );
+  }
+
   parts.push(
     '---\n' +
     'IMPORTANT: You must DO actual work right now — use tools to read/write files, run commands, create deliverables. ' +
     'Do NOT just reply with a status update or say you are idle. ' +
     'Pick a concrete task and execute it.\n\n' +
+    'If any water cooler discussion, open quest, or team need is relevant to your role — prioritize that.\n\n' +
     'When you finish something, record it as an accomplishment (a Loom-style screen recording is automatically captured):\n\n' +
     '```bash\n' +
     'curl -s -X POST http://localhost:3333/api/office/actions \\\n' +

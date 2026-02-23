@@ -1,7 +1,9 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { useDemoMode } from '../hooks/useDemoMode';
 import { TemplateGallery } from '../components/TemplateGallery';
+import { DemoBanner } from '../components/DemoBanner';
 
 type AgentStatus = 'working' | 'idle';
 type Mood = 'great' | 'good' | 'okay' | 'stressed';
@@ -1314,6 +1316,7 @@ function SettingsPanel({ config, onConfigChange, onClose }: {
 }
 
 export default function HomePage() {
+  const { isDemoMode, getApiPath } = useDemoMode();
   const [agents, setAgents] = useState<Agent[]>([]);
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
   const [time, setTime] = useState(new Date());
@@ -1375,7 +1378,7 @@ export default function HomePage() {
   useEffect(() => {
     const fetchConfig = async () => {
       try {
-        const res = await fetch('/api/office/config');
+        const res = await fetch(getApiPath('/api/office/config'));
         const data = await res.json();
         setConfig(data);
       } catch (err) {
@@ -1389,7 +1392,7 @@ export default function HomePage() {
   useEffect(() => {
     const fetchAutowork = async () => {
       try {
-        const res = await fetch('/api/office/autowork');
+        const res = await fetch(getApiPath('/api/office/autowork'));
         if (res.ok) {
           const data = await res.json();
           setAutoworkPolicies(data.policies || {});
@@ -1415,7 +1418,7 @@ export default function HomePage() {
         if (res.ok) {
           const data = await res.json();
           if (data.sent?.length > 0) {
-            const polRes = await fetch('/api/office/autowork');
+            const polRes = await fetch(getApiPath('/api/office/autowork'));
             if (polRes.ok) {
               const polData = await polRes.json();
               setAutoworkPolicies(polData.policies || {});
@@ -1432,7 +1435,7 @@ export default function HomePage() {
   useEffect(() => {
     const fetchStatus = async () => {
       try {
-        const res = await fetch('/api/office');
+        const res = await fetch(getApiPath('/api/office'));
         const data = await res.json();
         if (data.agents) {
           setAgents(prev => {
@@ -1469,7 +1472,7 @@ export default function HomePage() {
   useEffect(() => {
     const fetchMeeting = async () => {
       try {
-        const res = await fetch('/api/office/meeting');
+        const res = await fetch(getApiPath('/api/office/meeting'));
         const data = await res.json();
         setMeeting(data);
       } catch (err) {
@@ -1485,13 +1488,13 @@ export default function HomePage() {
   useEffect(() => {
     const fetchActions = async () => {
       try {
-        const res = await fetch('/api/office/actions');
+        const res = await fetch(getApiPath('/api/office/actions'));
         const data = await res.json();
         if (data.actions) setPendingActions(data.actions);
         if (data.accomplishments) setAccomplishments(data.accomplishments);
       } catch {}
       try {
-        const ar = await fetch('/api/office/actions?archiveOffset=0&limit=0');
+        const ar = await fetch(getApiPath('/api/office/actions') + '?archiveOffset=0&limit=0');
         const ad = await ar.json();
         if (typeof ad.archiveTotal === 'number') setArchiveTotal(ad.archiveTotal);
       } catch {}
@@ -1694,7 +1697,7 @@ export default function HomePage() {
       
       if (res.ok) {
         // Refresh actions
-        const actionsRes = await fetch('/api/office/actions');
+        const actionsRes = await fetch(getApiPath('/api/office/actions'));
         const data = await actionsRes.json();
         if (data.actions) setPendingActions(data.actions);
       }
@@ -1738,6 +1741,9 @@ export default function HomePage() {
         href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap"
         rel="stylesheet"
       />
+
+      {/* Demo Mode Banner */}
+      {isDemoMode && <DemoBanner />}
 
       {/* Header */}
       <div style={{
@@ -2709,9 +2715,9 @@ export default function HomePage() {
                   type="text"
                   value={groupMessage}
                   onChange={(e) => setGroupMessage(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && sendGroupMessage()}
-                  placeholder="Say something to the team..."
-                  disabled={sendingGroup}
+                  onKeyDown={(e) => e.key === 'Enter' && !isDemoMode && sendGroupMessage()}
+                  placeholder={isDemoMode ? "Demo mode: messaging disabled" : "Say something to the team..."}
+                  disabled={sendingGroup || isDemoMode}
                   style={{
                     flex: 1,
                     background: '#1e293b',

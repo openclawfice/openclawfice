@@ -334,11 +334,15 @@ function inferTaskWithEvidence(agentId: string, sessionId: string): TaskEvidence
 
       if (msg.role === 'assistant' && Array.isArray(msg.content)) {
         for (const part of msg.content) {
-          if (part.type === 'tool_use') {
+          if (part.type === 'tool_use' || part.type === 'toolCall') {
             hasToolCalls = true;
             if (ts > lastToolUseTs) lastToolUseTs = ts;
           }
         }
+      }
+      if (msg.role === 'toolResult') {
+        hasToolCalls = true;
+        if (ts > lastToolUseTs) lastToolUseTs = ts;
       }
     } catch {}
   }
@@ -382,13 +386,14 @@ function inferTaskWithEvidence(agentId: string, sessionId: string): TaskEvidence
           if (t) { task = t; break; }
         }
 
-        // Check for tool calls as task evidence
-        const toolPart = parts.find((c: any) => c.type === 'tool_use');
+        // Check for tool calls as task evidence (supports both Anthropic and OpenClaw formats)
+        const toolPart = parts.find((c: any) => c.type === 'tool_use' || c.type === 'toolCall');
         if (toolPart) {
-          const name = toolPart.name || 'unknown';
+          const name = toolPart.name || toolPart.toolName || 'unknown';
           let detail = '';
-          if (toolPart.input) {
-            detail = toolPart.input.path || toolPart.input.command || toolPart.input.pattern || '';
+          const inp = toolPart.input || toolPart.arguments || {};
+          if (inp) {
+            detail = inp.path || inp.command || inp.pattern || '';
             if (detail.length > 60) detail = '...' + detail.slice(-57);
           }
           task = detail ? `${name}: ${detail}` : name;

@@ -45,12 +45,12 @@ function parseTranscriptEntries(lines: string[]): LogEntry[] {
         for (const part of parts) {
           if (part.type === 'text' && part.text?.trim()) {
             entries.push({ ts, role: 'assistant', type: 'text', content: part.text.trim() });
-          } else if (part.type === 'tool_use') {
-            const name = part.name || 'unknown_tool';
+          } else if (part.type === 'tool_use' || part.type === 'toolCall') {
+            const name = part.name || part.toolName || 'unknown_tool';
             let inputStr = '';
-            if (part.input) {
+            const inp = part.input || part.arguments || null;
+            if (inp) {
               try {
-                const inp = part.input;
                 if (inp.command || inp.cmd) {
                   inputStr = inp.command || inp.cmd;
                 } else if (inp.path || inp.file_path) {
@@ -80,7 +80,7 @@ function parseTranscriptEntries(lines: string[]): LogEntry[] {
           : Array.isArray(c) ? (c.find((x: any) => x.type === 'text')?.text || '') : '';
         if (!text) continue;
         entries.push({ ts, role: 'user', type: 'text', content: text });
-      } else if (msg.role === 'tool') {
+      } else if (msg.role === 'tool' || msg.role === 'toolResult') {
         const c = msg.content;
         const text = typeof c === 'string' ? c
           : Array.isArray(c) ? (c.find((x: any) => x.type === 'text')?.text || '') : '';

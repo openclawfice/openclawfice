@@ -65,26 +65,54 @@ const RECORD_DURATION = 6;
 function triggerRecording(accomplishmentId: string, title: string, who: string) {
   if (!existsSync(RECORD_SCRIPT)) return;
 
+  // Mark as recording synchronously so the UI can show REC immediately
+  try {
+    const accs = readJson(ACCOMPLISHMENTS_FILE);
+    const target = accs.find((a: any) => a.id === accomplishmentId && !a.screenshot);
+    if (target) {
+      target.screenshot = 'recording';
+      writeJson(ACCOMPLISHMENTS_FILE, accs);
+    }
+  } catch {}
+
   const ttsText = `${who} just completed: ${title}`;
   const cmd = `bash "${RECORD_SCRIPT}" "${accomplishmentId}" ${RECORD_DURATION} "${ttsText.replace(/"/g, '\\"')}"`;
 
   exec(cmd, { timeout: (RECORD_DURATION + 15) * 1000 }, (err, stdout) => {
+    const updateScreenshot = (value: string | undefined) => {
+      for (let attempt = 0; attempt < 3; attempt++) {
+        try {
+          const accomplishments = readJson(ACCOMPLISHMENTS_FILE);
+          const acc = accomplishments.find(
+            (a: any) => a.id === accomplishmentId && a.screenshot === 'recording'
+          );
+          if (acc) {
+            if (value) {
+              acc.screenshot = value;
+            } else {
+              delete acc.screenshot;
+            }
+            writeJson(ACCOMPLISHMENTS_FILE, accomplishments);
+          }
+          return;
+        } catch {
+          // Retry on file contention
+        }
+      }
+    };
+
     if (err) {
       console.error(`Recording failed for ${accomplishmentId}:`, err.message);
+      updateScreenshot(undefined);
       return;
     }
     const filename = stdout.trim();
-    if (!filename || filename.startsWith('ERROR')) return;
+    if (!filename || filename.startsWith('ERROR')) {
+      updateScreenshot(undefined);
+      return;
+    }
 
-    // Update the accomplishment with the video filename
-    try {
-      const accomplishments = readJson(ACCOMPLISHMENTS_FILE);
-      const acc = accomplishments.find((a: any) => a.id === accomplishmentId);
-      if (acc) {
-        acc.screenshot = filename;
-        writeJson(ACCOMPLISHMENTS_FILE, accomplishments);
-      }
-    } catch {}
+    updateScreenshot(filename);
   });
 }
 
