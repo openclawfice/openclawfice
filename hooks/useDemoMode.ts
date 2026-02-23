@@ -1,16 +1,19 @@
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, usePathname } from 'next/navigation';
 
 /**
  * Demo Mode Hook - Detects demo mode and returns appropriate API paths
+ * Activates when ?demo=true OR when on the /demo route
  */
 export function useDemoMode() {
   let searchParams;
+  let pathname = '';
   try {
     searchParams = useSearchParams();
+    pathname = usePathname() || '';
   } catch {
     searchParams = null;
   }
-  const isDemoMode = searchParams?.get('demo') === 'true';
+  const isDemoMode = searchParams?.get('demo') === 'true' || pathname === '/demo';
 
   const getApiPath = (path: string) => {
     if (!isDemoMode) return path;
