@@ -39,6 +39,8 @@ That's it! The installer will:
 3. ✅ Create the `openclawfice` launcher
 4. ✅ Open http://localhost:3333 in your browser
 
+**New to OpenClawfice?** See [QUICKSTART.md](./QUICKSTART.md) for a 2-minute walkthrough.
+
 ### Manual Install
 
 ```bash
