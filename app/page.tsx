@@ -766,10 +766,25 @@ export default function HomePage() {
     startedAt?: number;
     lastMessage?: string;
   }>({ active: false });
+  const [config, setConfig] = useState<any>({});
 
   useEffect(() => {
     const i = setInterval(() => setTime(new Date()), 1000);
     return () => clearInterval(i);
+  }, []);
+
+  // Load config
+  useEffect(() => {
+    const fetchConfig = async () => {
+      try {
+        const res = await fetch('/api/office/config');
+        const data = await res.json();
+        setConfig(data);
+      } catch (err) {
+        console.error('Failed to load config:', err);
+      }
+    };
+    fetchConfig();
   }, []);
 
   // Poll API for live status every 3s
@@ -876,11 +891,44 @@ export default function HomePage() {
     }
   }, [chatLog, lastSeenChatCount]);
 
-  // Generate new chat message every 30-60s when 2+ agents are idle
+  // Generate new chat message based on config frequency
   useEffect(() => {
+    const waterCoolerConfig = config.waterCooler || {};
+    
+    // Check if water cooler is enabled
+    if (waterCoolerConfig.enabled === false) return;
+    
     const idleAgents = agents.filter(a => a.status === 'idle');
     if (idleAgents.length < 2) return;
-    const delay = 30000 + Math.random() * 30000;
+    
+    // Check quiet hours
+    if (waterCoolerConfig.quiet?.enabled) {
+      const now = new Date();
+      const tz = waterCoolerConfig.quiet.timezone || 'America/New_York';
+      const hour = parseInt(now.toLocaleString('en-US', { hour: 'numeric', hour12: false, timeZone: tz }));
+      const quietStart = parseInt(waterCoolerConfig.quiet.start?.split(':')[0] || '23');
+      const quietEnd = parseInt(waterCoolerConfig.quiet.end?.split(':')[0] || '8');
+      
+      // Check if current hour is in quiet window
+      if (hour >= quietStart || hour < quietEnd) {
+        return; // Skip chat generation during quiet hours
+      }
+    }
+    
+    // Parse frequency interval
+    const parseInterval = (str: string): number => {
+      const match = str.match(/^(\d+)(s|m|h|d)$/);
+      if (!match) return 45000; // default 45s
+      const [, num, unit] = match;
+      const n = parseInt(num, 10);
+      const multipliers: Record<string, number> = { s: 1000, m: 60000, h: 3600000, d: 86400000 };
+      return n * multipliers[unit];
+    };
+    
+    const baseFreq = parseInterval(waterCoolerConfig.frequency || '45s');
+    // Add jitter: ±25%
+    const delay = baseFreq + (Math.random() - 0.5) * baseFreq * 0.5;
+    
     const timer = setTimeout(async () => {
       try {
         await fetch('/api/office/chat', {
@@ -891,7 +939,7 @@ export default function HomePage() {
       } catch {}
     }, delay);
     return () => clearTimeout(timer);
-  }, [agents, chatLog]);
+  }, [agents, chatLog, config]);
 
   // Fluctuate needs slightly
   useEffect(() => {
@@ -1123,27 +1171,37 @@ export default function HomePage() {
                     }}
                   >
                     {a.task && (
-                      <div onClick={(e) => { e.stopPropagation(); setExpandedTask(expandedTask === a.id ? null : a.id); }} style={{
-                        background: 'rgba(16,185,129,0.12)',
-                        border: '1px solid rgba(16,185,129,0.25)',
-                        borderRadius: 4,
-                        padding: '2px 8px',
-                        fontSize: 9,
-                        color: '#6ee7b7',
-                        maxWidth: expandedTask === a.id ? 400 : 220,
-                        textAlign: 'center',
-                        whiteSpace: expandedTask === a.id ? 'normal' : 'nowrap',
-                        overflow: expandedTask === a.id ? 'visible' : 'hidden',
-                        textOverflow: expandedTask === a.id ? 'unset' : 'ellipsis',
-                        wordBreak: 'break-word',
-                        lineHeight: 1.3,
-                        cursor: 'pointer',
-                        transition: 'max-width 0.2s ease',
-                        zIndex: expandedTask === a.id ? 50 : 1,
-                        position: 'relative',
-                        boxShadow: expandedTask === a.id ? '0 4px 20px rgba(0,0,0,0.5)' : 'none',
-                      }}>
-                        {a.task}
+                      <div style={{ position: 'relative' }}>
+                        <div onClick={(e) => { e.stopPropagation(); setExpandedTask(expandedTask === a.id ? null : a.id); }} style={{
+                          background: 'rgba(16,185,129,0.12)',
+                          border: '1px solid rgba(16,185,129,0.25)',
+                          borderRadius: 4,
+                          padding: '2px 6px',
+                          fontSize: 8,
+                          color: '#6ee7b7',
+                          maxWidth: 140,
+                          textAlign: 'center',
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          cursor: 'pointer',
+                        }}>
+                          {a.task}
+                        </div>
+                        {expandedTask === a.id && (
+                          <div onClick={(e) => e.stopPropagation()} style={{
+                            position: 'absolute', top: '100%', left: '50%', transform: 'translateX(-50%)',
+                            marginTop: 4, zIndex: 100,
+                            background: '#1e293b', border: '1px solid #334155',
+                            borderRadius: 8, padding: '8px 12px', fontSize: 11, color: '#e2e8f0',
+                            maxWidth: 320, minWidth: 180, whiteSpace: 'normal', wordBreak: 'break-word',
+                            lineHeight: 1.4, boxShadow: '0 8px 32px rgba(0,0,0,0.6)',
+                            animation: 'fadeSlideIn 0.15s ease-out',
+                          }}>
+                            <div style={{ fontSize: 8, color: '#64748b', marginBottom: 4, fontFamily: '"Press Start 2P", monospace' }}>{a.name}</div>
+                            {a.task}
+                          </div>
+                        )}
                       </div>
                     )}
                     <NPC
