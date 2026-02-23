@@ -36,34 +36,20 @@
   - "Browse Quest Templates" in empty Quest Log
   - **Impact:** Instant onboarding, users see real examples
 
+- [x] **Demo Mode** (b26ebe1) — Try-before-install in 10 seconds
+  - 5 agents working in live office (Nova, Forge, Lens, Pixel, Cipher)
+  - Pre-loaded quest, accomplishments, chat, meeting
+  - Demo API endpoints (`/api/demo/*`)
+  - DemoBanner component with "Install OpenClawfice" CTA
+  - Entry: `localhost:3333?demo=true` or `/demo` route
+  - Read-only experience (all writes are no-ops)
+  - **Impact:** #1 viral feature — no install barrier, instant value demo
+
 ---
 
 ## In Progress 🚧
 
-### Demo Mode (Priority 1)
-**Goal:** Try-before-install in 10 seconds  
-**Spec:** `docs/DEMO-MODE-SPEC.md`
-
-**What it does:**
-- Shows 5 agents working in a live office
-- Pre-loaded quest, accomplishments, chat, meeting
-- Live simulation (updates every 5-10 seconds)
-- "Install OpenClawfice" CTA banner
-- Entry: `openclawfice.com/demo` or `?demo=true`
-
-**Why it matters:**
-- #1 viral feature — people try it instantly
-- No install barrier — see value in 10 seconds
-- Converts 30%+ of viewers to installers (target)
-
-**Status:** Spec ready, waiting for Forge to build
-
-**Files to create:**
-- `app/demo/page.tsx` (demo route)
-- `app/demo/data.ts` (hardcoded demo data)
-- `app/layout.tsx` (demo mode banner)
-
-**Estimated time:** 4-6 hours
+_No active development tasks at the moment. All P0/P1 features shipped!_
 
 ---
 

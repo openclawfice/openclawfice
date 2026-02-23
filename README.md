@@ -299,7 +299,7 @@ AGPL-3.0 © [Tyler Henkel](https://openclaw.ai)
 
 **Built with love by the OpenClaw community** 💙
 
-- Website: [openclawfice.com](https://openclawfice.com) *(coming soon)*
+- Website: [openclawfice.com](https://openclawfice.com)
 - Docs: [docs.openclaw.ai](https://docs.openclaw.ai)
 - Discord: [openclaw.ai/discord](https://openclaw.ai/discord)
 - GitHub: [github.com/openclawfice/openclawfice](https://github.com/openclawfice/openclawfice)

@@ -1714,6 +1714,37 @@ export default function HomePage() {
   const working = agentsWithThoughts.filter(a => a.status === 'working');
   const idle = agentsWithThoughts.filter(a => a.status === 'idle');
 
+  // Group accomplishments by date
+  const groupedAccomplishments = accomplishments.reduce((groups, acc) => {
+    const date = new Date(acc.timestamp);
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    
+    let label: string;
+    if (date.toDateString() === today.toDateString()) {
+      label = 'Today';
+    } else if (date.toDateString() === yesterday.toDateString()) {
+      label = 'Yesterday';
+    } else {
+      const daysAgo = Math.floor((today.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
+      if (daysAgo < 7) {
+        label = `${daysAgo} days ago`;
+      } else if (daysAgo < 30) {
+        const weeksAgo = Math.floor(daysAgo / 7);
+        label = weeksAgo === 1 ? '1 week ago' : `${weeksAgo} weeks ago`;
+      } else {
+        label = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      }
+    }
+    
+    if (!groups[label]) {
+      groups[label] = [];
+    }
+    groups[label].push(acc);
+    return groups;
+  }, {} as Record<string, typeof accomplishments>);
+
   const hour = time.getHours();
   const bgGrad =
     hour >= 6 && hour < 18
@@ -2415,7 +2446,21 @@ export default function HomePage() {
               flex: 1,
             }}>
               {accomplishments.length > 0 ? (
-                accomplishments.map((a, i) => {
+                Object.entries(groupedAccomplishments).map(([dateLabel, accs]) => (
+                  <div key={dateLabel}>
+                    {/* Date Header */}
+                    <div style={{
+                      fontSize: 8,
+                      fontFamily: '"Press Start 2P", monospace',
+                      color: '#64748b',
+                      padding: '8px 4px 4px',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.5px',
+                    }}>
+                      {dateLabel}
+                    </div>
+                    {/* Accomplishments for this date */}
+                    {accs.map((a, i) => {
                   const timeAgo = (() => {
                     const mins = Math.floor((Date.now() - a.timestamp) / 60000);
                     if (mins < 1) return 'just now';
@@ -2471,7 +2516,9 @@ export default function HomePage() {
                       </div>
                     </div>
                   );
-                })
+                })}
+                  </div>
+                ))
               ) : (
                 <div style={{
                   padding: 16,

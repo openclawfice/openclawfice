@@ -57,6 +57,29 @@ export default function InstallPage() {
           Virtual office dashboard for OpenClaw agents
         </p>
         
+        {/* Try Demo */}
+        <Link
+          href="/demo"
+          style={{
+            display: 'inline-block',
+            background: '#6366f1',
+            color: '#fff',
+            padding: '12px 24px',
+            borderRadius: 8,
+            fontSize: 14,
+            fontFamily: '"Press Start 2P", monospace',
+            textDecoration: 'none',
+            marginBottom: 12,
+            boxShadow: '0 4px 16px rgba(99,102,241,0.5)',
+            transition: 'all 0.15s',
+          }}
+        >
+          ▶ TRY DEMO
+        </Link>
+        <p style={{ fontSize: 11, color: '#64748b', marginBottom: 24 }}>
+          No install needed — see it in action instantly
+        </p>
+
         {/* Already installed? */}
         <Link
           href="/"

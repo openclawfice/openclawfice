@@ -320,6 +320,14 @@ Next.js hot-reloads automatically. Just save your changes and the browser update
 
 ---
 
+## Contributor License Agreement (CLA)
+
+By submitting a pull request, you agree to our [Contributor License Agreement](./CLA.md). This allows us to keep OpenClawfice open source under AGPL-3.0 while also offering commercial licenses to sustain the project.
+
+**TL;DR:** You keep ownership of your contributions. You grant us a license to use them in the project (including commercially licensed versions). Opening a PR = agreeing to the CLA.
+
+---
+
 ## Thank You! 🙏
 
 Every contribution—no matter how small—makes OpenClawfice better. Whether you're fixing a typo, adding a feature, or suggesting an idea, **you're helping build something cool.**
