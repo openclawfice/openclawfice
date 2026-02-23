@@ -10,6 +10,7 @@ const CRON_JOBS_FILE = join(OPENCLAW_DIR, 'cron', 'jobs.json');
 const STATUS_DIR = join(OPENCLAW_DIR, '.status');
 const ACTIVITY_FILE = join(STATUS_DIR, 'activity.json');
 const CHAT_FILE = join(STATUS_DIR, 'chat.json');
+const WATERCOOLER_MARKER = join(STATUS_DIR, 'watercooler-active.json');
 
 interface SessionInfo {
   sessionId: string;
@@ -413,6 +414,15 @@ function formatTime(ts: number): string {
 export async function GET() {
   const now = Date.now();
 
+  // Read watercooler markers — agents that were recently chatting, not working
+  let wcMarkers: Record<string, number> = {};
+  try {
+    if (existsSync(WATERCOOLER_MARKER)) {
+      wcMarkers = JSON.parse(readFileSync(WATERCOOLER_MARKER, 'utf-8'));
+    }
+  } catch {}
+  const WC_GRACE_MS = 30_000; // ignore session activity within 30s of a watercooler call
+
   // Auto-discover agents
   const agentConfigs = discoverAgents();
   
@@ -447,7 +457,11 @@ export async function GET() {
 
     // Primary signal: session activity
     const agentDir = cfg.id === '_owner' ? 'main' : cfg.id;
-    if (targetSession) {
+    // Check if session activity is just from watercooler chat
+    const wcLastActive = wcMarkers[cfg.id] || 0;
+    const isWatercoolerActivity = (now - wcLastActive) < WC_GRACE_MS;
+
+    if (targetSession && !isWatercoolerActivity) {
       const minsSinceUpdate = (now - targetSession.updatedAt) / 60000;
       
       if (minsSinceUpdate < (cfg.workingThresholdMin || 5)) {
@@ -472,7 +486,7 @@ export async function GET() {
     }
 
     // Also check for spawned sub-sessions
-    if (status === 'idle') {
+    if (status === 'idle' && !isWatercoolerActivity) {
       for (const [key, session] of Object.entries(sessions)) {
         if (session === targetSession) continue;
         if (IGNORED_SESSIONS.some(s => key.includes(`:${s}`))) continue;

@@ -14,7 +14,19 @@ const CONFIG_PATHS = [
 
 const OPENCLAW_BIN = join(homedir(), '.local', 'node', 'bin', 'openclaw');
 const WATERCOOLER_SESSION = 'watercooler';
+const WATERCOOLER_MARKER = join(STATUS_DIR, 'watercooler-active.json');
 const AGENT_TIMEOUT = 20;
+
+function markWatercoolerActive(agentId: string) {
+  try {
+    let markers: Record<string, number> = {};
+    if (existsSync(WATERCOOLER_MARKER)) {
+      markers = JSON.parse(readFileSync(WATERCOOLER_MARKER, 'utf-8'));
+    }
+    markers[agentId] = Date.now();
+    writeFileSync(WATERCOOLER_MARKER, JSON.stringify(markers));
+  } catch {}
+}
 
 function ensureStatusDir() {
   try {
@@ -239,7 +251,9 @@ export async function POST(request: Request) {
 
     const accomplishments = readAccomplishments();
     const prompt = buildPrompt(speaker, allAgents, chat, config.mission, accomplishments);
+    markWatercoolerActive(speaker.id);
     const reply = getAgentReply(speaker.id, prompt);
+    markWatercoolerActive(speaker.id);
 
     if (reply) {
       let text = reply;
