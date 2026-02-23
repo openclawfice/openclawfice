@@ -65,6 +65,13 @@ _No active development tasks at the moment. All P0/P1 features shipped!_
   - "Feeling great", "Doing well", "Okay", "Stressed"
   - Makes mood system more discoverable
   - Adds charm to retro aesthetic
+- [x] **Share Your Office** (580058a) — Screenshot + social share for viral growth
+  - Camera button in header opens share modal
+  - One-click screenshot (print dialog)
+  - Copy pre-written share text with stats
+  - Includes demo link + GitHub link
+  - Encourages Twitter/Reddit/Discord/HN sharing
+  - **Impact:** Frictionless viral sharing loop
 - [ ] Agent detail panel config (customize skills/XP/needs via config)
 - [ ] Dark/light theme toggle
 - [ ] Custom agent avatars (upload images)
