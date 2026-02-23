@@ -1850,8 +1850,9 @@ export default function HomePage() {
   const working = agentsWithThoughts.filter(a => a.status === 'working');
   const idle = agentsWithThoughts.filter(a => a.status === 'idle');
 
-  // Group accomplishments by date
-  const groupedAccomplishments = accomplishments.reduce((groups, acc) => {
+  // Group accomplishments by date (newest first)
+  const sortedAccomplishments = [...accomplishments].sort((a, b) => b.timestamp - a.timestamp);
+  const groupedAccomplishments = sortedAccomplishments.reduce((groups, acc) => {
     const date = new Date(acc.timestamp);
     const today = new Date();
     const yesterday = new Date(today);
