@@ -57,7 +57,14 @@ _No active development tasks at the moment. All P0/P1 features shipped!_
 
 ### P2 — Nice to Have
 - [ ] "Call Meeting" button in header
-- [ ] Date headers on accomplishments ("3 days ago", "Today")
+- [x] **Date headers on accomplishments** (10bc15f) — "Today", "Yesterday", "X days ago"
+  - Smart grouping by date
+  - Pixel-art headers in Press Start 2P font
+  - Improves scannability of history
+- [x] **Mood tooltips** (18e751a) — Hover plumbobs to see agent mood
+  - "Feeling great", "Doing well", "Okay", "Stressed"
+  - Makes mood system more discoverable
+  - Adds charm to retro aesthetic
 - [ ] Agent detail panel config (customize skills/XP/needs via config)
 - [ ] Dark/light theme toggle
 - [ ] Custom agent avatars (upload images)
