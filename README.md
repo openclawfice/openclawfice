@@ -89,6 +89,14 @@ Works out of the box. Optionally customize agents in `~/.openclaw/openclaw.json`
 
 PRs welcome! See [CONTRIBUTING.md](./CONTRIBUTING.md) and [docs/GOOD-FIRST-ISSUES.md](./docs/GOOD-FIRST-ISSUES.md).
 
+## Getting Value
+
+**New to OpenClawfice?** Read [USER-SUCCESS-GUIDE.md](./USER-SUCCESS-GUIDE.md) to learn:
+- What productivity gains to expect (4.4 hours saved/week)
+- Daily workflow best practices
+- How to measure ROI
+- 30-day success plan
+
 ## Troubleshooting
 
 Quick fix for 99% of issues:
