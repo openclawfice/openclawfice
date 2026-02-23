@@ -767,10 +767,24 @@ export default function HomePage() {
     lastMessage?: string;
   }>({ active: false });
   const [config, setConfig] = useState<any>({});
+  const [screenSize, setScreenSize] = useState<'mobile' | 'tablet' | 'desktop'>('desktop');
 
   useEffect(() => {
     const i = setInterval(() => setTime(new Date()), 1000);
     return () => clearInterval(i);
+  }, []);
+
+  // Detect screen size for responsive layout
+  useEffect(() => {
+    const handleResize = () => {
+      const width = window.innerWidth;
+      if (width < 768) setScreenSize('mobile');
+      else if (width < 1024) setScreenSize('tablet');
+      else setScreenSize('desktop');
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   // Load config
@@ -1002,6 +1016,15 @@ export default function HomePage() {
       ? 'linear-gradient(180deg, #0f172a 0%, #1e293b 100%)'
       : 'linear-gradient(180deg, #020617 0%, #0f172a 100%)';
 
+  // Responsive sizing
+  const isMobile = screenSize === 'mobile';
+  const isTablet = screenSize === 'tablet';
+  const npcSize = isMobile ? 0.6 : isTablet ? 0.75 : 0.9;
+  const roomGap = isMobile ? 6 : 8;
+  const roomPadding = isMobile ? '16px 6px 4px' : '24px 8px 6px';
+  const baseFontSize = isMobile ? 10 : isTablet ? 9 : 8;
+  const headerFontSize = isMobile ? 12 : 14;
+
   return (
     <div style={{
       height: '100vh',
@@ -1029,22 +1052,22 @@ export default function HomePage() {
         <div style={{
           display: 'flex',
           alignItems: 'center',
-          gap: 10,
+          gap: isMobile ? 6 : 10,
         }}>
-          <span style={{ fontSize: 22 }}>🏢</span>
+          <span style={{ fontSize: isMobile ? 18 : 22 }}>🏢</span>
           <h1 style={{
             margin: 0,
-            fontSize: 14,
+            fontSize: headerFontSize,
             fontFamily: '"Press Start 2P", monospace',
           }}>
-            OPENCLAWFICE
+            {isMobile ? 'OCF' : 'OPENCLAWFICE'}
           </h1>
           <span style={{
-            fontSize: 10,
+            fontSize: isMobile ? 8 : 10,
             color: '#475569',
-            marginLeft: 8,
+            marginLeft: isMobile ? 4 : 8,
           }}>
-            {agents.length} agents
+            {agents.length} {isMobile ? 'ag' : 'agents'}
           </span>
         </div>
         <div style={{
@@ -1126,22 +1149,22 @@ export default function HomePage() {
 
       {/* Office Floor */}
       <div style={{
-        padding: '8px 12px',
+        padding: isMobile ? '6px' : '8px 12px',
         display: 'grid',
-        gridTemplateColumns: '1fr 260px',
-        gap: 8,
-        maxWidth: 1400,
+        gridTemplateColumns: isMobile ? '1fr' : isTablet ? '1fr 240px' : '1fr 260px',
+        gap: roomGap,
+        maxWidth: isMobile ? '100%' : 1400,
         margin: '0 auto',
-        height: 'calc(100vh - 48px)',
-        overflow: 'hidden',
+        height: isMobile ? 'auto' : 'calc(100vh - 48px)',
+        overflow: isMobile ? 'auto' : 'hidden',
       }}>
         {/* LEFT COLUMN */}
         <div style={{
           display: 'flex',
           flexDirection: 'column',
-          gap: 6,
+          gap: roomGap,
           minHeight: 0,
-          overflow: 'hidden',
+          overflow: isMobile ? 'visible' : 'hidden',
         }}>
           {/* WORK ROOM */}
           <Room
@@ -1206,7 +1229,7 @@ export default function HomePage() {
                     )}
                     <NPC
                       agent={a}
-                      size={0.9}
+                      size={npcSize}
                       onClick={() => setSelectedAgent(a)}
                       forceThought={activeThought && activeThought.agentId === a.id ? activeThought.text : null}
                     />
@@ -1306,7 +1329,7 @@ export default function HomePage() {
                           <div style={{ position: 'relative' }}>
                             <NPC
                               agent={participant1}
-                              size={0.85}
+                              size={npcSize * 0.94}
                               onClick={() => setSelectedAgent(participant1)}
                             />
                           </div>
@@ -1323,8 +1346,8 @@ export default function HomePage() {
                             color: '#1a1a2e',
                             padding: '6px 12px',
                             borderRadius: 10,
-                            fontSize: 10,
-                            maxWidth: 300,
+                            fontSize: isMobile ? 9 : 10,
+                            maxWidth: isMobile ? 200 : 300,
                             textAlign: 'center',
                             boxShadow: '0 2px 12px rgba(0,0,0,0.3)',
                             lineHeight: 1.3,
@@ -1344,7 +1367,7 @@ export default function HomePage() {
                           }}>
                             <NPC
                               agent={participant2}
-                              size={0.85}
+                              size={npcSize * 0.94}
                               onClick={() => setSelectedAgent(participant2)}
                             />
                           </div>
@@ -1398,7 +1421,7 @@ export default function HomePage() {
                       {a.nextTaskAt && !a.isNew && <CooldownTimer targetMs={a.nextTaskAt} />}
                       <NPC
                         agent={a}
-                        size={0.9}
+                        size={npcSize}
                         onClick={() => setSelectedAgent(a)}
                         forceThought={activeThought && activeThought.agentId === a.id ? activeThought.text : null}
                       />
@@ -1682,18 +1705,20 @@ export default function HomePage() {
         <div style={{
           display: 'flex',
           flexDirection: 'column',
-          gap: 6,
-          height: '100%',
-          overflow: 'hidden',
+          gap: roomGap,
+          height: isMobile ? 'auto' : '100%',
+          overflow: isMobile ? 'visible' : 'hidden',
+          maxHeight: isMobile ? '400px' : undefined,
         }}>
           <div style={{
             background: '#0f172a',
             border: '2px solid #44320a',
             borderRadius: 12,
-            flex: 1,
+            flex: isMobile ? 'none' : 1,
             display: 'flex',
             flexDirection: 'column',
             overflow: 'hidden',
+            maxHeight: isMobile ? '400px' : undefined,
           }}>
             <div style={{
               background: '#1e293b',
