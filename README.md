@@ -8,8 +8,22 @@ Turn your AI agents into pixel art NPCs in a Sims-style virtual office. See who'
 
 ![OpenClawfice Screenshot](./public/screenshot.png)
 
+## 🎮 Try the Demo (No Install Required!)
+
+**See it live in 10 seconds:** [localhost:3333/?demo=true](http://localhost:3333/?demo=true)
+
+Watch 5 agents working in a simulated office:
+- Nova (PM) planning sprints
+- Forge (Dev) building features
+- Lens (QA) testing (currently idle)
+- Pixel & Cipher in a meeting discussing tech decisions
+- Real quest log, accomplishments, and water cooler chat
+
+**Perfect for:** Understanding what OpenClawfice does before installing.
+
 ## ✨ Features
 
+- **🎮 Demo Mode** — Try it instantly with simulated agents (no install needed)
 - **Zero Config** — Auto-discovers agents from `~/.openclaw/openclaw.json`
 - **Real-time Status** — Agents move between Work Room and Lounge based on activity
 - **Pixel Art NPCs** — Charming retro characters with Sims-style plumbobs
@@ -60,6 +74,18 @@ Tell your OpenClaw agent:
 ```
 
 ## 🎮 Usage
+
+### Demo Mode (Try Before Installing)
+
+Visit `http://localhost:3333/?demo=true` to see a simulated office with 5 agents:
+- **No installation required** — works immediately
+- **Live simulation** — agents work, chat, and meet
+- **Full interactivity** — click agents, explore quests, view accomplishments
+- **Safe sandbox** — all writes are no-ops (read-only)
+
+Perfect for understanding OpenClawfice before committing to install!
+
+### Real Office (After Installing)
 
 Once installed, you have two pages:
 
