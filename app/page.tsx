@@ -1600,28 +1600,43 @@ export default function HomePage() {
     setArchiveLoading(false);
   };
 
-  // Poll chat from main office API (included in data.chatLog)
+  // Poll chat — uses demo chat API in demo mode, real office API otherwise
   useEffect(() => {
-    const fetchOffice = async () => {
+    const fetchChat = async () => {
       try {
-        const res = await fetch('/api/office');
-        const data = await res.json();
-        if (data.chatLog && Array.isArray(data.chatLog)) {
-          setChatLog(prev => {
-            if (JSON.stringify(prev) !== JSON.stringify(data.chatLog)) {
-              setTimeout(() => {
-                if (chatRef.current) chatRef.current.scrollTop = chatRef.current.scrollHeight;
-              }, 100);
-            }
-            return data.chatLog;
-          });
+        if (isDemoMode) {
+          const res = await fetch(getApiPath('/api/office/chat'));
+          const data = await res.json();
+          if (data.messages && Array.isArray(data.messages)) {
+            setChatLog(prev => {
+              if (JSON.stringify(prev) !== JSON.stringify(data.messages)) {
+                setTimeout(() => {
+                  if (chatRef.current) chatRef.current.scrollTop = chatRef.current.scrollHeight;
+                }, 100);
+              }
+              return data.messages;
+            });
+          }
+        } else {
+          const res = await fetch('/api/office');
+          const data = await res.json();
+          if (data.chatLog && Array.isArray(data.chatLog)) {
+            setChatLog(prev => {
+              if (JSON.stringify(prev) !== JSON.stringify(data.chatLog)) {
+                setTimeout(() => {
+                  if (chatRef.current) chatRef.current.scrollTop = chatRef.current.scrollHeight;
+                }, 100);
+              }
+              return data.chatLog;
+            });
+          }
         }
       } catch {}
     };
-    fetchOffice();
-    const i = setInterval(fetchOffice, 5000);
+    fetchChat();
+    const i = setInterval(fetchChat, isDemoMode ? 3000 : 5000);
     return () => clearInterval(i);
-  }, []);
+  }, [isDemoMode]);
 
   // Track new chat messages and sync thought bubbles
   useEffect(() => {
@@ -1641,6 +1656,7 @@ export default function HomePage() {
   // Schedule next chat message — only reschedule when chatLog length changes (new message arrived)
   const chatLogLen = chatLog.length;
   useEffect(() => {
+    if (isDemoMode) return; // Demo mode has its own chat simulation
     const waterCoolerConfig = config.waterCooler || {};
     if (waterCoolerConfig.enabled === false) return;
 
@@ -2163,16 +2179,17 @@ export default function HomePage() {
               }}
             >
               <div style={{
-                padding: '16px 8px 8px',
-                minHeight: 120,
+                padding: '12px 12px 16px',
               }}>
                 {/* Topic */}
                 <div style={{
                   textAlign: 'center',
-                  marginBottom: 12,
+                  marginBottom: 8,
                   fontSize: 11,
                   color: '#c4b5fd',
                   fontWeight: 600,
+                  lineHeight: 1.4,
+                  padding: '0 8px',
                 }}>
                   {meeting.topic || 'Discussion in progress...'}
                 </div>
@@ -2181,15 +2198,16 @@ export default function HomePage() {
                 <div style={{
                   display: 'flex',
                   justifyContent: 'center',
-                  gap: 12,
-                  marginBottom: 16,
+                  gap: 8,
+                  marginBottom: 12,
+                  flexWrap: 'wrap',
                 }}>
                   <div style={{
                     background: 'rgba(124,58,237,0.15)',
                     border: '1px solid rgba(124,58,237,0.4)',
                     borderRadius: 6,
                     padding: '3px 8px',
-                    fontSize: 9,
+                    fontSize: 8,
                     color: '#a78bfa',
                     fontFamily: '"Press Start 2P", monospace',
                   }}>
@@ -2200,7 +2218,7 @@ export default function HomePage() {
                     border: '1px solid rgba(124,58,237,0.4)',
                     borderRadius: 6,
                     padding: '3px 8px',
-                    fontSize: 9,
+                    fontSize: 8,
                     color: '#a78bfa',
                     fontFamily: '"Press Start 2P", monospace',
                   }}>
@@ -2215,11 +2233,11 @@ export default function HomePage() {
 
                 {/* Participants facing each other */}
                 <div style={{
-                  position: 'relative',
                   display: 'flex',
                   justifyContent: 'center',
-                  alignItems: 'center',
-                  gap: 40,
+                  alignItems: 'flex-end',
+                  gap: isMobile ? 24 : 40,
+                  marginBottom: meeting.lastMessage ? 8 : 0,
                 }}>
                   {meeting.participants && meeting.participants.length >= 2 && (() => {
                     const participant1 = agents.find(a => a.id === meeting.participants![0]);
@@ -2228,48 +2246,18 @@ export default function HomePage() {
                     return (
                       <>
                         {participant1 && (
-                          <div style={{ position: 'relative' }}>
-                            <NPC
-                              agent={participant1}
-                              size={npcSize * 0.94}
-                              onClick={() => setSelectedAgent(participant1)}
-                            />
-                          </div>
-                        )}
-                        
-                        {/* Thought bubble with lastMessage between participants */}
-                        {meeting.lastMessage && (
-                          <div style={{
-                            position: 'absolute',
-                            top: -10,
-                            left: '50%',
-                            transform: 'translateX(-50%)',
-                            background: 'rgba(255,255,255,0.95)',
-                            color: '#1a1a2e',
-                            padding: '6px 12px',
-                            borderRadius: 10,
-                            fontSize: isMobile ? 9 : 10,
-                            maxWidth: isMobile ? 200 : 300,
-                            textAlign: 'center',
-                            boxShadow: '0 2px 12px rgba(0,0,0,0.3)',
-                            lineHeight: 1.3,
-                            animation: 'fadeSlideIn 0.3s ease-out',
-                            zIndex: 10,
-                          }}>
-                            {meeting.lastMessage.length > 100 
-                              ? meeting.lastMessage.slice(0, 97) + '...' 
-                              : meeting.lastMessage}
-                          </div>
+                          <NPC
+                            agent={participant1}
+                            size={npcSize * 0.85}
+                            onClick={() => setSelectedAgent(participant1)}
+                          />
                         )}
 
                         {participant2 && (
-                          <div style={{
-                            position: 'relative',
-                            transform: 'scaleX(-1)',
-                          }}>
+                          <div style={{ transform: 'scaleX(-1)' }}>
                             <NPC
                               agent={participant2}
-                              size={npcSize * 0.94}
+                              size={npcSize * 0.85}
                               onClick={() => setSelectedAgent(participant2)}
                             />
                           </div>
@@ -2278,6 +2266,25 @@ export default function HomePage() {
                     );
                   })()}
                 </div>
+
+                {/* Last message below the participants */}
+                {meeting.lastMessage && (
+                  <div style={{
+                    background: 'rgba(124,58,237,0.1)',
+                    border: '1px solid rgba(124,58,237,0.25)',
+                    color: '#c4b5fd',
+                    padding: '6px 10px',
+                    borderRadius: 8,
+                    fontSize: isMobile ? 9 : 10,
+                    textAlign: 'center',
+                    lineHeight: 1.4,
+                    marginTop: 4,
+                  }}>
+                    {meeting.lastMessage.length > 120 
+                      ? meeting.lastMessage.slice(0, 117) + '...' 
+                      : meeting.lastMessage}
+                  </div>
+                )}
               </div>
             </Room>
           )}
