@@ -28,6 +28,9 @@ yarn-error.log*
 # User config (contains personal agent names/colors)
 openclawfice.config.json
 
+# First-run marker (per-user)
+.openclawfice-init
+
 # Vercel
 .vercel
 
