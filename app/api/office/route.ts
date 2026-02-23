@@ -548,17 +548,34 @@ export async function GET() {
 
     if (targetSession && !isWatercoolerActivity) {
       const minsSinceUpdate = (now - targetSession.updatedAt) / 60000;
+      const threshold = cfg.workingThresholdMin || 5;
       
-      if (minsSinceUpdate < (cfg.workingThresholdMin || 5)) {
-        status = 'working';
-        mood = 'great';
+      if (minsSinceUpdate < threshold) {
         if (cfg.id === '_owner') {
           task = inferOwnerTask(agentDir, targetSession.sessionId);
+          status = 'working';
+          mood = 'great';
         } else {
           evidence = inferTaskWithEvidence(agentDir, targetSession.sessionId);
           task = evidence.task;
+
+          // Only count as "working" if there are actual tool calls (real work),
+          // OR if the last tool call was recent. Text-only responses (no tools)
+          // use a much shorter window — the agent just replied but isn't doing work.
+          const hasRecentToolUse = evidence.lastToolUseTs > 0 &&
+            (now - evidence.lastToolUseTs) / 60000 < threshold;
+          const textOnlyThresholdMin = 0.5; // 30 seconds for text-only
+
+          if (hasRecentToolUse) {
+            status = 'working';
+            mood = 'great';
+          } else if (minsSinceUpdate < textOnlyThresholdMin) {
+            status = 'working';
+            mood = 'good';
+          }
+          // Otherwise stays idle — agent just chatted or said it's idle
         }
-        if (!task) task = 'Working...';
+        if (status === 'working' && !task) task = 'Working...';
       }
     }
 
