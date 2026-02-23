@@ -8,15 +8,16 @@ const AGENTS_DIR = join(homedir(), '.openclaw', 'agents');
 interface LogEntry {
   ts: string;
   role: 'user' | 'assistant' | 'tool';
-  type: 'text' | 'tool_use' | 'tool_result' | 'watercooler';
-  summary: string;
+  type: 'text' | 'tool_use' | 'tool_result';
+  content: string;
+  toolName?: string;
 }
 
 function readTailLines(filePath: string, maxLines: number): string[] {
   try {
     const fd = openSync(filePath, 'r');
     const stat = fstatSync(fd);
-    const chunkSize = Math.min(stat.size, 256 * 1024);
+    const chunkSize = Math.min(stat.size, 512 * 1024);
     const buf = Buffer.alloc(chunkSize);
     readSync(fd, buf, 0, chunkSize, stat.size - chunkSize);
     closeSync(fd);
@@ -24,16 +25,6 @@ function readTailLines(filePath: string, maxLines: number): string[] {
   } catch {
     return [];
   }
-}
-
-function extractTextSummary(text: string, maxLen = 120): string {
-  const cleaned = text
-    .replace(/^\[.*?\]\s*/, '')
-    .replace(/```[\s\S]*?```/g, '[code block]')
-    .replace(/\n+/g, ' ')
-    .trim();
-  if (cleaned.length <= maxLen) return cleaned;
-  return cleaned.slice(0, maxLen - 3) + '...';
 }
 
 function parseTranscriptEntries(lines: string[]): LogEntry[] {
@@ -53,26 +44,33 @@ function parseTranscriptEntries(lines: string[]): LogEntry[] {
 
         for (const part of parts) {
           if (part.type === 'text' && part.text?.trim()) {
-            const text = part.text.trim();
-            if (text.includes('HEARTBEAT') || text === 'NO_REPLY' || text.length < 3) continue;
-            entries.push({ ts, role: 'assistant', type: 'text', summary: extractTextSummary(text) });
+            entries.push({ ts, role: 'assistant', type: 'text', content: part.text.trim() });
           } else if (part.type === 'tool_use') {
             const name = part.name || 'unknown_tool';
-            let detail = '';
+            let inputStr = '';
             if (part.input) {
-              if (name === 'Read' || name === 'read_file') {
-                detail = part.input.path || part.input.file_path || '';
-              } else if (name === 'Write' || name === 'write_to_file' || name === 'StrReplace' || name === 'str_replace_editor') {
-                detail = part.input.path || part.input.file_path || '';
-              } else if (name === 'Shell' || name === 'execute_command' || name === 'Bash') {
-                detail = extractTextSummary(part.input.command || part.input.cmd || '', 80);
-              } else if (name === 'Grep' || name === 'Search' || name === 'search_files') {
-                detail = part.input.pattern || part.input.query || part.input.regex || '';
+              try {
+                const inp = part.input;
+                if (inp.command || inp.cmd) {
+                  inputStr = inp.command || inp.cmd;
+                } else if (inp.path || inp.file_path) {
+                  inputStr = inp.path || inp.file_path;
+                  if (inp.pattern) inputStr += ` (pattern: ${inp.pattern})`;
+                  if (inp.old_string) inputStr += `\nold: ${inp.old_string.slice(0, 200)}`;
+                  if (inp.new_string) inputStr += `\nnew: ${inp.new_string.slice(0, 200)}`;
+                } else if (inp.pattern || inp.query || inp.regex) {
+                  inputStr = inp.pattern || inp.query || inp.regex;
+                } else {
+                  inputStr = JSON.stringify(inp).slice(0, 300);
+                }
+              } catch {
+                inputStr = '[input]';
               }
             }
             entries.push({
               ts, role: 'assistant', type: 'tool_use',
-              summary: detail ? `${name}: ${detail}` : name,
+              content: inputStr,
+              toolName: name,
             });
           }
         }
@@ -80,23 +78,17 @@ function parseTranscriptEntries(lines: string[]): LogEntry[] {
         const c = msg.content;
         const text = typeof c === 'string' ? c
           : Array.isArray(c) ? (c.find((x: any) => x.type === 'text')?.text || '') : '';
-        if (!text || text.includes('HEARTBEAT') || text.includes('Read HEARTBEAT.md')
-            || text.includes('Pre-compaction memory flush') || text.length < 5
-            || text.includes('Agent-to-agent announce step')) continue;
-        const isWatercooler = text.includes('WATER COOLER CHAT');
-        entries.push({ ts, role: 'user', type: isWatercooler ? 'watercooler' : 'text', summary: isWatercooler ? '💬 Water cooler prompt' : extractTextSummary(text) });
+        if (!text) continue;
+        entries.push({ ts, role: 'user', type: 'text', content: text });
       } else if (msg.role === 'tool') {
-        // Summarize tool results very briefly
         const c = msg.content;
         const text = typeof c === 'string' ? c
           : Array.isArray(c) ? (c.find((x: any) => x.type === 'text')?.text || '') : '';
-        if (text) {
-          const isError = text.toLowerCase().includes('error') || text.toLowerCase().includes('failed');
-          entries.push({
-            ts, role: 'tool', type: 'tool_result',
-            summary: isError ? `⚠️ ${extractTextSummary(text, 80)}` : `✓ result (${text.length} chars)`,
-          });
-        }
+        if (!text) continue;
+        entries.push({
+          ts, role: 'tool', type: 'tool_result',
+          content: text,
+        });
       }
     } catch {}
   }
@@ -107,7 +99,7 @@ function parseTranscriptEntries(lines: string[]): LogEntry[] {
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const agentId = searchParams.get('agentId');
-  const limit = Math.min(parseInt(searchParams.get('limit') || '50'), 200);
+  const limit = Math.min(parseInt(searchParams.get('limit') || '80'), 500);
 
   if (!agentId) {
     return NextResponse.json({ error: 'agentId required' }, { status: 400 });
@@ -127,11 +119,10 @@ export async function GET(req: Request) {
     return NextResponse.json({ entries: [], sessions: [] });
   }
 
-  // Find the most recent non-watercooler session
+  // Find the most recent session (include all sessions)
   let targetKey = '';
   let targetSession: any = null;
   for (const [key, session] of Object.entries(sessions) as [string, any][]) {
-    if (key.includes(':watercooler')) continue;
     if (!targetSession || session.updatedAt > targetSession.updatedAt) {
       targetSession = session;
       targetKey = key;
@@ -148,7 +139,6 @@ export async function GET(req: Request) {
 
   // Build session list summary
   const sessionList = Object.entries(sessions)
-    .filter(([k]) => !k.includes(':watercooler'))
     .map(([key, s]: [string, any]) => ({
       key,
       sessionId: s.sessionId,
@@ -156,7 +146,7 @@ export async function GET(req: Request) {
       active: key === targetKey,
     }))
     .sort((a, b) => b.updatedAt - a.updatedAt)
-    .slice(0, 5);
+    .slice(0, 10);
 
   return NextResponse.json({
     entries,

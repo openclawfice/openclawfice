@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { TemplateGallery } from '../components/TemplateGallery';
 
 type AgentStatus = 'working' | 'idle';
 type Mood = 'great' | 'good' | 'okay' | 'stressed';
@@ -470,16 +471,16 @@ function AgentPanel({ agent, onClose, autowork, onAutoworkUpdate, onStop }: { ag
   const [sending, setSending] = useState(false);
   const [sentConfirm, setSentConfirm] = useState(false);
   const [lastSent, setLastSent] = useState('');
-  const [logEntries, setLogEntries] = useState<{ ts: string; role: string; type: string; summary: string }[]>([]);
+  const [logEntries, setLogEntries] = useState<{ ts: string; role: string; type: string; content: string; toolName?: string }[]>([]);
   const [logLoading, setLogLoading] = useState(true);
-  const [showWatercooler, setShowWatercooler] = useState(false);
+  const [logCollapsed, setLogCollapsed] = useState<Record<number, boolean>>({});
   const logRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     let cancelled = false;
     const fetchLogs = async () => {
       try {
-        const res = await fetch(`/api/office/logs?agentId=${encodeURIComponent(agent.id)}&limit=50`);
+        const res = await fetch(`/api/office/logs?agentId=${encodeURIComponent(agent.id)}&limit=80`);
         if (!res.ok || cancelled) return;
         const data = await res.json();
         if (!cancelled) {
@@ -750,29 +751,18 @@ function AgentPanel({ agent, onClose, autowork, onAutoworkUpdate, onStop }: { ag
           <div style={{ fontSize: 9, color: '#64748b', textTransform: 'uppercase' as const, fontFamily: '"Press Start 2P", monospace' }}>
             📋 Activity Log
           </div>
-          <button
-            onClick={() => setShowWatercooler(!showWatercooler)}
-            style={{
-              background: showWatercooler ? 'rgba(99,102,241,0.2)' : 'transparent',
-              border: '1px solid #334155',
-              borderRadius: 4,
-              color: '#64748b',
-              fontSize: 7,
-              padding: '2px 5px',
-              cursor: 'pointer',
-              fontFamily: 'inherit',
-            }}
-          >
-            {showWatercooler ? 'Hide chat' : 'Show chat'}
-          </button>
+          <span style={{ fontSize: 8, color: '#475569' }}>
+            {logEntries.length} entries
+          </span>
         </div>
         <div
           ref={logRef}
           style={{
-            maxHeight: 260,
+            maxHeight: 400,
             overflowY: 'auto',
-            fontSize: 10,
-            lineHeight: '18px',
+            fontSize: 11,
+            lineHeight: '16px',
+            fontFamily: 'ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Consolas, monospace',
           }}
         >
           {logLoading && (
@@ -781,45 +771,63 @@ function AgentPanel({ agent, onClose, autowork, onAutoworkUpdate, onStop }: { ag
           {!logLoading && logEntries.length === 0 && (
             <div style={{ color: '#475569', fontStyle: 'italic', padding: '8px 0' }}>No activity yet</div>
           )}
-          {!logLoading && logEntries.length > 0 && (
-            <div style={{
-              display: 'flex', gap: 8, marginBottom: 6, padding: '4px 0',
-              borderBottom: '1px solid #334155', fontSize: 8, color: '#64748b',
-            }}>
-              <span>🔧 {logEntries.filter(e => e.type === 'tool_use').length} tool calls</span>
-              <span>👤 {logEntries.filter(e => e.role === 'user' && e.type === 'text').length} tasks</span>
-              <span>💬 {logEntries.filter(e => e.type === 'watercooler').length} chats</span>
-            </div>
-          )}
-          {!logLoading && logEntries
-            .filter(e => showWatercooler || e.type !== 'watercooler')
-            .map((e, i) => {
-              const icon = e.role === 'assistant'
-                ? (e.type === 'tool_use' ? '🔧' : '🤖')
-                : e.role === 'user'
-                  ? (e.type === 'watercooler' ? '💬' : '👤')
-                  : (e.summary.startsWith('⚠️') ? '⚠️' : '✓');
-              const entryColor = e.role === 'assistant'
-                ? (e.type === 'tool_use' ? '#a78bfa' : '#93c5fd')
-                : e.role === 'user'
-                  ? (e.type === 'watercooler' ? '#64748b' : '#fbbf24')
-                  : (e.summary.startsWith('⚠️') ? '#f87171' : '#475569');
-              const ts = e.ts ? new Date(e.ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
-              return (
-                <div key={i} style={{
-                  padding: '3px 0',
-                  borderBottom: '1px solid rgba(51,65,85,0.4)',
-                  display: 'flex',
-                  gap: 6,
-                  alignItems: 'flex-start',
-                  opacity: e.type === 'watercooler' ? 0.5 : (e.role === 'tool' ? 0.6 : 1),
+          {!logLoading && logEntries.map((e, i) => {
+            const isCollapsed = logCollapsed[i] !== undefined ? logCollapsed[i] : e.content.length > 300;
+            const icon = e.role === 'assistant'
+              ? (e.type === 'tool_use' ? '🔧' : '🤖')
+              : e.role === 'user' ? '👤' : '📎';
+            const labelColor = e.role === 'assistant'
+              ? (e.type === 'tool_use' ? '#a78bfa' : '#93c5fd')
+              : e.role === 'user' ? '#fbbf24' : '#64748b';
+            const label = e.role === 'assistant'
+              ? (e.type === 'tool_use' ? (e.toolName || 'tool') : 'assistant')
+              : e.role === 'user' ? 'user' : 'result';
+            const ts = e.ts ? new Date(e.ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '';
+            const displayContent = isCollapsed ? e.content.slice(0, 200) + '...' : e.content;
+            const canCollapse = e.content.length > 300;
+
+            return (
+              <div key={i} style={{
+                borderBottom: '1px solid rgba(51,65,85,0.3)',
+                padding: '6px 0',
+              }}>
+                <div style={{
+                  display: 'flex', alignItems: 'center', gap: 4, marginBottom: 3,
                 }}>
-                  <span style={{ flexShrink: 0, width: 16, textAlign: 'center' }}>{icon}</span>
-                  <span style={{ color: entryColor, flex: 1, wordBreak: 'break-word' }}>{e.summary}</span>
-                  {ts && <span style={{ color: '#334155', fontSize: 8, flexShrink: 0 }}>{ts}</span>}
+                  <span>{icon}</span>
+                  <span style={{ color: labelColor, fontSize: 9, fontWeight: 600, textTransform: 'uppercase' }}>{label}</span>
+                  {e.toolName && <span style={{ color: '#64748b', fontSize: 9 }}>({e.toolName})</span>}
+                  <span style={{ marginLeft: 'auto', color: '#334155', fontSize: 8 }}>{ts}</span>
                 </div>
-              );
-            })}
+                <div
+                  onClick={canCollapse ? () => setLogCollapsed(prev => ({ ...prev, [i]: !isCollapsed })) : undefined}
+                  style={{
+                    color: e.role === 'tool' ? '#94a3b8' : '#cbd5e1',
+                    whiteSpace: 'pre-wrap',
+                    wordBreak: 'break-word',
+                    fontSize: 10,
+                    cursor: canCollapse ? 'pointer' : 'default',
+                    maxHeight: isCollapsed ? 60 : undefined,
+                    overflow: 'hidden',
+                  }}
+                >
+                  {displayContent}
+                </div>
+                {canCollapse && (
+                  <button
+                    onClick={() => setLogCollapsed(prev => ({ ...prev, [i]: !isCollapsed }))}
+                    style={{
+                      background: 'none', border: 'none', color: '#6366f1',
+                      fontSize: 9, cursor: 'pointer', padding: '2px 0',
+                      fontFamily: 'inherit',
+                    }}
+                  >
+                    {isCollapsed ? `▸ show all (${e.content.length} chars)` : '▾ collapse'}
+                  </button>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
 
@@ -1356,6 +1364,7 @@ export default function HomePage() {
   const [groupMessage, setGroupMessage] = useState('');
   const [sendingGroup, setSendingGroup] = useState(false);
   const [groupSent, setGroupSent] = useState(false);
+  const [showTemplateGallery, setShowTemplateGallery] = useState(false);
   const [meeting, setMeeting] = useState<{
     active: boolean;
     topic?: string;
@@ -1695,6 +1704,26 @@ export default function HomePage() {
       alert('Failed to send group message');
     } finally {
       setSendingGroup(false);
+    }
+  };
+
+  const handleTemplateSelect = async (quest: any) => {
+    try {
+      // Add the cloned quest to actions
+      const res = await fetch('/api/office/actions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'add', action: quest }),
+      });
+      
+      if (res.ok) {
+        // Refresh actions
+        const actionsRes = await fetch('/api/office/actions');
+        const data = await actionsRes.json();
+        if (data.actions) setPendingActions(data.actions);
+      }
+    } catch (err) {
+      console.error('Failed to add template quest:', err);
     }
   };
 
@@ -2298,6 +2327,7 @@ export default function HomePage() {
                       color: '#64748b',
                       fontSize: 9,
                       lineHeight: 1.5,
+                      marginBottom: 12,
                     }}>
                       Your agents will create quests when
                       <br />
@@ -2308,6 +2338,31 @@ export default function HomePage() {
                         (Pulled from ~/.openclaw/.status/actions.json)
                       </span>
                     </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShowTemplateGallery(true);
+                      }}
+                      style={{
+                        background: '#6366f1',
+                        border: 'none',
+                        color: '#fff',
+                        borderRadius: 6,
+                        padding: '8px 16px',
+                        cursor: 'pointer',
+                        fontSize: 10,
+                        fontWeight: 600,
+                        transition: 'background 0.2s',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = '#4f46e5';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = '#6366f1';
+                      }}
+                    >
+                      Browse Quest Templates
+                    </button>
                   </div>
                 )}
               </div>
@@ -3077,6 +3132,14 @@ export default function HomePage() {
           }
         }
       `}</style>
+
+      {/* Template Gallery Modal */}
+      {showTemplateGallery && (
+        <TemplateGallery
+          onSelectTemplate={handleTemplateSelect}
+          onClose={() => setShowTemplateGallery(false)}
+        />
+      )}
     </div>
   );
 }
