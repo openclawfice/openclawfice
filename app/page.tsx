@@ -125,19 +125,28 @@ function Plumbob({ mood }: { mood: Mood }) {
     okay: '#eab308',
     stressed: '#ef4444',
   };
+  const moodLabels: Record<Mood, string> = {
+    great: 'Feeling great!',
+    good: 'Doing well',
+    okay: 'Okay',
+    stressed: 'Stressed',
+  };
   const c = colors[mood];
   return (
-    <div style={{
-      width: 0,
-      height: 0,
-      borderLeft: '6px solid transparent',
-      borderRight: '6px solid transparent',
-      borderBottom: `10px solid ${c}`,
-      filter: `drop-shadow(0 0 4px ${c})`,
-      animation: 'plumbobSpin 3s ease-in-out infinite',
-      position: 'relative',
-      top: -2,
-    }}>
+    <div 
+      title={moodLabels[mood]}
+      style={{
+        width: 0,
+        height: 0,
+        borderLeft: '6px solid transparent',
+        borderRight: '6px solid transparent',
+        borderBottom: `10px solid ${c}`,
+        filter: `drop-shadow(0 0 4px ${c})`,
+        animation: 'plumbobSpin 3s ease-in-out infinite',
+        position: 'relative',
+        top: -2,
+        cursor: 'help',
+      }}>
       <div style={{
         position: 'absolute',
         top: 10,
