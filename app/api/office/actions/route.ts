@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { readFileSync, existsSync, writeFileSync, appendFileSync } from 'fs';
 import { join } from 'path';
 import { homedir } from 'os';
+import { exec } from 'child_process';
 
 const OPENCLAW_DIR = join(homedir(), '.openclaw');
 const STATUS_DIR = join(OPENCLAW_DIR, '.status');
@@ -56,6 +57,35 @@ function readJson(path: string): any[] {
 
 function writeJson(path: string, data: any[]) {
   writeFileSync(path, JSON.stringify(data, null, 2));
+}
+
+const RECORD_SCRIPT = join(process.cwd(), 'scripts', 'record-loom.sh');
+const RECORD_DURATION = 6;
+
+function triggerRecording(accomplishmentId: string, title: string, who: string) {
+  if (!existsSync(RECORD_SCRIPT)) return;
+
+  const ttsText = `${who} just completed: ${title}`;
+  const cmd = `bash "${RECORD_SCRIPT}" "${accomplishmentId}" ${RECORD_DURATION} "${ttsText.replace(/"/g, '\\"')}"`;
+
+  exec(cmd, { timeout: (RECORD_DURATION + 15) * 1000 }, (err, stdout) => {
+    if (err) {
+      console.error(`Recording failed for ${accomplishmentId}:`, err.message);
+      return;
+    }
+    const filename = stdout.trim();
+    if (!filename || filename.startsWith('ERROR')) return;
+
+    // Update the accomplishment with the video filename
+    try {
+      const accomplishments = readJson(ACCOMPLISHMENTS_FILE);
+      const acc = accomplishments.find((a: any) => a.id === accomplishmentId);
+      if (acc) {
+        acc.screenshot = filename;
+        writeJson(ACCOMPLISHMENTS_FILE, accomplishments);
+      }
+    } catch {}
+  });
 }
 
 const MAX_ACCOMPLISHMENTS = 200;
@@ -164,15 +194,18 @@ export async function POST(request: Request) {
 
       // Auto-create accomplishment
       const accomplishments = readJson(ACCOMPLISHMENTS_FILE);
+      const responseAccId = `response-${body.id}`;
+      const responseTitle = `Resolved: ${action?.title || body.id}`;
       accomplishments.push({
-        id: `response-${body.id}`,
+        id: responseAccId,
         icon: '✅',
-        title: `Resolved: ${action?.title || body.id}`,
+        title: responseTitle,
         detail: `Response: ${body.response}`,
         who: getOwnerName(),
         timestamp: Date.now(),
       });
       writeJson(ACCOMPLISHMENTS_FILE, trimAccomplishments(accomplishments));
+      triggerRecording(responseAccId, responseTitle, getOwnerName());
 
       return NextResponse.json({ success: true });
     }
@@ -181,8 +214,9 @@ export async function POST(request: Request) {
     if (body.type === 'add_accomplishment') {
       const accomplishments = readJson(ACCOMPLISHMENTS_FILE);
       const a = body.accomplishment || body;
+      const accId = a.id || Date.now().toString();
       accomplishments.push({
-        id: a.id || Date.now().toString(),
+        id: accId,
         icon: a.icon || '✅',
         title: a.title,
         detail: a.detail,
@@ -191,6 +225,12 @@ export async function POST(request: Request) {
         timestamp: a.timestamp || Date.now(),
       });
       writeJson(ACCOMPLISHMENTS_FILE, trimAccomplishments(accomplishments));
+
+      // Auto-record a loom-style video if no screenshot was provided
+      if (!a.screenshot) {
+        triggerRecording(accId, a.title || 'Accomplishment', a.who || 'Agent');
+      }
+
       return NextResponse.json({ success: true });
     }
 
@@ -214,8 +254,9 @@ export async function POST(request: Request) {
 
     if (body.type === 'accomplishment') {
       const accomplishments = readJson(ACCOMPLISHMENTS_FILE);
+      const legacyAccId = body.id || Date.now().toString();
       accomplishments.push({
-        id: body.id || Date.now().toString(),
+        id: legacyAccId,
         icon: body.icon || '✅',
         title: body.title,
         detail: body.detail,
@@ -224,6 +265,11 @@ export async function POST(request: Request) {
         timestamp: Date.now(),
       });
       writeJson(ACCOMPLISHMENTS_FILE, trimAccomplishments(accomplishments));
+
+      if (!body.screenshot) {
+        triggerRecording(legacyAccId, body.title || 'Accomplishment', body.who || 'Agent');
+      }
+
       return NextResponse.json({ success: true });
     }
 

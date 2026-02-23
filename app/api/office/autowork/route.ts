@@ -186,7 +186,7 @@ function composePrompt(agentId: string, directive: string, mission: Mission, tea
   parts.push(
     '---\n' +
     'Work on your highest priority task that advances the mission above. ' +
-    'If you finish something, record it as an accomplishment:\n\n' +
+    'If you finish something, record it as an accomplishment (a Loom-style screen recording is automatically captured):\n\n' +
     '```bash\n' +
     'curl -s -X POST http://localhost:3333/api/office/actions \\\n' +
     '  -H "Content-Type: application/json" \\\n' +

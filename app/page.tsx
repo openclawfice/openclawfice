@@ -2445,6 +2445,8 @@ export default function HomePage() {
                     return `${Math.floor(hours / 24)}d ago`;
                   })();
                   const hasMedia = a.screenshot && (a.screenshot.endsWith('.mp4') || a.screenshot.endsWith('.webm') || a.screenshot.endsWith('.mov'));
+                  const hasScreenshot = !!a.screenshot;
+                  const isRecording = !hasScreenshot && (Date.now() - a.timestamp) < 30000;
                   return (
                     <div
                       key={a.id || i}
@@ -2470,7 +2472,10 @@ export default function HomePage() {
                         </span>
                       </div>
                       {hasMedia && (
-                        <span style={{ fontSize: 10, flexShrink: 0 }}>🎬</span>
+                        <span style={{ fontSize: 10, flexShrink: 0 }} title="Loom recording attached">🎬</span>
+                      )}
+                      {isRecording && (
+                        <span style={{ fontSize: 8, flexShrink: 0, color: '#f87171', animation: 'pulse 1s infinite' }} title="Recording loom...">🔴 REC</span>
                       )}
                       <div style={{
                         display: 'flex',
