@@ -1102,6 +1102,53 @@ export default function HomePage() {
         </div>
       </div>
 
+      {/* No Agents Empty State */}
+      {agents.length === 0 && (
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: 'calc(100vh - 100px)',
+          textAlign: 'center',
+          padding: '20px',
+        }}>
+          <div style={{ fontSize: 48, marginBottom: 16 }}>🏢</div>
+          <h2 style={{
+            fontSize: isMobile ? 16 : 20,
+            fontFamily: '"Press Start 2P", monospace',
+            marginBottom: 20,
+            color: '#e2e8f0',
+          }}>
+            Welcome to OpenClawfice!
+          </h2>
+          <div style={{
+            fontSize: isMobile ? 12 : 14,
+            color: '#94a3b8',
+            maxWidth: 500,
+            lineHeight: 1.8,
+            marginBottom: 20,
+          }}>
+            No agents detected yet.
+          </div>
+          <div style={{
+            fontSize: isMobile ? 11 : 13,
+            color: '#64748b',
+            maxWidth: 500,
+            lineHeight: 1.6,
+            textAlign: 'left',
+          }}>
+            <div style={{ marginBottom: 8 }}>To get started:</div>
+            <div style={{ marginBottom: 6 }}>1. Make sure OpenClaw is running</div>
+            <div style={{ marginBottom: 6 }}>2. Agents will appear here automatically from ~/.openclaw/openclaw.json</div>
+            <div style={{ marginBottom: 20 }}>3. Send a message in OpenClaw to wake them up!</div>
+            <div style={{ fontSize: isMobile ? 10 : 12, color: '#475569' }}>
+              Need help? Check the <a href="/install" style={{ color: '#6366f1', textDecoration: 'none' }}>install guide</a>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Onboarding Banner — shown when all agents are new (never ran) */}
       {agents.length > 0 && agents.every(a => a.isNew) && (
         <div style={{
@@ -1121,7 +1168,7 @@ export default function HomePage() {
             <div style={{ fontSize: 10, color: '#94a3b8', marginTop: 2 }}>
               Your agents will appear here once they start working. Send a message in OpenClaw to wake them up!
               {agents.some(a => !a.hasIdentity) && (
-                <span style={{ color: '#a78bfa' }}> 💡 Add <code style={{ background: '#1e293b', padding: '1px 4px', borderRadius: 3 }}>IDENTITY.md</code> to your agent workspaces to customize their names.</span>
+                <> 💡 Tip: Add <code style={{ background: '#1e293b', padding: '1px 4px', borderRadius: 3 }}>IDENTITY.md</code> to agent workspaces to customize their names.</>
               )}
             </div>
           </div>
@@ -1147,7 +1194,8 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* Office Floor */}
+      {/* Office Floor — only show if agents exist */}
+      {agents.length > 0 && (
       <div style={{
         padding: isMobile ? '6px' : '8px 12px',
         display: 'grid',
@@ -1166,7 +1214,8 @@ export default function HomePage() {
           minHeight: 0,
           overflow: isMobile ? 'visible' : 'hidden',
         }}>
-          {/* WORK ROOM */}
+          {/* WORK ROOM — hide in single agent mode */}
+          {agents.length > 1 && (
           <Room
             title="Work Room"
             icon="💻"
@@ -1247,6 +1296,7 @@ export default function HomePage() {
               )}
             </div>
           </Room>
+          )}
 
           {/* MEETING ROOM — only appears when meeting.active = true */}
           {meeting.active && (
@@ -1433,8 +1483,18 @@ export default function HomePage() {
                     fontFamily: '"Press Start 2P", monospace',
                     fontSize: 7,
                     padding: 8,
+                    textAlign: 'center',
                   }}>
-                    * everyone is busy *
+                    {agents.length === 1 ? (
+                      <div style={{ lineHeight: 1.8 }}>
+                        👋 Solo mode!
+                        <br />
+                        <br />
+                        Add more agents to openclaw.json to build a team.
+                      </div>
+                    ) : (
+                      '* everyone is busy *'
+                    )}
                   </div>
                 )}
               </div>
@@ -1550,15 +1610,26 @@ export default function HomePage() {
                       ✨
                     </div>
                     <div style={{
+                      color: '#e2e8f0',
+                      fontSize: 10,
+                      marginBottom: 6,
+                      fontWeight: 600,
+                    }}>
+                      No pending decisions
+                    </div>
+                    <div style={{
                       color: '#64748b',
                       fontSize: 9,
-                      lineHeight: 1.4,
+                      lineHeight: 1.5,
                     }}>
-                      No pending decisions yet.
+                      Your agents will create quests when
                       <br />
-                      OpenClawfice watches for questions
+                      they need your input.
                       <br />
-                      from your agents automatically.
+                      <br />
+                      <span style={{ fontSize: 8, fontStyle: 'italic' }}>
+                        (Pulled from ~/.openclaw/.status/actions.json)
+                      </span>
                     </div>
                   </div>
                 )}
@@ -1682,13 +1753,21 @@ export default function HomePage() {
                     🎯
                   </div>
                   <div style={{
-                    color: '#64748b',
+                    color: '#e2e8f0',
                     fontSize: 10,
-                    lineHeight: 1.5,
+                    marginBottom: 6,
+                    fontWeight: 600,
                   }}>
-                    Accomplishments appear here when
+                    No accomplishments yet
+                  </div>
+                  <div style={{
+                    color: '#64748b',
+                    fontSize: 9,
+                    lineHeight: 1.6,
+                  }}>
+                    Once your agents complete tasks,
                     <br />
-                    your agents complete tasks.
+                    they'll appear here!
                     <br />
                     <br />
                     <span style={{ fontSize: 8 }}>
@@ -1758,18 +1837,24 @@ export default function HomePage() {
                     💬
                   </div>
                   <div style={{
+                    color: '#e2e8f0',
+                    fontSize: 10,
+                    marginBottom: 6,
+                    fontWeight: 600,
+                  }}>
+                    Water Cooler
+                  </div>
+                  <div style={{
                     fontSize: 9,
                     color: '#64748b',
-                    lineHeight: 1.4,
+                    lineHeight: 1.6,
                   }}>
-                    Idle agents will chat here
+                    No chat yet. Idle agents will start
                     <br />
-                    automatically.
+                    chatting automatically!
                     <br />
                     <br />
-                    Or broadcast a message to
-                    <br />
-                    everyone below ↓
+                    Or broadcast a message below ↓
                   </div>
                 </div>
               )}
@@ -1894,6 +1979,7 @@ export default function HomePage() {
           </div>
         </div>
       </div>
+      )}
 
       {/* Agent Detail Panel */}
       {selectedAgent && (
