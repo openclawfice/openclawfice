@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useDemoMode } from '../hooks/useDemoMode';
 import { TemplateGallery } from '../components/TemplateGallery';
 import { DemoBanner } from '../components/DemoBanner';
+import { ShareModal } from '../components/ShareModal';
 
 type AgentStatus = 'working' | 'idle';
 type Mood = 'great' | 'good' | 'okay' | 'stressed';
@@ -1350,6 +1351,7 @@ export default function HomePage() {
   const [sendingGroup, setSendingGroup] = useState(false);
   const [groupSent, setGroupSent] = useState(false);
   const [showTemplateGallery, setShowTemplateGallery] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
   const [meeting, setMeeting] = useState<{
     active: boolean;
     topic?: string;
@@ -1836,6 +1838,20 @@ export default function HomePage() {
               timeZone: 'America/New_York',
             })}
           </div>
+          <button
+            onClick={() => setShowShareModal(true)}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: '#475569',
+              cursor: 'pointer',
+              fontSize: 14,
+              padding: '2px 4px',
+            }}
+            title="Share Your Office"
+          >
+            📸
+          </button>
           <button
             onClick={() => setShowSettings(true)}
             style={{
@@ -3278,6 +3294,15 @@ export default function HomePage() {
         <TemplateGallery
           onSelectTemplate={handleTemplateSelect}
           onClose={() => setShowTemplateGallery(false)}
+        />
+      )}
+
+      {/* Share Modal */}
+      {showShareModal && (
+        <ShareModal
+          onClose={() => setShowShareModal(false)}
+          agentCount={agents.length}
+          workingCount={working.length}
         />
       )}
     </div>
