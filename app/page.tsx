@@ -1212,6 +1212,8 @@ export default function HomePage() {
   const [activeThought, setActiveThought] = useState<{ agentId: string; text: string } | null>(null);
   const [lastSeenChatCount, setLastSeenChatCount] = useState(0);
   const [nextChatIn, setNextChatIn] = useState(0);
+  const chatTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const chatTargetRef = useRef(0);
   const chatRef = useRef<HTMLDivElement>(null);
   const [groupMessage, setGroupMessage] = useState('');
   const [sendingGroup, setSendingGroup] = useState(false);
@@ -1428,26 +1430,27 @@ export default function HomePage() {
     }
   }, [chatLog, lastSeenChatCount]);
 
-  // Generate new chat message based on config frequency
+  // Schedule next chat message — only reschedule when chatLog length changes (new message arrived)
+  const chatLogLen = chatLog.length;
   useEffect(() => {
     const waterCoolerConfig = config.waterCooler || {};
-    
     if (waterCoolerConfig.enabled === false) return;
-    
+
     const npcAgents = agents.filter(a => a.id !== '_owner');
     if (npcAgents.length < 2) return;
-    
-    // Check quiet hours
+
     if (waterCoolerConfig.quiet?.enabled) {
       const now = new Date();
       const tz = waterCoolerConfig.quiet.timezone || 'America/New_York';
       const hour = parseInt(now.toLocaleString('en-US', { hour: 'numeric', hour12: false, timeZone: tz }));
       const quietStart = parseInt(waterCoolerConfig.quiet.start?.split(':')[0] || '23');
       const quietEnd = parseInt(waterCoolerConfig.quiet.end?.split(':')[0] || '8');
-      
       if (hour >= quietStart || hour < quietEnd) return;
     }
-    
+
+    // If a timer is already running and hasn't fired yet, don't reset
+    if (chatTimerRef.current && chatTargetRef.current > Date.now()) return;
+
     const parseInterval = (str: string): number => {
       const match = str.match(/^(\d+)(s|m|h|d)$/);
       if (!match) return 45000;
@@ -1456,14 +1459,16 @@ export default function HomePage() {
       const multipliers: Record<string, number> = { s: 1000, m: 60000, h: 3600000, d: 86400000 };
       return n * multipliers[unit];
     };
-    
+
     const baseFreq = parseInterval(waterCoolerConfig.frequency || '45s');
     const delay = baseFreq + (Math.random() - 0.5) * baseFreq * 0.5;
-    const delaySec = Math.round(delay / 1000);
-    setNextChatIn(delaySec);
-    
-    const timer = setTimeout(async () => {
-      setNextChatIn(-1); // -1 = generating
+    chatTargetRef.current = Date.now() + delay;
+    setNextChatIn(Math.round(delay / 1000));
+
+    chatTimerRef.current = setTimeout(async () => {
+      chatTimerRef.current = null;
+      chatTargetRef.current = 0;
+      setNextChatIn(-1);
       try {
         const allAgentData = agents
           .filter(a => a.id !== '_owner')
@@ -1479,13 +1484,22 @@ export default function HomePage() {
       } catch {}
       setNextChatIn(0);
     }, delay);
-    return () => clearTimeout(timer);
-  }, [agents, chatLog, config]);
 
-  // Countdown tick — runs a steady 1s interval whenever countdown is active
+    return () => {
+      if (chatTimerRef.current) clearTimeout(chatTimerRef.current);
+      chatTimerRef.current = null;
+      chatTargetRef.current = 0;
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chatLogLen, config.waterCooler?.frequency, config.waterCooler?.enabled]);
+
+  // Countdown tick
   useEffect(() => {
     const tick = setInterval(() => {
-      setNextChatIn(p => (p > 0 ? p - 1 : p));
+      if (chatTargetRef.current > 0) {
+        const remaining = Math.max(0, Math.round((chatTargetRef.current - Date.now()) / 1000));
+        setNextChatIn(prev => prev === -1 ? prev : remaining);
+      }
     }, 1000);
     return () => clearInterval(tick);
   }, []);
