@@ -35,7 +35,7 @@ export async function GET() {
     
     // If agent just switched to idle, clear task
     if (newStatus === 'idle') {
-      newTask = undefined;
+      newTask = '';
     }
     
     // If agent just switched to working but has no task, assign one
