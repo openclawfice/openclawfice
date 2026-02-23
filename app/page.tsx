@@ -119,23 +119,92 @@ function generateAgentDefaults(id: string) {
   };
 }
 
-function Plumbob({ mood }: { mood: Mood }) {
+// Generate quirky RPG-style mood messages
+function getQuirkyMoodMessage(agent: Agent): string {
+  const { mood, status, task } = agent;
+  
+  // Context-aware messages
+  const messages: Record<Mood, string[]> = {
+    great: [
+      '✨ In the zone!',
+      '🎯 Peak performance!',
+      '🚀 On fire today!',
+      '💪 Crushing it!',
+      '⚡ Full power!',
+      '🎮 +10 XP per minute',
+      '🌟 Legendary mode',
+      '🎊 Living the dream',
+    ],
+    good: [
+      '👍 Steady progress',
+      '☕ Caffeinated & ready',
+      '🎵 Vibing',
+      '✅ Getting things done',
+      '🔥 Productive flow',
+      '💼 Business as usual',
+      '🎯 Locked in',
+      '⚙️ Operating smoothly',
+    ],
+    okay: [
+      '😐 Could use coffee',
+      '🤔 Contemplating life',
+      '📊 Mildly motivated',
+      '🌤️ Partly productive',
+      '⏱️ Waiting for inspiration',
+      '📝 Going through motions',
+      '💭 Daydreaming a bit',
+      '🎲 Rolling with it',
+    ],
+    stressed: [
+      '😰 Too many tabs open',
+      '🔥 Everything is fine™',
+      '😵 Context switching overload',
+      '⚠️ Mental stack overflow',
+      '😤 Needs vacation',
+      '🆘 Send help (or snacks)',
+      '💥 Burnout imminent',
+      '🌪️ Chaos mode',
+    ],
+  };
+  
+  // Status-specific overrides
+  if (status === 'idle') {
+    return '😴 Chillin\' in the lounge';
+  }
+  
+  if (agent.nextTaskAt && agent.nextTaskAt > Date.now()) {
+    const mins = Math.floor((agent.nextTaskAt - Date.now()) / 60000);
+    if (mins < 5) return '⏰ Almost time to work!';
+    if (mins < 15) return '🛋️ Enjoying the break';
+    return '💤 On cooldown';
+  }
+  
+  // Task-specific messages
+  if (task) {
+    if (task.toLowerCase().includes('bug')) return '🐛 Bug hunting mode';
+    if (task.toLowerCase().includes('meeting')) return '💼 Professional mode ON';
+    if (task.toLowerCase().includes('review')) return '👀 Critic mode activated';
+    if (task.toLowerCase().includes('writing')) return '✍️ Literary genius at work';
+    if (task.toLowerCase().includes('deploy')) return '🚀 Launch sequence initiated';
+  }
+  
+  // Random message from mood category
+  const pool = messages[mood];
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
+function Plumbob({ mood, agent }: { mood: Mood; agent?: Agent }) {
   const colors: Record<Mood, string> = {
     great: '#22c55e',
     good: '#84cc16',
     okay: '#eab308',
     stressed: '#ef4444',
   };
-  const moodLabels: Record<Mood, string> = {
-    great: 'Feeling great!',
-    good: 'Doing well',
-    okay: 'Okay',
-    stressed: 'Stressed',
-  };
   const c = colors[mood];
+  const message = agent ? getQuirkyMoodMessage(agent) : `Mood: ${mood}`;
   return (
     <div 
-      title={moodLabels[mood]}
+      title={message}
       style={{
         width: 0,
         height: 0,
@@ -264,7 +333,7 @@ function NPC({ agent, size = 1, onClick, forceThought }: {
           {displayThought}
         </div>
       )}
-      <Plumbob mood={agent.mood} />
+      <Plumbob mood={agent.mood} agent={agent} />
       <div style={{
         width: s * 8,
         height: s * 10,
