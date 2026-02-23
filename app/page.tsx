@@ -460,12 +460,14 @@ function formatInterval(ms: number): string {
   return `${(ms / 3600000).toFixed(1)}h`;
 }
 
-function AgentPanel({ agent, onClose, autowork, onAutoworkUpdate, onStop }: { agent: Agent; onClose: () => void; autowork?: { enabled: boolean; intervalMs: number; directive: string; lastSentAt: number }; onAutoworkUpdate?: (agentId: string, patch: Partial<{ enabled: boolean; intervalMs: number; directive: string }>) => void; onStop?: (agentId: string) => void }) {
+function AgentPanel({ agent, onClose, autowork, onAutoworkUpdate, onStop, pendingChanges }: { agent: Agent; onClose: () => void; autowork?: { enabled: boolean; intervalMs: number; directive: string; lastSentAt: number }; onAutoworkUpdate?: (agentId: string, patch: Partial<{ enabled: boolean; intervalMs: number; directive: string }>) => void; onStop?: (agentId: string) => void; pendingChanges?: Partial<{ enabled: boolean; intervalMs: number; directive: string }> }) {
   const [awSaving, setAwSaving] = useState(false);
-  const [awEnabled, setAwEnabled] = useState(autowork?.enabled ?? false);
-  const [awIntervalMs, setAwIntervalMs] = useState(autowork?.intervalMs ?? 600_000);
-  const [awDirective, setAwDirective] = useState(autowork?.directive ?? '');
+  const merged = { ...(autowork || { enabled: false, intervalMs: 600_000, directive: '', lastSentAt: 0 }), ...pendingChanges };
+  const [awEnabled, setAwEnabled] = useState(merged.enabled ?? false);
+  const [awIntervalMs, setAwIntervalMs] = useState(merged.intervalMs ?? 600_000);
+  const [awDirective, setAwDirective] = useState(merged.directive ?? '');
   const [directiveDirty, setDirectiveDirty] = useState(false);
+  const hasPending = !!pendingChanges && Object.keys(pendingChanges).length > 0;
   const [stopping, setStopping] = useState(false);
   const [dmMessage, setDmMessage] = useState('');
   const [sending, setSending] = useState(false);
@@ -868,29 +870,16 @@ function AgentPanel({ agent, onClose, autowork, onAutoworkUpdate, onStop }: { ag
                 ▶ NOW
               </button>
               <button
-                onClick={async () => {
-                  setAwSaving(true);
+                onClick={() => {
                   const newEnabled = !awEnabled;
-                  try {
-                    const res = await fetch('/api/office/autowork', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ agentId: agent.id, enabled: newEnabled }),
-                    });
-                    if (res.ok) {
-                      setAwEnabled(newEnabled);
-                      onAutoworkUpdate?.(agent.id, { enabled: newEnabled });
-                    }
-                  } catch {}
-                  setAwSaving(false);
+                  setAwEnabled(newEnabled);
+                  onAutoworkUpdate?.(agent.id, { enabled: newEnabled });
                 }}
-                disabled={awSaving}
                 style={{
                   background: awEnabled ? '#10b981' : '#475569',
                   border: 'none', borderRadius: 12, padding: '3px 10px',
                   color: '#fff', fontSize: 9, cursor: 'pointer',
                   fontFamily: '"Press Start 2P", monospace',
-                  opacity: awSaving ? 0.5 : 1,
                   transition: 'background 0.2s',
                 }}
               >
@@ -904,28 +893,26 @@ function AgentPanel({ agent, onClose, autowork, onAutoworkUpdate, onStop }: { ag
               ? `${agent.name} gets sent to work every ${formatInterval(awIntervalMs)}.`
               : `Paused — ${agent.name} will idle until manually tasked or enabled.`}
           </div>
+          {hasPending && (
+            <div style={{
+              background: 'rgba(245,158,11,0.1)',
+              border: '1px solid rgba(245,158,11,0.3)',
+              borderRadius: 6, padding: '5px 8px', marginBottom: 10,
+              fontSize: 9, color: '#fbbf24',
+            }}>
+              ⚠ Unsaved — apply changes from the banner below
+            </div>
+          )}
 
           <div style={{ fontSize: 8, color: '#64748b', marginBottom: 6, textTransform: 'uppercase' as const }}>Interval</div>
           <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
             {COOLDOWN_PRESETS.map(p => (
               <button
                 key={p.ms}
-                onClick={async () => {
-                  setAwSaving(true);
-                  try {
-                    const res = await fetch('/api/office/autowork', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ agentId: agent.id, intervalMs: p.ms }),
-                    });
-                    if (res.ok) {
-                      setAwIntervalMs(p.ms);
-                      onAutoworkUpdate?.(agent.id, { intervalMs: p.ms });
-                    }
-                  } catch {}
-                  setAwSaving(false);
+                onClick={() => {
+                  setAwIntervalMs(p.ms);
+                  onAutoworkUpdate?.(agent.id, { intervalMs: p.ms });
                 }}
-                disabled={awSaving}
                 style={{
                   background: awIntervalMs === p.ms ? '#6366f1' : '#0f172a',
                   border: `1px solid ${awIntervalMs === p.ms ? '#6366f1' : '#334155'}`,
@@ -933,7 +920,6 @@ function AgentPanel({ agent, onClose, autowork, onAutoworkUpdate, onStop }: { ag
                   color: awIntervalMs === p.ms ? '#fff' : (awEnabled ? '#94a3b8' : '#475569'),
                   fontSize: 9, cursor: 'pointer',
                   fontFamily: '"Press Start 2P", monospace',
-                  opacity: awSaving ? 0.5 : 1,
                   transition: 'all 0.15s',
                 }}
               >
@@ -968,22 +954,10 @@ function AgentPanel({ agent, onClose, autowork, onAutoworkUpdate, onStop }: { ag
             />
             {directiveDirty && (
               <button
-                onClick={async () => {
-                  setAwSaving(true);
-                  try {
-                    const res = await fetch('/api/office/autowork', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ agentId: agent.id, directive: awDirective }),
-                    });
-                    if (res.ok) {
-                      setDirectiveDirty(false);
-                      onAutoworkUpdate?.(agent.id, { directive: awDirective });
-                    }
-                  } catch {}
-                  setAwSaving(false);
+                onClick={() => {
+                  setDirectiveDirty(false);
+                  onAutoworkUpdate?.(agent.id, { directive: awDirective });
                 }}
-                disabled={awSaving}
                 style={{
                   marginTop: 4,
                   background: '#6366f1',
@@ -994,7 +968,6 @@ function AgentPanel({ agent, onClose, autowork, onAutoworkUpdate, onStop }: { ag
                   fontSize: 9,
                   cursor: 'pointer',
                   fontFamily: '"Press Start 2P", monospace',
-                  opacity: awSaving ? 0.5 : 1,
                 }}
               >
                 Save Directive
@@ -1376,6 +1349,7 @@ export default function HomePage() {
   }>({ active: false });
   const [config, setConfig] = useState<any>({});
   const [autoworkPolicies, setAutoworkPolicies] = useState<Record<string, { enabled: boolean; intervalMs: number; directive: string; lastSentAt: number }>>({});
+  const [pendingAutowork, setPendingAutowork] = useState<Record<string, Partial<{ enabled: boolean; intervalMs: number; directive: string }>>>({});
   const [showSettings, setShowSettings] = useState(false);
   const [screenSize, setScreenSize] = useState<'mobile' | 'tablet' | 'desktop'>('desktop');
 
@@ -3071,10 +3045,11 @@ export default function HomePage() {
             agent={selectedAgent}
             onClose={() => setSelectedAgent(null)}
             autowork={autoworkPolicies[selectedAgent.id]}
+            pendingChanges={pendingAutowork[selectedAgent.id]}
             onAutoworkUpdate={(agentId, patch) => {
-              setAutoworkPolicies(prev => ({
+              setPendingAutowork(prev => ({
                 ...prev,
-                [agentId]: { ...(prev[agentId] || { enabled: false, intervalMs: 600_000, directive: '', lastSentAt: 0 }), ...patch },
+                [agentId]: { ...(prev[agentId] || {}), ...patch },
               }));
             }}
             onStop={(agentId) => {
@@ -3099,6 +3074,98 @@ export default function HomePage() {
           <SettingsPanel config={config} onConfigChange={setConfig} onClose={() => setShowSettings(false)} />
           <div onClick={() => setShowSettings(false)} style={{ position: 'fixed', inset: 0, zIndex: 99 }} />
         </>
+      )}
+
+      {/* Pending Auto-Work Changes Banner */}
+      {Object.keys(pendingAutowork).length > 0 && (
+        <div style={{
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          zIndex: 200,
+          background: 'linear-gradient(to right, #1e1b4b, #312e81)',
+          borderTop: '2px solid #6366f1',
+          padding: '12px 20px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 16,
+          animation: 'fadeSlideIn 0.3s ease-out',
+          boxShadow: '0 -4px 20px rgba(99,102,241,0.3)',
+        }}>
+          <div style={{ flex: 1 }}>
+            <div style={{
+              fontSize: 11, fontWeight: 700, color: '#e0e7ff',
+              fontFamily: '"Press Start 2P", monospace',
+              marginBottom: 4,
+            }}>
+              ⚠ WORKSPACE RESTART REQUIRED
+            </div>
+            <div style={{ fontSize: 11, color: '#a5b4fc', lineHeight: 1.5 }}>
+              {Object.entries(pendingAutowork).map(([agentId, changes]) => {
+                const agentName = agents.find(a => a.id === agentId)?.name || agentId;
+                const parts: string[] = [];
+                if (changes.enabled !== undefined) parts.push(changes.enabled ? 'enable auto-work' : 'disable auto-work');
+                if (changes.intervalMs !== undefined) parts.push(`interval → ${formatInterval(changes.intervalMs)}`);
+                if (changes.directive !== undefined) parts.push('updated directive');
+                return `${agentName}: ${parts.join(', ')}`;
+              }).join(' · ')}
+            </div>
+          </div>
+          <button
+            onClick={() => setPendingAutowork({})}
+            style={{
+              background: 'transparent',
+              border: '1px solid #475569',
+              borderRadius: 8,
+              padding: '8px 16px',
+              color: '#94a3b8',
+              fontSize: 10,
+              cursor: 'pointer',
+              fontFamily: '"Press Start 2P", monospace',
+            }}
+          >
+            DISCARD
+          </button>
+          <button
+            onClick={async () => {
+              const entries = Object.entries(pendingAutowork);
+              try {
+                for (const [agentId, changes] of entries) {
+                  await fetch('/api/office/autowork', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ agentId, ...changes }),
+                  });
+                }
+                // Merge into live policies
+                setAutoworkPolicies(prev => {
+                  const next = { ...prev };
+                  for (const [agentId, changes] of entries) {
+                    next[agentId] = { ...(next[agentId] || { enabled: false, intervalMs: 600_000, directive: '', lastSentAt: 0 }), ...changes };
+                  }
+                  return next;
+                });
+                setPendingAutowork({});
+              } catch {
+                alert('Failed to apply changes');
+              }
+            }}
+            style={{
+              background: '#6366f1',
+              border: 'none',
+              borderRadius: 8,
+              padding: '8px 20px',
+              color: '#fff',
+              fontSize: 10,
+              cursor: 'pointer',
+              fontFamily: '"Press Start 2P", monospace',
+              boxShadow: '0 2px 8px rgba(99,102,241,0.4)',
+            }}
+          >
+            APPLY & RESTART
+          </button>
+        </div>
       )}
 
       <style jsx global>{`
@@ -3137,6 +3204,10 @@ export default function HomePage() {
           to {
             transform: translateX(0);
           }
+        }
+        @keyframes pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.4; }
         }
       `}</style>
 
