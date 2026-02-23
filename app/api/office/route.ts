@@ -288,28 +288,86 @@ function readTailLines(filePath: string, maxLines: number = 20): string[] {
 }
 
 /**
- * Infer what an agent is doing from the tail of their session transcript.
+ * Detect whether recent transcript lines contain watercooler chat.
+ * Watercooler user prompts contain "WATER COOLER CHAT".
  */
-function inferTask(agentId: string, sessionId: string): string {
+function isWatercoolerEntry(msg: any): boolean {
+  if (!msg) return false;
+  const c = msg.content;
+  const text = typeof c === 'string' ? c
+    : Array.isArray(c) ? (c.find((x: any) => x.type === 'text')?.text || '') : '';
+  return text.includes('WATER COOLER CHAT');
+}
+
+interface TaskEvidence {
+  task: string;
+  hasToolCalls: boolean;
+  lastToolUseTs: number;
+  lastActivityTs: number;
+}
+
+/**
+ * Infer what an agent is doing from the tail of their session transcript.
+ * Also returns evidence of actual work (tool calls) vs just chatting.
+ */
+function inferTaskWithEvidence(agentId: string, sessionId: string): TaskEvidence {
+  const empty: TaskEvidence = { task: '', hasToolCalls: false, lastToolUseTs: 0, lastActivityTs: 0 };
   const filePath = join(AGENTS_DIR, agentId, 'sessions', `${sessionId}.jsonl`);
-  if (!existsSync(filePath)) return '';
+  if (!existsSync(filePath)) return empty;
 
-  const lines = readTailLines(filePath, 20);
+  const lines = readTailLines(filePath, 40);
+  let task = '';
+  let hasToolCalls = false;
+  let lastToolUseTs = 0;
+  let lastActivityTs = 0;
+  let inWatercoolerBlock = false;
 
+  // First pass: scan for tool calls and timestamps
+  for (const line of lines) {
+    try {
+      const entry = JSON.parse(line);
+      const msg = entry.type === 'message' ? entry.message : entry;
+      const ts = entry.timestamp ? new Date(entry.timestamp).getTime() : 0;
+      if (!msg?.role) continue;
+
+      if (ts > lastActivityTs) lastActivityTs = ts;
+
+      if (msg.role === 'assistant' && Array.isArray(msg.content)) {
+        for (const part of msg.content) {
+          if (part.type === 'tool_use') {
+            hasToolCalls = true;
+            if (ts > lastToolUseTs) lastToolUseTs = ts;
+          }
+        }
+      }
+    } catch {}
+  }
+
+  // Second pass (reverse): find the task description, skipping watercooler blocks
   for (let i = lines.length - 1; i >= 0; i--) {
     try {
       const entry = JSON.parse(lines[i]);
       const msg = entry.type === 'message' ? entry.message : entry;
       if (!msg?.role) continue;
 
-      // Look for assistant messages — prefer text over tool names
-      if (msg.role === 'assistant' && msg.content) {
+      // If we hit a watercooler user prompt, mark that we're in a watercooler block
+      if (msg.role === 'user' && isWatercoolerEntry(msg)) {
+        inWatercoolerBlock = true;
+        continue;
+      }
+
+      // Skip assistant replies that immediately follow a watercooler prompt
+      if (msg.role === 'assistant' && inWatercoolerBlock) {
+        inWatercoolerBlock = false;
+        continue;
+      }
+      inWatercoolerBlock = false;
+
+      if (!task && msg.role === 'assistant' && msg.content) {
         const parts = Array.isArray(msg.content) ? msg.content : [];
-        
-        // Prefer text content — it's more descriptive than tool names
         const textPart = parts.find((c: any) => c.type === 'text');
         if (textPart?.text && textPart.text.length > 10) {
-          let task = textPart.text
+          let t = textPart.text
             .split('\n')
             .map((l: string) => l.trim())
             .find((l: string) => 
@@ -319,31 +377,46 @@ function inferTask(agentId: string, sessionId: string): string {
               !l.startsWith('```') &&
               !l.includes('HEARTBEAT')
             ) || '';
-          
-          task = task.replace(/^\*+\s*/, '').replace(/\*+$/, '').replace(/^[-•]\s*/, '').trim();
-          if (task.length > 80) task = task.slice(0, 77) + '...';
-          if (task) return task;
+          t = t.replace(/^\*+\s*/, '').replace(/\*+$/, '').replace(/^[-•]\s*/, '').trim();
+          if (t.length > 80) t = t.slice(0, 77) + '...';
+          if (t) { task = t; break; }
         }
-        // If only tool calls and no text, keep scanning for user message below
+
+        // Check for tool calls as task evidence
+        const toolPart = parts.find((c: any) => c.type === 'tool_use');
+        if (toolPart) {
+          const name = toolPart.name || 'unknown';
+          let detail = '';
+          if (toolPart.input) {
+            detail = toolPart.input.path || toolPart.input.command || toolPart.input.pattern || '';
+            if (detail.length > 60) detail = '...' + detail.slice(-57);
+          }
+          task = detail ? `${name}: ${detail}` : name;
+          break;
+        }
       }
 
-      // Fallback: use the most recent user message as the task description
-      if (msg.role === 'user') {
+      if (!task && msg.role === 'user') {
         const c = msg.content;
         const text = typeof c === 'string' ? c
           : Array.isArray(c) ? (c.find((x: any) => x.type === 'text')?.text || '') : '';
         if (text.length > 10 && !text.includes('HEARTBEAT') && !text.includes('Read HEARTBEAT.md')
             && !text.includes('Agent-to-agent') && !text.includes('announce step')
-            && !text.includes('Pre-compaction memory flush')) {
-          let task = text.replace(/^\[.*?\]\s*/, '').replace(/\n/g, ' ').trim();
-          if (task.length > 80) task = task.slice(0, 77) + '...';
-          return task;
+            && !text.includes('Pre-compaction memory flush') && !text.includes('WATER COOLER CHAT')) {
+          let t = text.replace(/^\[.*?\]\s*/, '').replace(/\n/g, ' ').trim();
+          if (t.length > 80) t = t.slice(0, 77) + '...';
+          task = t;
+          break;
         }
       }
     } catch {}
   }
   
-  return '';
+  return { task, hasToolCalls, lastToolUseTs, lastActivityTs };
+}
+
+function inferTask(agentId: string, sessionId: string): string {
+  return inferTaskWithEvidence(agentId, sessionId).task;
 }
 
 /**
@@ -361,7 +434,7 @@ function inferOwnerTask(agentId: string, sessionId: string): string {
         const c = msg.content;
         const text = typeof c === 'string' ? c
           : Array.isArray(c) ? (c.find((x: any) => x.type === 'text')?.text || '') : '';
-        if (text.length > 5 && !text.includes('HEARTBEAT') && !text.includes('Read HEARTBEAT.md') && !text.includes('Pre-compaction memory flush')) {
+        if (text.length > 5 && !text.includes('HEARTBEAT') && !text.includes('Read HEARTBEAT.md') && !text.includes('Pre-compaction memory flush') && !text.includes('WATER COOLER CHAT')) {
           let task = text.replace(/^\[.*?\]\s*/, '').replace(/\n/g, ' ').trim();
           if (task.length > 80) task = task.slice(0, 77) + '...';
           return task;
@@ -461,15 +534,20 @@ export async function GET() {
     const wcLastActive = wcMarkers[cfg.id] || 0;
     const isWatercoolerActivity = (now - wcLastActive) < WC_GRACE_MS;
 
+    let evidence: TaskEvidence | null = null;
+
     if (targetSession && !isWatercoolerActivity) {
       const minsSinceUpdate = (now - targetSession.updatedAt) / 60000;
       
       if (minsSinceUpdate < (cfg.workingThresholdMin || 5)) {
         status = 'working';
         mood = 'great';
-        task = cfg.id === '_owner' 
-          ? inferOwnerTask(agentDir, targetSession.sessionId)
-          : inferTask(agentDir, targetSession.sessionId);
+        if (cfg.id === '_owner') {
+          task = inferOwnerTask(agentDir, targetSession.sessionId);
+        } else {
+          evidence = inferTaskWithEvidence(agentDir, targetSession.sessionId);
+          task = evidence.task;
+        }
         if (!task) task = 'Working...';
       }
     }
@@ -523,6 +601,11 @@ export async function GET() {
       cooldown: agentCooldowns[cfg.id] || undefined,
       isNew: !hasEverRun,
       hasIdentity: cfg.hasIdentity !== false,
+      workEvidence: evidence ? {
+        hasToolCalls: evidence.hasToolCalls,
+        lastToolUseTs: evidence.lastToolUseTs,
+        lastActivityTs: evidence.lastActivityTs,
+      } : undefined,
     };
   });
 

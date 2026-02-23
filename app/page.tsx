@@ -65,6 +65,11 @@ interface Agent {
   };
   isNew?: boolean;
   hasIdentity?: boolean;
+  workEvidence?: {
+    hasToolCalls: boolean;
+    lastToolUseTs: number;
+    lastActivityTs: number;
+  };
   needs: Needs;
   skills: Skill[];
   xp: number;
@@ -688,30 +693,50 @@ function AgentPanel({ agent, onClose, autowork, onAutoworkUpdate, onStop }: { ag
         </div>
       </div>
 
-      {agent.task && (
-        <div style={{
-          background: '#1e293b',
-          borderRadius: 8,
-          padding: 12,
-          marginBottom: 16,
-          borderLeft: `3px solid ${agent.status === 'working' ? '#10b981' : '#6366f1'}`,
-        }}>
+      {agent.task && (() => {
+        const ev = agent.workEvidence;
+        const hasRealWork = ev?.hasToolCalls;
+        const toolAge = ev?.lastToolUseTs ? Math.round((Date.now() - ev.lastToolUseTs) / 60000) : null;
+        return (
           <div style={{
-            fontSize: 9,
-            color: '#64748b',
-            textTransform: 'uppercase',
-            marginBottom: 4,
+            background: '#1e293b',
+            borderRadius: 8,
+            padding: 12,
+            marginBottom: 16,
+            borderLeft: `3px solid ${hasRealWork ? '#10b981' : '#f59e0b'}`,
           }}>
-            🔨 Working On
+            <div style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              marginBottom: 4,
+            }}>
+              <div style={{ fontSize: 9, color: '#64748b', textTransform: 'uppercase' }}>
+                🔨 Working On
+              </div>
+              <div style={{
+                fontSize: 7,
+                padding: '2px 6px',
+                borderRadius: 4,
+                background: hasRealWork ? 'rgba(16,185,129,0.15)' : 'rgba(245,158,11,0.15)',
+                color: hasRealWork ? '#6ee7b7' : '#fbbf24',
+                border: `1px solid ${hasRealWork ? 'rgba(16,185,129,0.3)' : 'rgba(245,158,11,0.3)'}`,
+                fontFamily: '"Press Start 2P", monospace',
+              }}>
+                {hasRealWork
+                  ? `✓ VERIFIED${toolAge !== null && toolAge > 0 ? ` ${toolAge}m ago` : ''}`
+                  : '? UNVERIFIED'}
+              </div>
+            </div>
+            <div style={{ fontSize: 12, color: '#e2e8f0' }}>
+              {agent.task}
+            </div>
+            {!hasRealWork && (
+              <div style={{ fontSize: 9, color: '#92400e', marginTop: 6, fontStyle: 'italic' }}>
+                No tool calls detected — agent may just be chatting
+              </div>
+            )}
           </div>
-          <div style={{
-            fontSize: 12,
-            color: '#e2e8f0',
-          }}>
-            {agent.task}
-          </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* Activity Log */}
       <div style={{
@@ -750,41 +775,51 @@ function AgentPanel({ agent, onClose, autowork, onAutoworkUpdate, onStop }: { ag
             lineHeight: '18px',
           }}
         >
-          {logLoading ? (
+          {logLoading && (
             <div style={{ color: '#475569', fontStyle: 'italic', padding: '8px 0' }}>Loading...</div>
-          ) : logEntries.length === 0 ? (
-            <div style={{ color: '#475569', fontStyle: 'italic', padding: '8px 0' }}>No activity yet</div>
-          ) : (
-            logEntries
-              .filter(e => showWatercooler || e.type !== 'watercooler')
-              .map((e, i) => {
-                const icon = e.role === 'assistant'
-                  ? (e.type === 'tool_use' ? '🔧' : '🤖')
-                  : e.role === 'user'
-                    ? (e.type === 'watercooler' ? '💬' : '👤')
-                    : (e.summary.startsWith('⚠️') ? '⚠️' : '✓');
-                const color = e.role === 'assistant'
-                  ? (e.type === 'tool_use' ? '#a78bfa' : '#93c5fd')
-                  : e.role === 'user'
-                    ? (e.type === 'watercooler' ? '#64748b' : '#fbbf24')
-                    : (e.summary.startsWith('⚠️') ? '#f87171' : '#475569');
-                const ts = e.ts ? new Date(e.ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
-                return (
-                  <div key={i} style={{
-                    padding: '3px 0',
-                    borderBottom: '1px solid rgba(51,65,85,0.4)',
-                    display: 'flex',
-                    gap: 6,
-                    alignItems: 'flex-start',
-                    opacity: e.type === 'watercooler' ? 0.5 : (e.role === 'tool' ? 0.6 : 1),
-                  }}>
-                    <span style={{ flexShrink: 0, width: 16, textAlign: 'center' }}>{icon}</span>
-                    <span style={{ color, flex: 1, wordBreak: 'break-word' }}>{e.summary}</span>
-                    {ts && <span style={{ color: '#334155', fontSize: 8, flexShrink: 0 }}>{ts}</span>}
-                  </div>
-                );
-              })
           )}
+          {!logLoading && logEntries.length === 0 && (
+            <div style={{ color: '#475569', fontStyle: 'italic', padding: '8px 0' }}>No activity yet</div>
+          )}
+          {!logLoading && logEntries.length > 0 && (
+            <div style={{
+              display: 'flex', gap: 8, marginBottom: 6, padding: '4px 0',
+              borderBottom: '1px solid #334155', fontSize: 8, color: '#64748b',
+            }}>
+              <span>🔧 {logEntries.filter(e => e.type === 'tool_use').length} tool calls</span>
+              <span>👤 {logEntries.filter(e => e.role === 'user' && e.type === 'text').length} tasks</span>
+              <span>💬 {logEntries.filter(e => e.type === 'watercooler').length} chats</span>
+            </div>
+          )}
+          {!logLoading && logEntries
+            .filter(e => showWatercooler || e.type !== 'watercooler')
+            .map((e, i) => {
+              const icon = e.role === 'assistant'
+                ? (e.type === 'tool_use' ? '🔧' : '🤖')
+                : e.role === 'user'
+                  ? (e.type === 'watercooler' ? '💬' : '👤')
+                  : (e.summary.startsWith('⚠️') ? '⚠️' : '✓');
+              const entryColor = e.role === 'assistant'
+                ? (e.type === 'tool_use' ? '#a78bfa' : '#93c5fd')
+                : e.role === 'user'
+                  ? (e.type === 'watercooler' ? '#64748b' : '#fbbf24')
+                  : (e.summary.startsWith('⚠️') ? '#f87171' : '#475569');
+              const ts = e.ts ? new Date(e.ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+              return (
+                <div key={i} style={{
+                  padding: '3px 0',
+                  borderBottom: '1px solid rgba(51,65,85,0.4)',
+                  display: 'flex',
+                  gap: 6,
+                  alignItems: 'flex-start',
+                  opacity: e.type === 'watercooler' ? 0.5 : (e.role === 'tool' ? 0.6 : 1),
+                }}>
+                  <span style={{ flexShrink: 0, width: 16, textAlign: 'center' }}>{icon}</span>
+                  <span style={{ color: entryColor, flex: 1, wordBreak: 'break-word' }}>{e.summary}</span>
+                  {ts && <span style={{ color: '#334155', fontSize: 8, flexShrink: 0 }}>{ts}</span>}
+                </div>
+              );
+            })}
         </div>
       </div>
 
