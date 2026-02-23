@@ -1503,6 +1503,15 @@ export default function HomePage() {
     
     setSendingGroup(true);
     try {
+      const ownerName = agents.find(a => a.id === '_owner')?.name || 'You';
+
+      // Add user message to water cooler chat so agents see it and respond
+      fetch('/api/office/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'user_message', from: ownerName, text: groupMessage }),
+      }).catch(() => {});
+
       // Send to all agents (broadcast)
       const res = await fetch('/api/office/message', {
         method: 'POST',
@@ -2434,25 +2443,29 @@ export default function HomePage() {
                   </div>
                 </div>
               )}
-              {chatLog.slice(-12).map((m, i) => (
-                <div
-                  key={`${i}-${m.text}`}
-                  style={{
-                    fontSize: 11,
-                    padding: '4px 0',
-                    animation: 'fadeSlideIn 0.3s ease-out',
-                  }}
-                >
-                  <span style={{
-                    fontWeight: 700,
-                    color: agents.find(a => a.name === m.from)?.color || '#94a3b8',
-                    fontSize: 10,
-                  }}>
-                    {m.from}
-                  </span>{' '}
-                  <span style={{ color: '#a1a1aa' }}>{m.text}</span>
-                </div>
-              ))}
+              {chatLog.slice(-12).map((m, i) => {
+                const isOwner = agents.find(a => a.id === '_owner' && a.name === m.from);
+                return (
+                  <div
+                    key={`${i}-${m.text}`}
+                    style={{
+                      fontSize: 11,
+                      padding: '4px 0',
+                      animation: 'fadeSlideIn 0.3s ease-out',
+                      ...(isOwner ? { background: 'rgba(245,158,11,0.06)', borderRadius: 4, padding: '4px 6px', margin: '2px -6px' } : {}),
+                    }}
+                  >
+                    <span style={{
+                      fontWeight: 700,
+                      color: isOwner ? '#f59e0b' : (agents.find(a => a.name === m.from)?.color || '#94a3b8'),
+                      fontSize: 10,
+                    }}>
+                      {isOwner ? `${m.from} (you)` : m.from}
+                    </span>{' '}
+                    <span style={{ color: isOwner ? '#fbbf24' : '#a1a1aa' }}>{m.text}</span>
+                  </div>
+                );
+              })}
             </div>
             {/* Group Chat Input */}
             <div style={{
@@ -2466,7 +2479,7 @@ export default function HomePage() {
                 marginBottom: 6,
                 fontFamily: '"Press Start 2P", monospace',
               }}>
-                BROADCAST TO ALL ({agents.length} agents)
+                SAY SOMETHING ({agents.filter(a => a.id !== '_owner').length} listening)
               </div>
               {groupSent && (
                 <div style={{
@@ -2479,7 +2492,7 @@ export default function HomePage() {
                   color: '#fbbf24',
                   animation: 'fadeSlideIn 0.3s ease-out',
                 }}>
-                  ✓ Broadcast sent to all agents
+                  ✓ Sent to the team
                 </div>
               )}
               <div style={{ display: 'flex', gap: 6 }}>
@@ -2488,7 +2501,7 @@ export default function HomePage() {
                   value={groupMessage}
                   onChange={(e) => setGroupMessage(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && sendGroupMessage()}
-                  placeholder="Message all agents..."
+                  placeholder="Say something to the team..."
                   disabled={sendingGroup}
                   style={{
                     flex: 1,

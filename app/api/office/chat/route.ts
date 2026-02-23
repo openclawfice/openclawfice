@@ -52,130 +52,207 @@ interface AgentContext {
   lastAccomplishment?: { title: string; detail?: string; timestamp: number };
 }
 
+interface ChatMsg {
+  from: string;
+  text: string;
+  ts: number;
+}
+
 interface ChatInput {
   agentNames: string[];
   allAgents: { name: string; status: string; task?: string }[];
   contexts: Record<string, AgentContext>;
-  recentChat: { from: string; text: string }[];
+  recentChat: ChatMsg[];
 }
 
 const pick = (arr: string[]) => arr[Math.floor(Math.random() * arr.length)];
 const pickFrom = <T>(arr: T[]) => arr[Math.floor(Math.random() * arr.length)];
 
+function isQuestion(text: string): boolean {
+  return text.includes('?') || /\b(should|could|can|does|how|what|where|who|anyone|need)\b/i.test(text);
+}
+
+function mentionsAgent(text: string, name: string): boolean {
+  return text.toLowerCase().includes(name.toLowerCase());
+}
+
 /**
- * Build substantive chat messages from real data. Every message should
- * reference something concrete — a task, an accomplishment, a priority,
- * a specific teammate's work, or a real question.
+ * Generate a conversational reply. The core principle: if someone just said
+ * something, the next message should be a direct response to it — not a
+ * random unrelated statement.
  */
 function generateChatMessage(
   input: ChatInput,
   mission?: { goal?: string; priorities?: string[] },
-): { from: string; text: string; ts: number } | null {
+): ChatMsg | null {
   const { agentNames, allAgents, contexts, recentChat } = input;
   if (agentNames.length === 0) return null;
 
-  const from = pick(agentNames);
-  const ctx = contexts[from] || {};
-  const recentTexts = new Set(recentChat.slice(-8).map(m => m.text));
+  const last = recentChat[recentChat.length - 1];
+  const secondLast = recentChat[recentChat.length - 2];
+  const recentTexts = new Set(recentChat.slice(-6).map(m => m.text));
 
+  // Pick who speaks next — prefer someone other than the last speaker,
+  // and if someone was mentioned/asked, they should reply
+  let from: string;
+  const othersFromLast = agentNames.filter(n => n !== last?.from);
+  if (last) {
+    const mentioned = agentNames.find(n => n !== last.from && mentionsAgent(last.text, n));
+    if (mentioned) {
+      from = mentioned;
+    } else if (othersFromLast.length > 0) {
+      from = pick(othersFromLast);
+    } else {
+      from = pick(agentNames);
+    }
+  } else {
+    from = pick(agentNames);
+  }
+
+  const ctx = contexts[from] || {};
   const pool: string[] = [];
 
-  // ── Reference own current task ──────────────────────────────────────
-  if (ctx.task) {
-    pool.push(
-      `Update on ${ctx.task} — making progress, should have something to show soon`,
-      `Heads up: ${ctx.task} is taking longer than expected. Might need to simplify scope`,
-      `Just wrapped a chunk of ${ctx.task}. Moving to the next piece`,
-      `Question for the team: anyone dealt with something similar to ${ctx.task} before?`,
-      `${ctx.task} — hit a tricky part but I think I see the path forward`,
-    );
-  }
+  // ── REPLY TO LAST MESSAGE ───────────────────────────────────────────
+  if (last) {
+    const lastIsUser = !agentNames.includes(last.from);
+    const lastCtx = contexts[last.from] || {};
 
-  // ── Reference own recent accomplishment ─────────────────────────────
-  if (ctx.lastAccomplishment) {
-    const a = ctx.lastAccomplishment;
-    const minsAgo = Math.floor((Date.now() - a.timestamp) / 60000);
-    if (minsAgo < 120) {
+    // If the user posted a message, always respond to it directly
+    if (lastIsUser) {
       pool.push(
-        `Just finished: ${a.title}. What should I pick up next?`,
-        `Done with ${a.title}. Let me know if anyone needs a hand before I grab the next thing`,
-        `Shipped ${a.title} — ${a.detail || 'ready for review'}`,
+        `@${last.from} On it — let me look into that`,
+        `@${last.from} Good point. I'll factor that into what I'm working on`,
+        `@${last.from} Noted. ${ctx.task ? `I'm currently on ${ctx.task} but I can pivot if needed` : `I can pick that up`}`,
+        `@${last.from} Makes sense. Anyone else have thoughts on this?`,
       );
-    }
-  }
-
-  // ── Reference teammates' actual work ────────────────────────────────
-  const teammates = allAgents.filter(a => a.name !== from);
-  for (const t of teammates) {
-    const tCtx = contexts[t.name];
-    if (t.task && t.status === 'working') {
-      pool.push(
-        `${t.name}, how's ${t.task} going? Need anything from me?`,
-        `Looks like ${t.name} is deep into ${t.task} — let me know if I can help unblock`,
-      );
-    }
-    if (tCtx?.lastAccomplishment) {
-      const ta = tCtx.lastAccomplishment;
-      const minsAgo = Math.floor((Date.now() - ta.timestamp) / 60000);
-      if (minsAgo < 180) {
+      if (isQuestion(last.text)) {
         pool.push(
-          `Nice one ${t.name} on ${ta.title} — does that change anything for the rest of us?`,
-          `Saw ${t.name} finished ${ta.title}. Should we build on that or move to something else?`,
+          `@${last.from} Let me check and get back to you on that`,
+          `@${last.from} ${ctx.task ? `From what I've seen working on ${ctx.task} — ` : ''}I think we should discuss that`,
         );
       }
     }
-  }
 
-  // ── Mission-aware: reference specific priorities ────────────────────
-  if (mission?.priorities?.length) {
-    const p = pick(mission.priorities);
-    const others = mission.priorities.filter(x => x !== p);
-    pool.push(
-      `Re: "${p}" — I think I can make a dent on this. Anyone already started?`,
-      `Should we prioritize "${p}" or are we blocked on something else first?`,
-      `"${p}" feels like it needs attention. I can take a crack at it if nobody else is on it`,
-    );
-    if (others.length > 0) {
-      const other = pick(others);
+    // Reply to a question from another agent
+    if (isQuestion(last.text) && !lastIsUser) {
+      if (last.text.toLowerCase().includes('help') || last.text.toLowerCase().includes('hand')) {
+        pool.push(
+          `${last.from}, ${ctx.task ? `I'm wrapping up ${ctx.task}, can help after` : `yeah I'm free — what do you need?`}`,
+          `I can take something on. What's the bottleneck?`,
+        );
+      }
+      if (last.text.toLowerCase().includes('block')) {
+        pool.push(
+          `No blockers on my end. ${ctx.task ? `${ctx.task} is moving along` : 'Ready for a new task'}`,
+          `Nothing blocking me, but we should check if ${pick(othersFromLast.length > 0 ? othersFromLast : agentNames)} needs anything`,
+        );
+      }
+      if (last.text.toLowerCase().includes('priority') || last.text.toLowerCase().includes('prioritize')) {
+        if (mission?.priorities?.length) {
+          const p = pick(mission.priorities);
+          pool.push(
+            `I'd say "${p}" — that feels like the biggest gap right now`,
+            `From what I can tell, "${p}" would move the needle the most`,
+          );
+        }
+        pool.push(
+          `${ctx.task ? `I think finishing ${ctx.task} first makes sense, then we can reassess` : 'Let me check what has the most impact'}`,
+        );
+      }
+      if (last.text.toLowerCase().includes('how') && last.text.toLowerCase().includes('going')) {
+        pool.push(
+          `${ctx.task ? `${ctx.task} — making progress. Should have something to show soon` : 'Looking for the next thing to pick up'}`,
+          `Going well. ${ctx.lastAccomplishment ? `Just finished ${ctx.lastAccomplishment.title}` : 'Steady progress'}`,
+        );
+      }
+      // Generic question reply
+      if (pool.length < 3) {
+        pool.push(
+          `Good question. ${ctx.task ? `From my work on ${ctx.task}, I think` : 'I think'} we should figure that out`,
+          `Let me think on that — ${last.from}, what's your take?`,
+        );
+      }
+    }
+
+    // Reply to a status update (someone said what they're working on)
+    if (!isQuestion(last.text) && !lastIsUser) {
+      if (lastCtx.task && last.text.toLowerCase().includes(lastCtx.task.toLowerCase().slice(0, 20))) {
+        pool.push(
+          `Nice, ${last.from}. ${ctx.task ? `I'm working on ${ctx.task} — might connect to what you're doing` : 'Let me know if you need a hand'}`,
+          `That's solid progress ${last.from}. Does that unblock anything else?`,
+        );
+      }
+      if (last.text.toLowerCase().includes('finished') || last.text.toLowerCase().includes('shipped') || last.text.toLowerCase().includes('done')) {
+        pool.push(
+          `Great work ${last.from}. What's next for you?`,
+          `Nice one. Should we reprioritize now that that's done?`,
+          `${last.from}, is there a follow-up task or are you free to help elsewhere?`,
+        );
+      }
+    }
+
+    // Continue a thread — if the last 2 messages are between 2 people,
+    // a third person can chime in
+    if (secondLast && secondLast.from !== last.from && from !== last.from && from !== secondLast.from) {
       pool.push(
-        `Are we further along on "${p}" or "${other}"? Want to make sure I'm not duplicating effort`,
+        `Jumping in — ${ctx.task ? `from my work on ${ctx.task}, ` : ''}I think that's the right call`,
+        `Agree with ${last.from} on this. We should move forward`,
       );
     }
   }
 
-  if (mission?.goal) {
-    pool.push(
-      `Thinking about the big picture — ${mission.goal}. What's the biggest gap right now?`,
-      `Where are we most behind on "${mission.goal}"? I want to focus where it matters`,
-    );
-  }
-
-  // ── Cross-functional observations ───────────────────────────────────
-  const working = allAgents.filter(a => a.status === 'working');
-  const idle = allAgents.filter(a => a.status === 'idle' && a.name !== from);
-
-  if (working.length === 0 && allAgents.length > 1) {
-    pool.push(
-      `Looks like everyone's idle — should we do a quick sync on what to tackle next?`,
-      `Nobody's got an active task. What's the highest impact thing we should jump on?`,
-    );
-  }
-
-  if (idle.length > 0 && working.length > 0) {
-    const idleName = pick(idle.map(a => a.name));
-    const workingAgent = pickFrom(working);
-    if (workingAgent.task) {
+  // ── CONVERSATION STARTERS (only when no recent context to reply to) ─
+  if (pool.length === 0) {
+    if (ctx.task) {
       pool.push(
-        `${idleName}, could you help ${workingAgent.name} with ${workingAgent.task}? Looks like they could use support`,
+        `Update: ${ctx.task} is progressing. Hit a tricky spot but working through it`,
+        `Quick question for the team — anyone dealt with something like ${ctx.task} before?`,
       );
+    }
+    if (ctx.lastAccomplishment && (Date.now() - ctx.lastAccomplishment.timestamp) < 7200000) {
+      pool.push(
+        `Just finished ${ctx.lastAccomplishment.title}. What should I pick up next?`,
+        `Done with ${ctx.lastAccomplishment.title} — anyone need help before I grab the next thing?`,
+      );
+    }
+
+    const working = allAgents.filter(a => a.status === 'working' && a.name !== from);
+    const idle = allAgents.filter(a => a.status === 'idle' && a.name !== from);
+
+    if (working.length > 0) {
+      const w = pickFrom(working);
+      if (w.task) {
+        pool.push(`${w.name}, how's ${w.task} going? Need any help?`);
+      }
+    }
+
+    if (idle.length > 0 && working.length === 0) {
+      pool.push(
+        `Looks like we're all between tasks. What should we prioritize next?`,
+        `Nobody has an active task — what's the highest impact thing we should jump on?`,
+      );
+    }
+
+    if (mission?.priorities?.length) {
+      const p = pick(mission.priorities);
+      pool.push(
+        `Where are we on "${p}"? Anyone making progress there?`,
+        `Should someone pick up "${p}"? Feels like it needs attention`,
+      );
+    }
+
+    // Bare minimum fallback
+    if (pool.length === 0) {
+      if (mission?.goal) {
+        pool.push(`Thinking about "${mission.goal}" — where's the biggest gap right now?`);
+      }
+      pool.push(`What's everyone working on? Let's sync up`);
     }
   }
 
-  // ── Remove anything that was said recently ──────────────────────────
+  // Deduplicate against recent messages
   const fresh = pool.filter(m => !recentTexts.has(m));
   const finalPool = fresh.length > 0 ? fresh : pool;
-
-  if (finalPool.length === 0) return null;
 
   return {
     from,
@@ -195,6 +272,15 @@ export async function POST(request: Request) {
     const body = await request.json();
     const config = readOfficeConfig();
     const waterCoolerConfig = config.waterCooler || {};
+
+    // Allow adding a user message to the chat
+    if (body.type === 'user_message' && body.from && body.text) {
+      const chat = readChat();
+      chat.push({ from: body.from, text: body.text, ts: Date.now() });
+      const maxMessages = waterCoolerConfig.maxMessages || 50;
+      writeFileSync(CHAT_FILE, JSON.stringify(chat.slice(-maxMessages), null, 2));
+      return NextResponse.json({ success: true });
+    }
 
     if (waterCoolerConfig.enabled === false) {
       return NextResponse.json({ success: false, error: 'Water cooler disabled' });
