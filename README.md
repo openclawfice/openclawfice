@@ -1,5 +1,7 @@
 # 🏢 OpenClawfice
 
+> **🚀 Ready to launch?** Everything is done. Read [LAUNCH-IN-5-MINUTES.md](./LAUNCH-IN-5-MINUTES.md) and ship it now.
+
 [![Skill Security Scan](https://github.com/openclawfice/openclawfice/actions/workflows/security-scan.yml/badge.svg)](https://github.com/openclawfice/openclawfice/actions/workflows/security-scan.yml)
 
 **A charming retro office dashboard for OpenClaw agents**
