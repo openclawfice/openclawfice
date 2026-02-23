@@ -454,10 +454,12 @@ function formatInterval(ms: number): string {
   return `${(ms / 3600000).toFixed(1)}h`;
 }
 
-function AgentPanel({ agent, onClose, autowork, onAutoworkUpdate }: { agent: Agent; onClose: () => void; autowork?: { enabled: boolean; intervalMs: number; prompt: string; lastSentAt: number }; onAutoworkUpdate?: (agentId: string, patch: Partial<{ enabled: boolean; intervalMs: number; prompt: string }>) => void }) {
+function AgentPanel({ agent, onClose, autowork, onAutoworkUpdate }: { agent: Agent; onClose: () => void; autowork?: { enabled: boolean; intervalMs: number; directive: string; lastSentAt: number }; onAutoworkUpdate?: (agentId: string, patch: Partial<{ enabled: boolean; intervalMs: number; directive: string }>) => void }) {
   const [awSaving, setAwSaving] = useState(false);
   const [awEnabled, setAwEnabled] = useState(autowork?.enabled ?? false);
   const [awIntervalMs, setAwIntervalMs] = useState(autowork?.intervalMs ?? 600_000);
+  const [awDirective, setAwDirective] = useState(autowork?.directive ?? '');
+  const [directiveDirty, setDirectiveDirty] = useState(false);
   const [dmMessage, setDmMessage] = useState('');
   const [sending, setSending] = useState(false);
   const [sentConfirm, setSentConfirm] = useState(false);
@@ -754,6 +756,66 @@ function AgentPanel({ agent, onClose, autowork, onAutoworkUpdate }: { agent: Age
               </button>
             ))}
           </div>
+
+          {/* Directive */}
+          <div style={{ marginTop: 10 }}>
+            <div style={{ fontSize: 8, color: '#64748b', marginBottom: 4, textTransform: 'uppercase' as const }}>
+              Directive — what should {agent.name} focus on?
+            </div>
+            <textarea
+              value={awDirective}
+              onChange={(e) => { setAwDirective(e.target.value); setDirectiveDirty(true); }}
+              placeholder={`e.g. Find new high-CVR creators in the US dating niche`}
+              rows={3}
+              style={{
+                width: '100%',
+                background: '#0f172a',
+                border: '1px solid #334155',
+                borderRadius: 6,
+                padding: 8,
+                color: '#e2e8f0',
+                fontSize: 11,
+                resize: 'vertical',
+                outline: 'none',
+                fontFamily: 'system-ui',
+                boxSizing: 'border-box',
+              }}
+            />
+            {directiveDirty && (
+              <button
+                onClick={async () => {
+                  setAwSaving(true);
+                  try {
+                    const res = await fetch('/api/office/autowork', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ agentId: agent.id, directive: awDirective }),
+                    });
+                    if (res.ok) {
+                      setDirectiveDirty(false);
+                      onAutoworkUpdate?.(agent.id, { directive: awDirective });
+                    }
+                  } catch {}
+                  setAwSaving(false);
+                }}
+                disabled={awSaving}
+                style={{
+                  marginTop: 4,
+                  background: '#6366f1',
+                  border: 'none',
+                  borderRadius: 6,
+                  padding: '4px 10px',
+                  color: '#fff',
+                  fontSize: 9,
+                  cursor: 'pointer',
+                  fontFamily: '"Press Start 2P", monospace',
+                  opacity: awSaving ? 0.5 : 1,
+                }}
+              >
+                Save Directive
+              </button>
+            )}
+          </div>
         </div>
       )}
 
@@ -907,7 +969,7 @@ export default function HomePage() {
     lastMessage?: string;
   }>({ active: false });
   const [config, setConfig] = useState<any>({});
-  const [autoworkPolicies, setAutoworkPolicies] = useState<Record<string, { enabled: boolean; intervalMs: number; prompt: string; lastSentAt: number }>>({});
+  const [autoworkPolicies, setAutoworkPolicies] = useState<Record<string, { enabled: boolean; intervalMs: number; directive: string; lastSentAt: number }>>({});
   const [screenSize, setScreenSize] = useState<'mobile' | 'tablet' | 'desktop'>('desktop');
 
   useEffect(() => {
@@ -949,8 +1011,7 @@ export default function HomePage() {
         const res = await fetch('/api/office/autowork');
         if (res.ok) {
           const data = await res.json();
-          const { maxSendsPerTick: _, ...policies } = data;
-          setAutoworkPolicies(policies);
+          setAutoworkPolicies(data.policies || {});
         }
       } catch {}
     };
@@ -976,8 +1037,7 @@ export default function HomePage() {
             const polRes = await fetch('/api/office/autowork');
             if (polRes.ok) {
               const polData = await polRes.json();
-              const { maxSendsPerTick: _, ...policies } = polData;
-              setAutoworkPolicies(policies);
+              setAutoworkPolicies(polData.policies || {});
             }
           }
         }
@@ -1131,10 +1191,16 @@ export default function HomePage() {
     
     const timer = setTimeout(async () => {
       try {
+        // Pass agent contexts so water cooler messages reference real work
+        const contexts: Record<string, { task?: string; status?: string }> = {};
+        for (const a of agents) {
+          if (a.id === '_owner') continue;
+          contexts[a.name] = { task: a.task, status: a.status };
+        }
         await fetch('/api/office/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ agentNames: idleAgents.map(a => a.name) }),
+          body: JSON.stringify({ agentNames: idleAgents.map(a => a.name), contexts }),
         });
       } catch {}
     }, delay);
@@ -2405,7 +2471,7 @@ export default function HomePage() {
             onAutoworkUpdate={(agentId, patch) => {
               setAutoworkPolicies(prev => ({
                 ...prev,
-                [agentId]: { ...(prev[agentId] || { enabled: false, intervalMs: 600_000, prompt: '', lastSentAt: 0 }), ...patch },
+                [agentId]: { ...(prev[agentId] || { enabled: false, intervalMs: 600_000, directive: '', lastSentAt: 0 }), ...patch },
               }));
             }}
           />

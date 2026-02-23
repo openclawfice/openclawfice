@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { readFileSync, existsSync, writeFileSync } from 'fs';
+import { readFileSync, existsSync, writeFileSync, mkdirSync } from 'fs';
 import { join } from 'path';
 import { homedir } from 'os';
 
@@ -10,13 +10,9 @@ const CONFIG_PATHS = [
   join(homedir(), '.openclaw', 'openclawfice.config.json'),
 ];
 
-// Ensure status dir exists
 function ensureStatusDir() {
   try {
-    const fs = require('fs');
-    if (!fs.existsSync(STATUS_DIR)) {
-      fs.mkdirSync(STATUS_DIR, { recursive: true });
-    }
+    if (!existsSync(STATUS_DIR)) mkdirSync(STATUS_DIR, { recursive: true });
   } catch {}
 }
 
@@ -29,196 +25,120 @@ function readChat(): any[] {
   return [];
 }
 
-/**
- * Read waterCooler config
- */
-function readWaterCoolerConfig(): any {
+function readOfficeConfig(): any {
   for (const path of CONFIG_PATHS) {
     if (existsSync(path)) {
       try {
-        const config = JSON.parse(readFileSync(path, 'utf-8'));
-        return config.waterCooler || {};
+        return JSON.parse(readFileSync(path, 'utf-8'));
       } catch {}
     }
   }
-  
-  // Defaults
-  return {
-    enabled: true,
-    frequency: '45s',
-    style: 'casual',
-    context: true,
-    maxMessages: 50,
-    quiet: { enabled: false },
-  };
+  return {};
 }
 
 /**
- * Generate chat message with style variants
+ * Generate a water-cooler message. When a mission is configured, messages
+ * reference actual work, priorities, and status — keeping the ambient chat
+ * productive rather than decorative.
  */
 function generateChatMessage(
-  agentNames: string[], 
-  style: string = 'casual',
-  useContext: boolean = true,
-  personality?: string,
-  agentContext?: any
+  agentNames: string[],
+  mission?: { goal?: string; priorities?: string[] },
+  agentContexts?: Record<string, { task?: string; status?: string }>,
 ): { from: string; text: string; ts: number } | null {
   if (agentNames.length === 0) return null;
-  
+
   const from = agentNames[Math.floor(Math.random() * agentNames.length)];
-  const hour = new Date().getHours();
-  
-  // Style-specific prompts
-  const casualMorning = [
-    "Morning! Ready to ship some code ☕",
-    "What's on the agenda today?",
-    "Fresh deploy incoming 🚀",
-    "Coffee first, then we conquer the backlog ☕",
-  ];
-  
-  const casualAfternoon = [
-    "How's everyone doing?",
-    "Making good progress today 💪",
-    "Anyone need a hand with anything?",
-    "Lunch break was great, back to it!",
-  ];
-  
-  const casualEvening = [
-    "Wrapping up for the day",
-    "Good progress today team! 🎉",
-    "Tomorrow's looking good 👍",
-    "Time to push and call it a day",
-  ];
-  
-  const casualIdle = [
-    "Taking a quick break",
-    "Anyone want coffee? ☕",
-    "Monitoring the systems 👀",
-    "Standing by for tasks",
-    "Ready when you are!",
-  ];
-  
-  const professionalMorning = [
-    "Good morning. Beginning daily tasks.",
-    "Ready to start the day.",
-    "Morning standup complete.",
-  ];
-  
-  const professionalAfternoon = [
-    "Progress update: on track.",
-    "Available for collaboration.",
-    "Continuing assigned tasks.",
-  ];
-  
-  const professionalEvening = [
-    "Completing final tasks for today.",
-    "Daily objectives met.",
-    "Preparing for tomorrow.",
-  ];
-  
-  const professionalIdle = [
-    "Standing by.",
-    "Available for assignment.",
-    "Monitoring queue.",
-  ];
-  
-  const minimalMorning = ["Morning", "Ready", "Start"];
-  const minimalAfternoon = ["Progress good", "Available", "Working"];
-  const minimalEvening = ["Wrapping up", "Done", "Tomorrow"];
-  const minimalIdle = ["Idle", "Available", "Ready"];
-  
-  // Context-aware prompts (if enabled and context provided)
-  let contextPrompts: string[] = [];
-  if (useContext && agentContext) {
-    const task = agentContext.task || agentContext.lastTask;
-    if (task && style === 'casual') {
-      contextPrompts = [
-        `Just wrapped up: ${task} ✅`,
-        `Working on: ${task}`,
-        `Almost done with ${task}!`,
-      ];
-    } else if (task && style === 'professional') {
-      contextPrompts = [
-        `Task completed: ${task}`,
-        `In progress: ${task}`,
-      ];
+  const pick = (arr: string[]) => arr[Math.floor(Math.random() * arr.length)];
+
+  // Build a pool of messages, weighted toward mission-relevant ones
+  const pool: string[] = [];
+
+  // If mission is set, generate mission-relevant messages
+  if (mission?.goal) {
+    pool.push(
+      `Focused on the mission: ${mission.goal}`,
+      `Checking what I can do next to advance the goal`,
+      `Any blockers I should know about?`,
+      `What's highest priority right now?`,
+    );
+    if (mission.priorities?.length) {
+      const p = pick(mission.priorities);
+      pool.push(
+        `Working toward: ${p}`,
+        `How are we doing on "${p}"?`,
+        `I think "${p}" is the most impactful thing right now`,
+        `Making progress on ${p}`,
+      );
     }
   }
-  
-  // Select prompt set based on style and time
-  let prompts: string[] = [];
-  
-  if (style === 'minimal') {
-    if (hour >= 6 && hour < 12) prompts = minimalMorning;
-    else if (hour >= 12 && hour < 18) prompts = minimalAfternoon;
-    else if (hour >= 18 && hour < 22) prompts = minimalEvening;
-    else prompts = minimalIdle;
-  } else if (style === 'professional') {
-    if (hour >= 6 && hour < 12) prompts = professionalMorning;
-    else if (hour >= 12 && hour < 18) prompts = professionalAfternoon;
-    else if (hour >= 18 && hour < 22) prompts = professionalEvening;
-    else prompts = professionalIdle;
-  } else {
-    // casual (default)
-    if (hour >= 6 && hour < 12) prompts = casualMorning;
-    else if (hour >= 12 && hour < 18) prompts = casualAfternoon;
-    else if (hour >= 18 && hour < 22) prompts = casualEvening;
-    else prompts = casualIdle;
+
+  // Context-aware: reference what the agent is actually doing
+  if (agentContexts) {
+    const ctx = agentContexts[from];
+    if (ctx?.task) {
+      pool.push(
+        `Working on: ${ctx.task}`,
+        `Almost done with ${ctx.task}`,
+        `Update: ${ctx.task} is progressing well`,
+      );
+    }
+
+    // Reference what teammates are doing
+    const others = Object.entries(agentContexts).filter(([name]) => name !== from);
+    if (others.length > 0) {
+      const [teammate, tCtx] = pick(others as any) as any;
+      if (tCtx?.task) {
+        pool.push(`Nice work on ${tCtx.task}, ${teammate}!`);
+      }
+    }
   }
-  
-  // Mix in context prompts if available
-  if (contextPrompts.length > 0) {
-    prompts = [...prompts, ...contextPrompts];
-  }
-  
-  const text = prompts[Math.floor(Math.random() * prompts.length)];
-  
+
+  // Fallback ambient messages (generic but work-oriented)
+  pool.push(
+    'Ready for the next task',
+    'Checking my queue',
+    'What needs attention?',
+    'Standing by for assignments',
+  );
+
   return {
     from,
-    text,
+    text: pick(pool),
     ts: Date.now(),
   };
 }
 
 export async function GET() {
-  const chat = readChat();
-  return NextResponse.json(chat);
+  return NextResponse.json(readChat());
 }
 
 export async function POST(request: Request) {
   ensureStatusDir();
-  
+
   try {
     const body = await request.json();
-    const config = readWaterCoolerConfig();
-    
-    // Check if water cooler is enabled
-    if (config.enabled === false) {
+    const config = readOfficeConfig();
+    const waterCoolerConfig = config.waterCooler || {};
+
+    if (waterCoolerConfig.enabled === false) {
       return NextResponse.json({ success: false, error: 'Water cooler disabled' });
     }
-    
+
     const chat = readChat();
-    
-    // Generate a new chat message from idle agents
-    const agentNames = body.agentNames || [];
-    const agentContext = body.context;
-    const style = config.style || 'casual';
-    const useContext = config.context !== false;
-    const personality = config.personality?.enabled ? config.personality.instructions : undefined;
-    
-    const newMessage = generateChatMessage(agentNames, style, useContext, personality, agentContext);
-    
+    const agentNames: string[] = body.agentNames || [];
+    const agentContexts: Record<string, { task?: string; status?: string }> = body.contexts || {};
+
+    const newMessage = generateChatMessage(agentNames, config.mission, agentContexts);
+
     if (newMessage) {
       chat.push(newMessage);
-      
-      // Apply configured message limit
-      const maxMessages = config.maxMessages || 50;
+      const maxMessages = waterCoolerConfig.maxMessages || 50;
       const trimmed = chat.slice(-maxMessages);
-      
       writeFileSync(CHAT_FILE, JSON.stringify(trimmed, null, 2));
       return NextResponse.json({ success: true, message: newMessage });
     }
-    
+
     return NextResponse.json({ success: false, error: 'No agents available' });
   } catch (err) {
     return NextResponse.json({ error: 'Failed to generate chat' }, { status: 500 });

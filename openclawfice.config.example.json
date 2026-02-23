@@ -3,6 +3,15 @@
     "name": "My AI Office",
     "icon": "🏢"
   },
+  "mission": {
+    "goal": "What is your company or project trying to achieve?",
+    "priorities": [
+      "First priority",
+      "Second priority",
+      "Third priority"
+    ],
+    "context": "Any additional context about your business, current state, key metrics, or constraints that agents should know."
+  },
   "agents": {
     "main": {
       "color": "#6366f1",
