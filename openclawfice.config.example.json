@@ -1,0 +1,22 @@
+{
+  "office": {
+    "name": "My AI Office",
+    "icon": "🏢"
+  },
+  "agents": {
+    "main": {
+      "color": "#6366f1",
+      "skinColor": "#c8a87c",
+      "shirtColor": "#6366f1",
+      "hairColor": "#1a1a2e"
+    }
+  },
+  "owner": {
+    "role": "CEO",
+    "emoji": "👑",
+    "color": "#10b981",
+    "skinColor": "#e8c4a0",
+    "shirtColor": "#10b981",
+    "hairColor": "#4a3728"
+  }
+}

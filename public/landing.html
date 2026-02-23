@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OpenClawfice | Virtual Office for OpenClaw Agents</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+      color: #e2e8f0;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .hero {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 80px 20px;
+      text-align: center;
+    }
+
+    .logo {
+      font-size: 64px;
+      margin-bottom: 20px;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    h1 {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 36px;
+      margin-bottom: 20px;
+      color: #fff;
+      line-height: 1.4;
+    }
+
+    .tagline {
+      font-size: 20px;
+      color: #94a3b8;
+      margin-bottom: 40px;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+      line-height: 1.6;
+    }
+
+    .cta {
+      display: inline-block;
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      color: #fff;
+      font-size: 18px;
+      font-weight: 700;
+      padding: 20px 40px;
+      border-radius: 12px;
+      text-decoration: none;
+      transition: all 0.3s;
+      box-shadow: 0 8px 32px rgba(99, 102, 241, 0.4);
+      border: none;
+      cursor: pointer;
+    }
+
+    .cta:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 48px rgba(99, 102, 241, 0.6);
+    }
+
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+      max-width: 1000px;
+      margin: 60px auto 0;
+      padding: 0 20px;
+    }
+
+    .feature {
+      background: rgba(30, 41, 59, 0.5);
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 24px;
+      text-align: left;
+    }
+
+    .feature-icon {
+      font-size: 32px;
+      margin-bottom: 12px;
+    }
+
+    .feature h3 {
+      font-size: 16px;
+      margin-bottom: 8px;
+      color: #fff;
+    }
+
+    .feature p {
+      font-size: 14px;
+      color: #94a3b8;
+      line-height: 1.6;
+    }
+
+    .screenshot {
+      max-width: 900px;
+      margin: 60px auto;
+      padding: 0 20px;
+    }
+
+    .screenshot img {
+      width: 100%;
+      border-radius: 16px;
+      border: 3px solid #334155;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.9);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: #0f172a;
+      border: 3px solid #334155;
+      border-radius: 16px;
+      max-width: 600px;
+      width: 90%;
+      padding: 40px;
+      position: relative;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: #94a3b8;
+      border-radius: 6px;
+      padding: 8px 12px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    .install-step {
+      display: none;
+    }
+
+    .install-step.active {
+      display: block;
+    }
+
+    .install-step h2 {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 18px;
+      margin-bottom: 20px;
+      color: #fff;
+    }
+
+    .install-step p {
+      font-size: 16px;
+      color: #94a3b8;
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+
+    .code-block {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 16px;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      color: #6ee7b7;
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: #334155;
+      border: none;
+      color: #94a3b8;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .copy-btn:hover {
+      background: #475569;
+    }
+
+    .progress {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 30px;
+    }
+
+    .progress-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #334155;
+    }
+
+    .progress-dot.active {
+      background: #6366f1;
+      box-shadow: 0 0 12px rgba(99, 102, 241, 0.6);
+    }
+
+    .btn-next {
+      background: #6366f1;
+      color: #fff;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-next:hover {
+      background: #7c3aed;
+    }
+
+    .success-icon {
+      font-size: 64px;
+      text-align: center;
+      margin-bottom: 20px;
+      animation: bounce 1s ease-in-out;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+    }
+
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 24px;
+      }
+
+      .tagline {
+        font-size: 16px;
+      }
+
+      .cta {
+        font-size: 16px;
+        padding: 16px 32px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="hero">
+    <div class="logo">🏢</div>
+    <h1>OPENCLAWFICE</h1>
+    <p class="tagline">
+      Turn your AI agents into charming pixel art NPCs in a Sims-style virtual office.
+      See who's working, who's idle, and when they'll self-assign next — all with zero config.
+    </p>
+    <button class="cta" onclick="openInstallModal()">
+      Connect to OpenClaw →
+    </button>
+  </div>
+
+  <div class="screenshot">
+    <img src="https://via.placeholder.com/900x500/1e293b/6366f1?text=OpenClawfice+Screenshot+Coming+Soon" alt="OpenClawfice Dashboard">
+  </div>
+
+  <div class="features">
+    <div class="feature">
+      <div class="feature-icon">🎨</div>
+      <h3>Charming Pixel Art</h3>
+      <p>Your agents become retro NPCs with Sims-style plumbobs and pixel art rendering.</p>
+    </div>
+
+    <div class="feature">
+      <div class="feature-icon">⚡</div>
+      <h3>Real-time Status</h3>
+      <p>Agents move between Work Room and Lounge based on live activity from OpenClaw sessions.</p>
+    </div>
+
+    <div class="feature">
+      <div class="feature-icon">⏱️</div>
+      <h3>Cooldown Timers</h3>
+      <p>See when idle agents will next self-assign, powered by your OpenClaw cron jobs.</p>
+    </div>
+
+    <div class="feature">
+      <div class="feature-icon">🔧</div>
+      <h3>Zero Config</h3>
+      <p>Auto-discovers agents from OpenClaw. No setup, no database, no hassle.</p>
+    </div>
+
+    <div class="feature">
+      <div class="feature-icon">🚀</div>
+      <h3>One Command</h3>
+      <p>Install and launch with a single command. Up and running in under 60 seconds.</p>
+    </div>
+
+    <div class="feature">
+      <div class="feature-icon">🎯</div>
+      <h3>Open Source</h3>
+      <p>MIT licensed, fully auditable, and built by the OpenClaw community.</p>
+    </div>
+  </div>
+
+  <!-- Install Modal -->
+  <div class="modal" id="installModal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeInstallModal()">✕</button>
+
+      <!-- Step 1: Install Command -->
+      <div class="install-step active" id="step1">
+        <div class="progress">
+          <div class="progress-dot active"></div>
+          <div class="progress-dot"></div>
+          <div class="progress-dot"></div>
+        </div>
+        <h2>Install OpenClawfice</h2>
+        <p>Run this command in your terminal to install and launch:</p>
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCode()">Copy</button>
+          <code id="installCode">curl -fsSL https://openclawfice.com/install.sh | bash</code>
+        </div>
+        <p style="font-size: 14px; color: #64748b;">
+          This will clone the repo, install dependencies, and launch the dashboard.
+        </p>
+        <button class="btn-next" onclick="nextStep(2)">Next →</button>
+      </div>
+
+      <!-- Step 2: Installing -->
+      <div class="install-step" id="step2">
+        <div class="progress">
+          <div class="progress-dot active"></div>
+          <div class="progress-dot active"></div>
+          <div class="progress-dot"></div>
+        </div>
+        <h2>Installing...</h2>
+        <p>The installer is:</p>
+        <ul style="margin-left: 20px; margin-bottom: 20px; color: #94a3b8; line-height: 1.8;">
+          <li>📦 Cloning the repository</li>
+          <li>📚 Installing dependencies</li>
+          <li>🚀 Creating launcher</li>
+        </ul>
+        <p style="font-size: 14px; color: #64748b;">
+          This usually takes 20-30 seconds.
+        </p>
+        <button class="btn-next" onclick="nextStep(3)">Installation Complete →</button>
+      </div>
+
+      <!-- Step 3: Success -->
+      <div class="install-step" id="step3">
+        <div class="progress">
+          <div class="progress-dot active"></div>
+          <div class="progress-dot active"></div>
+          <div class="progress-dot active"></div>
+        </div>
+        <div class="success-icon">✅</div>
+        <h2>Connected!</h2>
+        <p>OpenClawfice is now running at:</p>
+        <div class="code-block" style="text-align: center; font-size: 18px; color: #6ee7b7;">
+          <a href="http://localhost:3333" target="_blank" style="color: inherit; text-decoration: none;">
+            http://localhost:3333
+          </a>
+        </div>
+        <p style="font-size: 14px; color: #64748b;">
+          Your browser should open automatically. If not, click the link above.
+        </p>
+        <button class="btn-next" onclick="window.open('http://localhost:3333', '_blank')">
+          Open Dashboard →
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function openInstallModal() {
+      document.getElementById('installModal').classList.add('active');
+    }
+
+    function closeInstallModal() {
+      document.getElementById('installModal').classList.remove('active');
+      // Reset to step 1
+      document.querySelectorAll('.install-step').forEach(step => step.classList.remove('active'));
+      document.getElementById('step1').classList.add('active');
+    }
+
+    function nextStep(stepNum) {
+      document.querySelectorAll('.install-step').forEach(step => step.classList.remove('active'));
+      document.getElementById('step' + stepNum).classList.add('active');
+    }
+
+    function copyCode() {
+      const code = document.getElementById('installCode').textContent;
+      navigator.clipboard.writeText(code);
+      const btn = document.querySelector('.copy-btn');
+      btn.textContent = 'Copied!';
+      setTimeout(() => {
+        btn.textContent = 'Copy';
+      }, 2000);
+    }
+
+    // Close modal on escape
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeInstallModal();
+    });
+
+    // Close modal on backdrop click
+    document.getElementById('installModal').addEventListener('click', (e) => {
+      if (e.target.id === 'installModal') closeInstallModal();
+    });
+  </script>
+</body>
+</html>

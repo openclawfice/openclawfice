@@ -1,0 +1,32 @@
+{
+  "name": "openclawfice",
+  "version": "0.1.0",
+  "private": false,
+  "description": "Virtual office dashboard for OpenClaw agents",
+  "license": "MIT",
+  "author": "OpenClaw Community",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/openclaw/openclawfice"
+  },
+  "bin": {
+    "openclawfice": "./bin/openclawfice.js"
+  },
+  "scripts": {
+    "dev": "next dev -p 3333",
+    "build": "next build",
+    "start": "next start -p 3333",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "next": "^15.1.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "typescript": "^5"
+  }
+}
