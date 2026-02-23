@@ -1482,12 +1482,13 @@ export default function HomePage() {
     return () => clearTimeout(timer);
   }, [agents, chatLog, config]);
 
-  // Countdown tick
+  // Countdown tick — runs a steady 1s interval whenever countdown is active
   useEffect(() => {
-    if (nextChatIn <= 0) return;
-    const tick = setInterval(() => setNextChatIn(p => Math.max(0, p - 1)), 1000);
+    const tick = setInterval(() => {
+      setNextChatIn(p => (p > 0 ? p - 1 : p));
+    }, 1000);
     return () => clearInterval(tick);
-  }, [nextChatIn > 0]);
+  }, []);
 
   // Fluctuate needs slightly
   useEffect(() => {
