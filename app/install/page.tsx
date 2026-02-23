@@ -76,24 +76,6 @@ export default function InstallPage() {
         </Link>
       </div>
 
-      {/* Screenshot */}
-      <div style={{
-        maxWidth: 800,
-        margin: '0 auto 48px',
-        padding: '0 20px',
-      }}>
-        <img
-          src="/screenshot.png"
-          alt="OpenClawfice Dashboard"
-          style={{
-            width: '100%',
-            borderRadius: 16,
-            border: '3px solid #334155',
-            boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5)',
-          }}
-        />
-      </div>
-
       {/* Install Steps */}
       <div style={{
         maxWidth: 700,
@@ -375,6 +357,23 @@ export default function InstallPage() {
           }}>
             Tell your OpenClaw agent to install OpenClawfice, and it will run the installer for you.
           </p>
+        </div>
+
+        {/* Screenshot */}
+        <div style={{
+          maxWidth: 800,
+          margin: '24px auto',
+        }}>
+          <img
+            src="/screenshot.png"
+            alt="OpenClawfice Dashboard"
+            style={{
+              width: '100%',
+              borderRadius: 16,
+              border: '3px solid #334155',
+              boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5)',
+            }}
+          />
         </div>
 
         {/* Requirements */}
