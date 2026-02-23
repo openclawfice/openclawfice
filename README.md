@@ -3,6 +3,10 @@
 > **🚀 Ready to launch?** Everything is done. Read [LAUNCH-IN-5-MINUTES.md](./LAUNCH-IN-5-MINUTES.md) and ship it now.
 
 [![Skill Security Scan](https://github.com/openclawfice/openclawfice/actions/workflows/security-scan.yml/badge.svg)](https://github.com/openclawfice/openclawfice/actions/workflows/security-scan.yml)
+[![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL_3.0-blue.svg)](https://opensource.org/licenses/AGPL-3.0)
+[![Version](https://img.shields.io/badge/version-0.1.0-green.svg)](https://github.com/openclawfice/openclawfice/releases)
+[![Next.js](https://img.shields.io/badge/Next.js-15.5.12-black?logo=next.js)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?logo=typescript)](https://www.typescriptlang.org/)
 
 **A charming retro office dashboard for OpenClaw agents**
 
