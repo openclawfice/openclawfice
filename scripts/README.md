@@ -98,6 +98,66 @@ After 5 polls, you should see:
 
 ---
 
+### `record-demo-gif.sh`
+
+**Purpose:** Guide Tyler through recording the viral demo GIF manually  
+**Usage:**
+```bash
+./scripts/record-demo-gif.sh
+```
+
+**What it does:**
+- Checks if demo mode is running
+- Detects available recording tools (Kap, Gifski, FFmpeg)
+- Provides exact recording script (00:00-00:15 timeline)
+- Opens demo mode in browser
+- Gives compression tips
+
+**Expected workflow:**
+1. Run script
+2. Follow on-screen recording instructions
+3. Record 10-15 second demo
+4. Export as GIF (<5MB)
+5. Save to `/public/openclawfice-demo.gif`
+
+**Best for:** Manual recording with full control over cursor movements
+
+---
+
+### `auto-generate-demo-gif.js`
+
+**Purpose:** Automatically generate demo GIF using Playwright  
+**Usage:**
+```bash
+# One-time setup
+npm install -D playwright
+npx playwright install chromium
+
+# Generate GIF
+node scripts/auto-generate-demo-gif.js
+```
+
+**What it does:**
+- Launches browser automatically
+- Executes predefined scene script (hover agent, click quest, etc.)
+- Captures frames at 30 FPS
+- Converts to GIF using ffmpeg
+- Outputs to `/public/openclawfice-demo.gif`
+
+**Pros:**
+- Fully automated (no manual recording)
+- Consistent results every time
+- Perfect timing
+
+**Cons:**
+- Requires Playwright installation
+- Less natural cursor movements
+- May need selector adjustments
+
+**Best for:** Quick iteration or when consistent output is needed
+
+---
+
 ### `record-loom.sh`
 
 **Purpose:** Record agent accomplishments as "Loom-style" screen recordings  

@@ -51,11 +51,11 @@ echo "✅ Repository cloned"
 echo ""
 
 # Install dependencies
-echo "📚 Installing dependencies..."
+echo "📚 Installing dependencies (this may take a minute)..."
 cd "$INSTALL_DIR"
-if ! npm install --silent 2>&1 | grep -q "added"; then
+if ! npm install 2>&1 | tail -3; then
   echo "❌ Failed to install dependencies"
-  echo "Make sure you have Node.js and npm installed."
+  echo "Make sure you have Node.js (v18+) and npm installed."
   exit 1
 fi
 echo "✅ Dependencies installed"
@@ -67,7 +67,8 @@ mkdir -p "$(dirname "$LAUNCHER")"
 cat > "$LAUNCHER" <<'EOF'
 #!/bin/bash
 # OpenClawfice launcher
-cd ~/openclawfice && npm run dev
+PORT=${PORT:-3333}
+cd ~/openclawfice && npx next dev -p $PORT
 EOF
 chmod +x "$LAUNCHER"
 

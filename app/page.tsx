@@ -2187,6 +2187,7 @@ export default function HomePage() {
                       size={npcSize}
                       onClick={() => setSelectedAgent(a)}
                       forceThought={activeThought && activeThought.agentId === a.id ? activeThought.text : null}
+                      hasCelebration={celebrations.some(c => c.agentId === a.id)}
                     />
                   </div>
                 ))
@@ -2288,6 +2289,7 @@ export default function HomePage() {
                             agent={participant1}
                             size={npcSize * 0.85}
                             onClick={() => setSelectedAgent(participant1)}
+                            hasCelebration={celebrations.some(c => c.agentId === participant1.id)}
                           />
                         )}
 
@@ -2297,6 +2299,7 @@ export default function HomePage() {
                             size={npcSize * 0.85}
                             onClick={() => setSelectedAgent(participant2)}
                             flipped
+                            hasCelebration={celebrations.some(c => c.agentId === participant2.id)}
                           />
                         )}
                       </>
@@ -2370,6 +2373,7 @@ export default function HomePage() {
                         size={npcSize}
                         onClick={() => setSelectedAgent(a)}
                         forceThought={activeThought && activeThought.agentId === a.id ? activeThought.text : null}
+                        hasCelebration={celebrations.some(c => c.agentId === a.id)}
                       />
                     </div>
                   ))
