@@ -61,9 +61,19 @@ function writeJson(path: string, data: any[]) {
 
 const RECORD_SCRIPT = join(process.cwd(), 'scripts', 'record-loom.sh');
 const RECORD_DURATION = 6;
+const MIN_RECORDING_GAP_MS = 15000; // At most one recording every 15 seconds
+let lastRecordingStarted = 0;
 
 function triggerRecording(accomplishmentId: string, title: string, who: string) {
   if (!existsSync(RECORD_SCRIPT)) return;
+
+  // Rate limit: skip if a recording started recently
+  const now = Date.now();
+  if (now - lastRecordingStarted < MIN_RECORDING_GAP_MS) {
+    console.log(`[recording] Skipped for ${accomplishmentId} (rate limited, last was ${Math.round((now - lastRecordingStarted) / 1000)}s ago)`);
+    return;
+  }
+  lastRecordingStarted = now;
 
   // Mark as recording synchronously so the UI can show REC immediately
   try {

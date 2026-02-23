@@ -1,5 +1,5 @@
 #!/bin/bash
-# Record a Loom-style screen capture with TTS voiceover
+# Record a Loom-style screen capture of the OpenClawfice dashboard
 # Usage: record-loom.sh <output_filename> [duration_seconds] [tts_text]
 # Outputs the final mp4 path on success
 
@@ -16,7 +16,7 @@ mkdir -p "$SCREENSHOTS_DIR" "$TEMP_DIR"
 VIDEO_FILE="$TEMP_DIR/${OUTPUT_NAME}-screen.mov"
 FINAL_FILE="$SCREENSHOTS_DIR/${OUTPUT_NAME}.mp4"
 
-# Record screen
+# Record screen (captures whatever is currently displayed — no window switching)
 /usr/sbin/screencapture -V "$DURATION" -x "$VIDEO_FILE" 2>/dev/null
 
 if [ ! -f "$VIDEO_FILE" ]; then
