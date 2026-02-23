@@ -426,13 +426,14 @@ export async function GET() {
     const sessions = readSessionsJson(agentDirId);
     const statusFile = readStatusFile(agentDirId);
     
-    // Find the session we're tracking (or most recent)
+    // Find the session we're tracking (or most recent), ignoring non-work sessions
+    const IGNORED_SESSIONS = ['watercooler', 'watercooler-test'];
     let targetSession: SessionInfo | null = null;
     if (cfg.sessionKey && sessions[cfg.sessionKey]) {
       targetSession = sessions[cfg.sessionKey];
     } else {
-      // Find most recently updated session
-      for (const session of Object.values(sessions)) {
+      for (const [key, session] of Object.entries(sessions)) {
+        if (IGNORED_SESSIONS.some(s => key.includes(`:${s}`))) continue;
         if (!targetSession || session.updatedAt > targetSession.updatedAt) {
           targetSession = session;
         }
@@ -472,8 +473,9 @@ export async function GET() {
 
     // Also check for spawned sub-sessions
     if (status === 'idle') {
-      for (const session of Object.values(sessions)) {
+      for (const [key, session] of Object.entries(sessions)) {
         if (session === targetSession) continue;
+        if (IGNORED_SESSIONS.some(s => key.includes(`:${s}`))) continue;
         const sessMins = (now - session.updatedAt) / 60000;
         if (sessMins < (cfg.workingThresholdMin || 5)) {
           status = 'working';
