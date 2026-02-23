@@ -6,6 +6,52 @@ Utility scripts for development, testing, and demos.
 
 ## Available Scripts
 
+### `verify-launch-ready.sh`
+
+**Purpose:** Pre-flight check before launching OpenClawfice  
+**Usage:**
+```bash
+./scripts/verify-launch-ready.sh
+```
+
+**What it checks:**
+- ✅ Server running at localhost:3333
+- ✅ Demo API working with 5 agents
+- ✅ Live simulation functioning (agents change status)
+- ✅ All documentation files exist
+- ✅ Build passes without errors
+- ✅ Git status (uncommitted changes, remote URL)
+- ✅ Install script exists and is executable
+
+**Expected output:**
+```
+🚀 OpenClawfice Launch Readiness Check
+=======================================
+
+📡 Server Status
+✅ Server running at localhost:3333
+
+🎮 Demo Mode
+✅ Demo API working (5 agents)
+✅ Live simulation working (agents change status)
+
+📚 Documentation
+✅ README.md exists
+✅ QUICKSTART.md exists
+... (all docs checked)
+
+📊 Summary
+✅ Passed: 15
+❌ Failed: 0
+⚠️  Warnings: 2
+
+🎉 Launch ready! All critical checks passed.
+```
+
+**When to use:** Before posting to Discord, Twitter, or HN. Ensures nothing is broken.
+
+---
+
 ### `test-demo-simulation.sh`
 
 **Purpose:** Test the live simulation in demo mode  
