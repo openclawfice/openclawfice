@@ -1,0 +1,25 @@
+# Internal docs
+docs/internal/
+
+# Dev files
+.next/
+.github/
+coverage/
+*.test.ts
+*.test.tsx
+vitest.config.*
+
+# Assets not needed at runtime
+/tmp/
+*.mp4
+screenshots/
+
+# Git
+.git/
+.gitignore
+
+# Editor
+.vscode/
+.idea/
+*.swp
+.DS_Store
