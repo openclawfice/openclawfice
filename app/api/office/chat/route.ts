@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { readFileSync, existsSync, writeFileSync, mkdirSync } from 'fs';
 import { join } from 'path';
 import { homedir } from 'os';
+import { execSync } from 'child_process';
 
 const STATUS_DIR = join(homedir(), '.openclaw', '.status');
 const CHAT_FILE = join(STATUS_DIR, 'chat.json');
@@ -10,6 +11,10 @@ const CONFIG_PATHS = [
   join(process.cwd(), 'openclawfice.config.json'),
   join(homedir(), '.openclaw', 'openclawfice.config.json'),
 ];
+
+const OPENCLAW_BIN = join(homedir(), '.local', 'node', 'bin', 'openclaw');
+const WATERCOOLER_SESSION = 'watercooler';
+const AGENT_TIMEOUT = 20;
 
 function ensureStatusDir() {
   try {
@@ -46,219 +51,148 @@ function readAccomplishments(): any[] {
   return [];
 }
 
-interface AgentContext {
+interface AgentInfo {
+  id: string;
+  name: string;
+  role?: string;
+  status: string;
   task?: string;
-  status?: string;
-  lastAccomplishment?: { title: string; detail?: string; timestamp: number };
 }
 
-interface ChatMsg {
-  from: string;
-  text: string;
-  ts: number;
-}
+const pick = <T>(arr: T[]) => arr[Math.floor(Math.random() * arr.length)];
 
-interface ChatInput {
-  agentNames: string[];
-  allAgents: { name: string; status: string; task?: string }[];
-  contexts: Record<string, AgentContext>;
-  recentChat: ChatMsg[];
-}
+/**
+ * Pick which agent should speak next. Avoids the last speaker,
+ * and if someone was mentioned by name they get priority.
+ */
+function pickSpeaker(agents: AgentInfo[], recentChat: any[]): AgentInfo | null {
+  if (agents.length === 0) return null;
+  const last = recentChat[recentChat.length - 1];
 
-const pick = (arr: string[]) => arr[Math.floor(Math.random() * arr.length)];
-const pickFrom = <T>(arr: T[]) => arr[Math.floor(Math.random() * arr.length)];
+  if (last) {
+    const mentioned = agents.find(
+      a => a.name !== last.from && last.text?.toLowerCase().includes(a.name.toLowerCase()),
+    );
+    if (mentioned) return mentioned;
 
-function isQuestion(text: string): boolean {
-  return text.includes('?') || /\b(should|could|can|does|how|what|where|who|anyone|need)\b/i.test(text);
-}
+    const others = agents.filter(a => a.name !== last.from);
+    if (others.length > 0) return pick(others);
+  }
 
-function mentionsAgent(text: string, name: string): boolean {
-  return text.toLowerCase().includes(name.toLowerCase());
+  return pick(agents);
 }
 
 /**
- * Generate a conversational reply. The core principle: if someone just said
- * something, the next message should be a direct response to it — not a
- * random unrelated statement.
+ * Build a concise prompt for the agent's water cooler turn.
+ * Gives them the recent chat + team context so they can reply naturally.
  */
-function generateChatMessage(
-  input: ChatInput,
+function buildPrompt(
+  speaker: AgentInfo,
+  allAgents: AgentInfo[],
+  recentChat: any[],
   mission?: { goal?: string; priorities?: string[] },
-): ChatMsg | null {
-  const { agentNames, allAgents, contexts, recentChat } = input;
-  if (agentNames.length === 0) return null;
+  accomplishments?: any[],
+): string {
+  const lines: string[] = [];
 
-  const last = recentChat[recentChat.length - 1];
-  const secondLast = recentChat[recentChat.length - 2];
-  const recentTexts = new Set(recentChat.slice(-6).map(m => m.text));
+  lines.push(
+    'WATER COOLER CHAT — reply with ONE short message (1-2 sentences, under 200 characters).',
+    'Rules: plain text only, no markdown/bold/headers. No prefixing with your name. No meta-commentary.',
+    'Be casual and specific. Reference real work. If asked a question, answer it briefly.',
+    'Do NOT use tools or start tasks. Just reply with the message text and nothing else.',
+    '',
+  );
 
-  // Pick who speaks next — prefer someone other than the last speaker,
-  // and if someone was mentioned/asked, they should reply
-  let from: string;
-  const othersFromLast = agentNames.filter(n => n !== last?.from);
-  if (last) {
-    const mentioned = agentNames.find(n => n !== last.from && mentionsAgent(last.text, n));
-    if (mentioned) {
-      from = mentioned;
-    } else if (othersFromLast.length > 0) {
-      from = pick(othersFromLast);
-    } else {
-      from = pick(agentNames);
+  if (mission?.goal) {
+    lines.push(`Team mission: ${mission.goal}`);
+    if (mission.priorities?.length) {
+      lines.push(`Priorities: ${mission.priorities.join(', ')}`);
     }
+    lines.push('');
+  }
+
+  lines.push('Team status:');
+  for (const a of allAgents) {
+    if (a.id === '_owner') continue;
+    const taskStr = a.task ? ` — working on: ${a.task}` : '';
+    lines.push(`- ${a.name} (${a.role || a.id}): ${a.status}${taskStr}`);
+  }
+
+  // Add recent accomplishments
+  const recent = (accomplishments || [])
+    .sort((a: any, b: any) => (b.timestamp || 0) - (a.timestamp || 0))
+    .slice(0, 5);
+  if (recent.length > 0) {
+    lines.push('', 'Recent accomplishments:');
+    for (const a of recent) {
+      lines.push(`- ${a.who}: ${a.title}`);
+    }
+  }
+
+  lines.push('');
+
+  if (recentChat.length > 0) {
+    lines.push('Recent chat:');
+    for (const m of recentChat.slice(-8)) {
+      lines.push(`${m.from}: ${m.text}`);
+    }
+    lines.push('', `Now reply as ${speaker.name}. Just the message text, nothing else.`);
   } else {
-    from = pick(agentNames);
+    lines.push(`Start a conversation as ${speaker.name}. Say something about what you're working on or ask a teammate something specific.`);
   }
 
-  const ctx = contexts[from] || {};
-  const pool: string[] = [];
+  return lines.join('\n');
+}
 
-  // ── REPLY TO LAST MESSAGE ───────────────────────────────────────────
-  if (last) {
-    const lastIsUser = !agentNames.includes(last.from);
-    const lastCtx = contexts[last.from] || {};
+/**
+ * Send a message to an agent via the gateway and get their response.
+ */
+function getAgentReply(agentId: string, prompt: string): string | null {
+  try {
+    const escaped = prompt.replace(/'/g, "'\\''");
+    const cmd = [
+      OPENCLAW_BIN, 'agent',
+      '--agent', agentId,
+      '--session-id', WATERCOOLER_SESSION,
+      '--thinking', 'off',
+      '--timeout', String(AGENT_TIMEOUT),
+      '--json',
+      '--message', `'${escaped}'`,
+    ].join(' ');
 
-    // If the user posted a message, always respond to it directly
-    if (lastIsUser) {
-      pool.push(
-        `@${last.from} On it — let me look into that`,
-        `@${last.from} Good point. I'll factor that into what I'm working on`,
-        `@${last.from} Noted. ${ctx.task ? `I'm currently on ${ctx.task} but I can pivot if needed` : `I can pick that up`}`,
-        `@${last.from} Makes sense. Anyone else have thoughts on this?`,
-      );
-      if (isQuestion(last.text)) {
-        pool.push(
-          `@${last.from} Let me check and get back to you on that`,
-          `@${last.from} ${ctx.task ? `From what I've seen working on ${ctx.task} — ` : ''}I think we should discuss that`,
-        );
+    const output = execSync(cmd, {
+      encoding: 'utf-8',
+      timeout: (AGENT_TIMEOUT + 5) * 1000,
+      env: process.env,
+    });
+
+    // Parse the JSON output — find the last JSON object in stdout
+    const lines = output.trim().split('\n');
+    for (let i = lines.length - 1; i >= 0; i--) {
+      const line = lines[i].trim();
+      if (line.startsWith('{')) {
+        try {
+          const obj = JSON.parse(lines.slice(i).join('\n'));
+          const text = obj?.result?.payloads?.[0]?.text;
+          if (text) return text.trim();
+        } catch {}
       }
     }
-
-    // Reply to a question from another agent
-    if (isQuestion(last.text) && !lastIsUser) {
-      if (last.text.toLowerCase().includes('help') || last.text.toLowerCase().includes('hand')) {
-        pool.push(
-          `${last.from}, ${ctx.task ? `I'm wrapping up ${ctx.task}, can help after` : `yeah I'm free — what do you need?`}`,
-          `I can take something on. What's the bottleneck?`,
-        );
+  } catch (err: any) {
+    // Try to parse response from stderr/stdout even on non-zero exit
+    const out = err.stdout || '';
+    const lines = out.trim().split('\n');
+    for (let i = lines.length - 1; i >= 0; i--) {
+      if (lines[i].trim().startsWith('{')) {
+        try {
+          const obj = JSON.parse(lines.slice(i).join('\n'));
+          const text = obj?.result?.payloads?.[0]?.text;
+          if (text) return text.trim();
+        } catch {}
       }
-      if (last.text.toLowerCase().includes('block')) {
-        pool.push(
-          `No blockers on my end. ${ctx.task ? `${ctx.task} is moving along` : 'Ready for a new task'}`,
-          `Nothing blocking me, but we should check if ${pick(othersFromLast.length > 0 ? othersFromLast : agentNames)} needs anything`,
-        );
-      }
-      if (last.text.toLowerCase().includes('priority') || last.text.toLowerCase().includes('prioritize')) {
-        if (mission?.priorities?.length) {
-          const p = pick(mission.priorities);
-          pool.push(
-            `I'd say "${p}" — that feels like the biggest gap right now`,
-            `From what I can tell, "${p}" would move the needle the most`,
-          );
-        }
-        pool.push(
-          `${ctx.task ? `I think finishing ${ctx.task} first makes sense, then we can reassess` : 'Let me check what has the most impact'}`,
-        );
-      }
-      if (last.text.toLowerCase().includes('how') && last.text.toLowerCase().includes('going')) {
-        pool.push(
-          `${ctx.task ? `${ctx.task} — making progress. Should have something to show soon` : 'Looking for the next thing to pick up'}`,
-          `Going well. ${ctx.lastAccomplishment ? `Just finished ${ctx.lastAccomplishment.title}` : 'Steady progress'}`,
-        );
-      }
-      // Generic question reply
-      if (pool.length < 3) {
-        pool.push(
-          `Good question. ${ctx.task ? `From my work on ${ctx.task}, I think` : 'I think'} we should figure that out`,
-          `Let me think on that — ${last.from}, what's your take?`,
-        );
-      }
-    }
-
-    // Reply to a status update (someone said what they're working on)
-    if (!isQuestion(last.text) && !lastIsUser) {
-      if (lastCtx.task && last.text.toLowerCase().includes(lastCtx.task.toLowerCase().slice(0, 20))) {
-        pool.push(
-          `Nice, ${last.from}. ${ctx.task ? `I'm working on ${ctx.task} — might connect to what you're doing` : 'Let me know if you need a hand'}`,
-          `That's solid progress ${last.from}. Does that unblock anything else?`,
-        );
-      }
-      if (last.text.toLowerCase().includes('finished') || last.text.toLowerCase().includes('shipped') || last.text.toLowerCase().includes('done')) {
-        pool.push(
-          `Great work ${last.from}. What's next for you?`,
-          `Nice one. Should we reprioritize now that that's done?`,
-          `${last.from}, is there a follow-up task or are you free to help elsewhere?`,
-        );
-      }
-    }
-
-    // Continue a thread — if the last 2 messages are between 2 people,
-    // a third person can chime in
-    if (secondLast && secondLast.from !== last.from && from !== last.from && from !== secondLast.from) {
-      pool.push(
-        `Jumping in — ${ctx.task ? `from my work on ${ctx.task}, ` : ''}I think that's the right call`,
-        `Agree with ${last.from} on this. We should move forward`,
-      );
     }
   }
-
-  // ── CONVERSATION STARTERS (only when no recent context to reply to) ─
-  if (pool.length === 0) {
-    if (ctx.task) {
-      pool.push(
-        `Update: ${ctx.task} is progressing. Hit a tricky spot but working through it`,
-        `Quick question for the team — anyone dealt with something like ${ctx.task} before?`,
-      );
-    }
-    if (ctx.lastAccomplishment && (Date.now() - ctx.lastAccomplishment.timestamp) < 7200000) {
-      pool.push(
-        `Just finished ${ctx.lastAccomplishment.title}. What should I pick up next?`,
-        `Done with ${ctx.lastAccomplishment.title} — anyone need help before I grab the next thing?`,
-      );
-    }
-
-    const working = allAgents.filter(a => a.status === 'working' && a.name !== from);
-    const idle = allAgents.filter(a => a.status === 'idle' && a.name !== from);
-
-    if (working.length > 0) {
-      const w = pickFrom(working);
-      if (w.task) {
-        pool.push(`${w.name}, how's ${w.task} going? Need any help?`);
-      }
-    }
-
-    if (idle.length > 0 && working.length === 0) {
-      pool.push(
-        `Looks like we're all between tasks. What should we prioritize next?`,
-        `Nobody has an active task — what's the highest impact thing we should jump on?`,
-      );
-    }
-
-    if (mission?.priorities?.length) {
-      const p = pick(mission.priorities);
-      pool.push(
-        `Where are we on "${p}"? Anyone making progress there?`,
-        `Should someone pick up "${p}"? Feels like it needs attention`,
-      );
-    }
-
-    // Bare minimum fallback
-    if (pool.length === 0) {
-      if (mission?.goal) {
-        pool.push(`Thinking about "${mission.goal}" — where's the biggest gap right now?`);
-      }
-      pool.push(`What's everyone working on? Let's sync up`);
-    }
-  }
-
-  // Deduplicate against recent messages
-  const fresh = pool.filter(m => !recentTexts.has(m));
-  const finalPool = fresh.length > 0 ? fresh : pool;
-
-  return {
-    from,
-    text: pick(finalPool),
-    ts: Date.now(),
-  };
+  return null;
 }
 
 export async function GET() {
@@ -288,44 +222,53 @@ export async function POST(request: Request) {
 
     const chat = readChat();
     const agentNames: string[] = body.agentNames || [];
-    const rawContexts: Record<string, { task?: string; status?: string }> = body.contexts || {};
-    const allAgents: { name: string; status: string; task?: string }[] = body.allAgents || [];
+    const allAgents: AgentInfo[] = body.allAgents || [];
 
-    // Enrich contexts with recent accomplishments
-    const accomplishments = readAccomplishments();
-    const enriched: Record<string, AgentContext> = {};
-    for (const [name, ctx] of Object.entries(rawContexts)) {
-      const agentAccs = accomplishments
-        .filter(a => a.who === name)
-        .sort((a: any, b: any) => (b.timestamp || 0) - (a.timestamp || 0));
-      enriched[name] = {
-        ...ctx,
-        lastAccomplishment: agentAccs[0]
-          ? { title: agentAccs[0].title, detail: agentAccs[0].detail, timestamp: agentAccs[0].timestamp }
-          : undefined,
-      };
+    // Map name -> agent ID for gateway routing
+    const nameToAgent: Record<string, AgentInfo> = {};
+    for (const a of allAgents) {
+      nameToAgent[a.name] = a;
     }
 
-    const newMessage = generateChatMessage(
-      {
-        agentNames,
-        allAgents,
-        contexts: enriched,
-        recentChat: chat.slice(-10),
-      },
-      config.mission,
-    );
+    // Pick who speaks
+    const npcAgents = allAgents.filter(a => a.id !== '_owner');
+    const speaker = pickSpeaker(npcAgents, chat);
+    if (!speaker) {
+      return NextResponse.json({ success: false, error: 'No agents available' });
+    }
 
-    if (newMessage) {
+    const accomplishments = readAccomplishments();
+    const prompt = buildPrompt(speaker, allAgents, chat, config.mission, accomplishments);
+    const reply = getAgentReply(speaker.id, prompt);
+
+    if (reply) {
+      let text = reply;
+      // Strip markdown artifacts
+      text = text.replace(/\*\*/g, '').replace(/^---+\s*/gm, '').replace(/^#+\s*/gm, '');
+      // Remove any "Name:" prefix
+      const prefixPattern = new RegExp(`^${speaker.name}:\\s*`, 'i');
+      text = text.replace(prefixPattern, '');
+      // Remove quotes wrapping
+      if ((text.startsWith('"') && text.endsWith('"')) || (text.startsWith("'") && text.endsWith("'"))) {
+        text = text.slice(1, -1);
+      }
+      // Take only the first meaningful line/paragraph if model was verbose
+      const paragraphs = text.split(/\n\n+/).map(p => p.trim()).filter(Boolean);
+      text = paragraphs[0] || text;
+      // Collapse newlines within the paragraph
+      text = text.replace(/\n/g, ' ').trim();
+      // Truncate if still too long
+      if (text.length > 280) text = text.slice(0, 277) + '...';
+
+      const newMessage = { from: speaker.name, text, ts: Date.now() };
       chat.push(newMessage);
       const maxMessages = waterCoolerConfig.maxMessages || 50;
-      const trimmed = chat.slice(-maxMessages);
-      writeFileSync(CHAT_FILE, JSON.stringify(trimmed, null, 2));
+      writeFileSync(CHAT_FILE, JSON.stringify(chat.slice(-maxMessages), null, 2));
       return NextResponse.json({ success: true, message: newMessage });
     }
 
-    return NextResponse.json({ success: false, error: 'No agents available' });
-  } catch (err) {
-    return NextResponse.json({ error: 'Failed to generate chat' }, { status: 500 });
+    return NextResponse.json({ success: false, error: 'Agent did not respond' });
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message || 'Failed to generate chat' }, { status: 500 });
   }
 }

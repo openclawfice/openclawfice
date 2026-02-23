@@ -244,33 +244,21 @@ describe('/api/office/chat', () => {
     expect(Array.isArray(data)).toBe(true);
   });
 
-  it('POST generates a message when agents provided', async () => {
+  it('POST user_message adds to chat log', async () => {
     const { POST } = await import('../app/api/office/chat/route');
     const req = new Request('http://localhost/api/office/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        agentNames: ['Scout', 'Forge'],
-        allAgents: [
-          { name: 'Scout', status: 'working', task: 'Research competitor pricing' },
-          { name: 'Forge', status: 'idle' },
-        ],
-        contexts: {
-          Scout: { task: 'Research competitor pricing', status: 'working' },
-          Forge: { status: 'idle' },
-        },
+        type: 'user_message',
+        from: 'Tyler',
+        text: 'Hey team, how is everyone doing?',
       }),
     });
 
     const res = await POST(req);
     const data = await res.json();
-
     expect(data.success).toBe(true);
-    expect(data.message).toBeDefined();
-    expect(data.message.from).toBeDefined();
-    expect(data.message.text).toBeDefined();
-    expect(data.message.text.length).toBeGreaterThan(10);
-    expect(data.message.ts).toBeGreaterThan(0);
   });
 
   it('POST with empty agents returns error', async () => {

@@ -1461,19 +1461,15 @@ export default function HomePage() {
     
     const timer = setTimeout(async () => {
       try {
-        const contexts: Record<string, { task?: string; status?: string }> = {};
-        const allAgents: { name: string; status: string; task?: string }[] = [];
-        for (const a of npcAgents) {
-          contexts[a.name] = { task: a.task, status: a.status };
-          allAgents.push({ name: a.name, status: a.status, task: a.task });
-        }
+        const allAgentData = agents
+          .filter(a => a.id !== '_owner')
+          .map(a => ({ id: a.id, name: a.name, role: a.role, status: a.status, task: a.task }));
         await fetch('/api/office/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            agentNames: npcAgents.map(a => a.name),
-            allAgents,
-            contexts,
+            agentNames: allAgentData.map(a => a.name),
+            allAgents: allAgentData,
           }),
         });
       } catch {}
