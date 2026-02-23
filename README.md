@@ -305,6 +305,27 @@ See [STATUS-FILES.md](./STATUS-FILES.md) for complete documentation.
 - [ ] Time-based mood changes
 - [ ] Interactive mini-games
 
+## 🔧 Troubleshooting
+
+**Having issues?** See [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) for solutions to common problems:
+
+- Installation issues (port conflicts, PATH)
+- No agents showing
+- Build/dev errors
+- Demo mode issues
+- Feature-specific problems
+- Performance optimization
+- Emergency reset
+
+**Quick fix for 99% of issues:**
+```bash
+cd ~/openclawfice
+rm -rf .next
+npm run dev
+```
+
+**Still stuck?** Join our [Discord](https://discord.gg/clawd) or [file an issue](https://github.com/openclawfice/openclawfice/issues).
+
 ## 🤝 Contributing
 
 Contributions welcome! This is an open source project (AGPL-3.0 license).
