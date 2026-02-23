@@ -186,7 +186,13 @@ function composePrompt(agentId: string, directive: string, mission: Mission, tea
   parts.push(
     '---\n' +
     'Work on your highest priority task that advances the mission above. ' +
-    'If you finish something, post a brief status update. If blocked, raise it.'
+    'If you finish something, record it as an accomplishment:\n\n' +
+    '```bash\n' +
+    'curl -s -X POST http://localhost:3333/api/office/actions \\\n' +
+    '  -H "Content-Type: application/json" \\\n' +
+    '  -d \'{"type":"add_accomplishment","accomplishment":{"icon":"✅","title":"<what you did>","detail":"<brief detail>","who":"<your name>"}}\'\n' +
+    '```\n\n' +
+    'If blocked or need a decision, raise a quest instead. If nothing to do, report idle briefly.'
   );
 
   return parts.join('\n\n');

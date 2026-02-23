@@ -57,6 +57,14 @@ function writeJson(path: string, data: any[]) {
   writeFileSync(path, JSON.stringify(data, null, 2));
 }
 
+const MAX_ACCOMPLISHMENTS = 200;
+
+function trimAccomplishments(list: any[]): any[] {
+  return list.length > MAX_ACCOMPLISHMENTS
+    ? list.slice(list.length - MAX_ACCOMPLISHMENTS)
+    : list;
+}
+
 export async function GET() {
   return NextResponse.json({
     actions: readJson(ACTIONS_FILE),
@@ -125,7 +133,7 @@ export async function POST(request: Request) {
         who: getOwnerName(),
         timestamp: Date.now(),
       });
-      writeJson(ACCOMPLISHMENTS_FILE, accomplishments);
+      writeJson(ACCOMPLISHMENTS_FILE, trimAccomplishments(accomplishments));
 
       return NextResponse.json({ success: true });
     }
@@ -143,7 +151,7 @@ export async function POST(request: Request) {
         screenshot: a.screenshot,
         timestamp: a.timestamp || Date.now(),
       });
-      writeJson(ACCOMPLISHMENTS_FILE, accomplishments);
+      writeJson(ACCOMPLISHMENTS_FILE, trimAccomplishments(accomplishments));
       return NextResponse.json({ success: true });
     }
 
@@ -176,7 +184,7 @@ export async function POST(request: Request) {
         screenshot: body.screenshot,
         timestamp: Date.now(),
       });
-      writeJson(ACCOMPLISHMENTS_FILE, accomplishments);
+      writeJson(ACCOMPLISHMENTS_FILE, trimAccomplishments(accomplishments));
       return NextResponse.json({ success: true });
     }
 

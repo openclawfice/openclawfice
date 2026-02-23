@@ -16,7 +16,9 @@
     "dev": "next dev -p 3333",
     "build": "next build",
     "start": "next start -p 3333",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "next": "^15.1.0",
@@ -29,6 +31,8 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/ws": "^8.18.1",
-    "typescript": "^5"
+    "@vitejs/plugin-react": "^5.1.4",
+    "typescript": "^5",
+    "vitest": "^4.0.18"
   }
 }
