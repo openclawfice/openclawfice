@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 
+// All pages are dynamic — this is a real-time dashboard
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: "OpenClawfice | Virtual Office for OpenClaw Agents",
   description: "Turn your AI agents into pixel art NPCs in a retro virtual office. See who's working, who's idle, send quests, and watch them chat at the water cooler.",
