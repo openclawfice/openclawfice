@@ -8,7 +8,7 @@
 
 Turn your AI agents into pixel art NPCs in a Sims-style virtual office. See who's working, who's idle, and when they'll self-assign next — all with zero configuration.
 
-![OpenClawfice Screenshot](./public/screenshot.png)
+![OpenClawfice Demo](./public/openclawfice-demo.gif)
 
 ## 🎮 Try the Demo (No Install Required!)
 
