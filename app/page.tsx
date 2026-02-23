@@ -454,12 +454,13 @@ function formatInterval(ms: number): string {
   return `${(ms / 3600000).toFixed(1)}h`;
 }
 
-function AgentPanel({ agent, onClose, autowork, onAutoworkUpdate }: { agent: Agent; onClose: () => void; autowork?: { enabled: boolean; intervalMs: number; directive: string; lastSentAt: number }; onAutoworkUpdate?: (agentId: string, patch: Partial<{ enabled: boolean; intervalMs: number; directive: string }>) => void }) {
+function AgentPanel({ agent, onClose, autowork, onAutoworkUpdate, onStop }: { agent: Agent; onClose: () => void; autowork?: { enabled: boolean; intervalMs: number; directive: string; lastSentAt: number }; onAutoworkUpdate?: (agentId: string, patch: Partial<{ enabled: boolean; intervalMs: number; directive: string }>) => void; onStop?: (agentId: string) => void }) {
   const [awSaving, setAwSaving] = useState(false);
   const [awEnabled, setAwEnabled] = useState(autowork?.enabled ?? false);
   const [awIntervalMs, setAwIntervalMs] = useState(autowork?.intervalMs ?? 600_000);
   const [awDirective, setAwDirective] = useState(autowork?.directive ?? '');
   const [directiveDirty, setDirectiveDirty] = useState(false);
+  const [stopping, setStopping] = useState(false);
   const [dmMessage, setDmMessage] = useState('');
   const [sending, setSending] = useState(false);
   const [sentConfirm, setSentConfirm] = useState(false);
@@ -542,6 +543,45 @@ function AgentPanel({ agent, onClose, autowork, onAutoworkUpdate }: { agent: Age
       }}>
         {agent.emoji} {agent.role}
       </div>
+
+      {/* Stop Button — visible when agent is working */}
+      {agent.id !== '_owner' && agent.status === 'working' && (
+        <button
+          onClick={async () => {
+            setStopping(true);
+            try {
+              const res = await fetch('/api/office/stop', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ agentId: agent.id }),
+              });
+              if (res.ok) {
+                setAwEnabled(false);
+                onAutoworkUpdate?.(agent.id, { enabled: false });
+                onStop?.(agent.id);
+              }
+            } catch {}
+            setStopping(false);
+          }}
+          disabled={stopping}
+          style={{
+            width: '100%',
+            background: '#991b1b',
+            border: '2px solid #dc2626',
+            borderRadius: 8,
+            padding: '8px 12px',
+            color: '#fecaca',
+            fontSize: 10,
+            cursor: stopping ? 'not-allowed' : 'pointer',
+            fontFamily: '"Press Start 2P", monospace',
+            marginBottom: 16,
+            opacity: stopping ? 0.5 : 1,
+            transition: 'all 0.2s',
+          }}
+        >
+          {stopping ? '⏳ Stopping...' : '⛔ STOP — Return to Idle'}
+        </button>
+      )}
 
       {/* DM Input */}
       <div style={{
@@ -2473,6 +2513,10 @@ export default function HomePage() {
                 ...prev,
                 [agentId]: { ...(prev[agentId] || { enabled: false, intervalMs: 600_000, directive: '', lastSentAt: 0 }), ...patch },
               }));
+            }}
+            onStop={(agentId) => {
+              setAgents(prev => prev.map(a => a.id === agentId ? { ...a, status: 'idle' as AgentStatus, task: undefined } : a));
+              setSelectedAgent(prev => prev && prev.id === agentId ? { ...prev, status: 'idle' as AgentStatus, task: undefined } : prev);
             }}
           />
           <div
