@@ -983,6 +983,7 @@ function Room({
 }
 
 const CHAT_FREQ_PRESETS = [
+  { label: '5s', value: '5s' },
   { label: '15s', value: '15s' },
   { label: '30s', value: '30s' },
   { label: '45s', value: '45s' },
