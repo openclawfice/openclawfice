@@ -87,8 +87,11 @@ if [ -d "/Applications/ScreenFlow.app" ] || [ -d "/Applications/Kap.app" ]; then
 fi
 
 if [ $TOOLS_FOUND -eq 0 ]; then
-  check_fail "No recording tools found"
-  echo "   Install QuickTime Player or Kap"
+  echo "⚠️  No auto-detected recording tools"
+  echo "   (This is OK if you have your own screen recorder)"
+  echo "   Recommended: QuickTime, ScreenFlow, Kap, or OBS"
+else
+  check_pass "Recording tools available"
 fi
 echo ""
 
