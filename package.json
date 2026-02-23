@@ -3,6 +3,22 @@
   "version": "0.1.0",
   "private": false,
   "description": "Virtual office dashboard for OpenClaw agents",
+  "keywords": [
+    "openclaw",
+    "ai-agents",
+    "dashboard",
+    "virtual-office",
+    "agent-collaboration",
+    "async-teams",
+    "retro",
+    "pixel-art",
+    "sims-style",
+    "agent-monitoring",
+    "multi-agent",
+    "agent-management",
+    "developer-tools",
+    "productivity"
+  ],
   "license": "AGPL-3.0",
   "author": "OpenClaw Community",
   "repository": {
