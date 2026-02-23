@@ -274,11 +274,12 @@ function CooldownTimer({ targetMs }: { targetMs: number }) {
   );
 }
 
-function NPC({ agent, size = 1, onClick, forceThought }: {
+function NPC({ agent, size = 1, onClick, forceThought, flipped }: {
   agent: Agent;
   size?: number;
   onClick?: () => void;
   forceThought?: string | null;
+  flipped?: boolean;
 }) {
   const s = 4 * size;
   const displayThought = forceThought || agent.thought;
@@ -340,6 +341,7 @@ function NPC({ agent, size = 1, onClick, forceThought }: {
         imageRendering: 'pixelated' as any,
         position: 'relative',
         animation: 'npcBob 2s ease-in-out infinite',
+        ...(flipped ? { transform: 'scaleX(-1)' } : {}),
       }}>
         {/* Hair */}
         <div style={{
@@ -2254,13 +2256,12 @@ export default function HomePage() {
                         )}
 
                         {participant2 && (
-                          <div style={{ transform: 'scaleX(-1)' }}>
-                            <NPC
-                              agent={participant2}
-                              size={npcSize * 0.85}
-                              onClick={() => setSelectedAgent(participant2)}
-                            />
-                          </div>
+                          <NPC
+                            agent={participant2}
+                            size={npcSize * 0.85}
+                            onClick={() => setSelectedAgent(participant2)}
+                            flipped
+                          />
                         )}
                       </>
                     );

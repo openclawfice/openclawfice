@@ -27,6 +27,10 @@ export const metadata: Metadata = {
     images: ["/og-image.png"],
   },
   keywords: ["openclaw", "ai agents", "virtual office", "pixel art", "dashboard", "agent management", "retro", "rpg"],
+  icons: {
+    icon: "/icon.svg",
+    apple: "/icon.svg",
+  },
 };
 
 export default function RootLayout({

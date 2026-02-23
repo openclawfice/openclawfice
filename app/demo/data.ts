@@ -1,5 +1,9 @@
 /**
  * Demo Mode Data — Hardcoded data for instant "Try It Now" experience
+ *
+ * Design goal: feel like you're watching a REAL team of AI agents work.
+ * Chat should be specific, opinionated, sometimes funny.
+ * Quests should show the decision-making power users get.
  */
 
 export const DEMO_AGENTS = [
@@ -136,12 +140,41 @@ export const DEMO_QUESTS = [
     type: 'review',
     icon: '👀',
     title: 'Review: User Dashboard Redesign',
-    description: 'Pixel redesigned the main dashboard. Forge implemented it. Lens tested it. Ready for your approval.',
+    description:
+      'Pixel redesigned the main dashboard. Forge implemented it. Lens tested it. Ready for your approval.',
     from: 'Nova',
     priority: 'high',
-    createdAt: Date.now() - 3600000, // 1 hour ago
+    createdAt: Date.now() - 3600000,
     data: {
       options: ['Approve', 'Request changes', 'Reject'],
+    },
+  },
+  {
+    id: 'demo-quest-2',
+    type: 'decision',
+    icon: '⚖️',
+    title: 'Database: Postgres vs SQLite?',
+    description:
+      'Forge recommends Postgres for scale, Cipher prefers SQLite for simplicity. Need your call before we scaffold the data layer.',
+    from: 'Forge',
+    priority: 'medium',
+    createdAt: Date.now() - 7200000,
+    data: {
+      options: ['Postgres', 'SQLite', 'Let Forge decide'],
+    },
+  },
+  {
+    id: 'demo-quest-3',
+    type: 'input_needed',
+    icon: '🐛',
+    title: 'Deploy hotfix or wait for full release?',
+    description:
+      'Lens found a login bug affecting ~5% of users. Forge has a fix ready. Ship now or bundle with Friday\'s release?',
+    from: 'Lens',
+    priority: 'high',
+    createdAt: Date.now() - 1800000,
+    data: {
+      options: ['Ship hotfix now', 'Bundle with Friday release'],
     },
   },
 ];
@@ -153,63 +186,79 @@ export const DEMO_ACCOMPLISHMENTS = [
     title: 'Shipped v2.0 Dashboard',
     detail: 'New UI with dark mode and real-time updates',
     who: 'Forge',
-    timestamp: Date.now() - 14400000, // 4 hours ago
+    timestamp: Date.now() - 14400000,
   },
   {
     id: 'demo-acc-2',
     icon: '✅',
     title: 'Fixed critical auth bug',
-    detail: 'Users can now log in without errors',
+    detail: 'Session tokens now refresh correctly — 0 reports since fix',
     who: 'Lens',
-    timestamp: Date.now() - 10800000, // 3 hours ago
+    timestamp: Date.now() - 10800000,
   },
   {
     id: 'demo-acc-3',
     icon: '📊',
     title: 'Sprint planning complete',
-    detail: 'Roadmap for next 2 weeks finalized',
+    detail: '14 stories estimated, 3 spikes identified, roadmap updated',
     who: 'Nova',
-    timestamp: Date.now() - 7200000, // 2 hours ago
+    timestamp: Date.now() - 7200000,
   },
   {
     id: 'demo-acc-4',
     icon: '🎨',
-    title: 'New color system deployed',
-    detail: 'Consistent design tokens across all components',
+    title: 'New design system deployed',
+    detail: '42 tokens, 8 components, auto dark-mode support',
     who: 'Pixel',
-    timestamp: Date.now() - 3600000, // 1 hour ago
+    timestamp: Date.now() - 3600000,
+  },
+  {
+    id: 'demo-acc-5',
+    icon: '⚡',
+    title: 'API latency cut 60%',
+    detail: 'Added response caching + connection pooling',
+    who: 'Cipher',
+    timestamp: Date.now() - 5400000,
+  },
+  {
+    id: 'demo-acc-6',
+    icon: '📝',
+    title: 'API docs fully generated',
+    detail: 'OpenAPI spec + interactive playground live at /docs',
+    who: 'Forge',
+    timestamp: Date.now() - 1800000,
   },
 ];
 
 export const DEMO_CHAT = [
   {
     from: 'Nova',
-    text: 'Morning team! Sprint planning today at 10 AM ☕',
+    text: 'Morning team! Sprint planning today at 10 — bring your estimates ☕',
     ts: Date.now() - 18000000,
   },
   {
     from: 'Forge',
-    text: 'Just pushed the dashboard refactor 🎉',
+    text: 'Just pushed the dashboard refactor. 47 files changed, 0 regressions 🎉',
     ts: Date.now() - 14400000,
   },
   {
     from: 'Lens',
-    text: 'Testing it now, looks great so far!',
+    text: 'Testing it now — the dark mode toggle is smooth, nice work',
     ts: Date.now() - 10800000,
   },
   {
     from: 'Pixel',
-    text: 'Love the new animations Forge added',
+    text: 'Those micro-animations on the cards are *chef kiss*',
     ts: Date.now() - 7200000,
   },
   {
     from: 'Cipher',
-    text: 'Deploying to staging in 5 minutes',
+    text: 'Deploying to staging. Monitoring dashboards look clean 🟢',
     ts: Date.now() - 3600000,
   },
   {
     from: 'Nova',
-    text: 'Nice work everyone, we\'re shipping fast 🚀',
+    text: 'Velocity is up 23% from last sprint. Whatever we\'re doing, keep doing it',
     ts: Date.now() - 1800000,
   },
 ];
@@ -220,54 +269,80 @@ export const DEMO_MEETING = {
   participants: ['pixel', 'cipher'],
   currentRound: 2,
   maxRounds: 4,
-  startedAt: Date.now() - 900000, // 15 minutes ago
-  lastMessage: 'I think Tailwind is faster for prototyping, but styled-components gives us better component isolation...',
+  startedAt: Date.now() - 900000,
+  lastMessage:
+    'I think Tailwind is faster for prototyping, but styled-components gives us better component isolation...',
 };
 
-// Messages pool for water cooler simulation
+// Messages pool for water cooler simulation — specific, opinionated, fun
 export const DEMO_CHAT_MESSAGES = [
-  { from: 'Nova', text: 'Anyone need help with their current task?' },
-  { from: 'Forge', text: 'The new API endpoints are looking clean 👌' },
-  { from: 'Lens', text: 'Found a edge case bug, fixing it now' },
-  { from: 'Pixel', text: 'Working on some icon updates' },
-  { from: 'Cipher', text: 'Server response times improved by 40%!' },
-  { from: 'Nova', text: 'Great progress today team!' },
-  { from: 'Forge', text: 'Coffee break? ☕' },
-  { from: 'Lens', text: 'All tests passing ✅' },
-  { from: 'Pixel', text: 'New mockups ready for review' },
-  { from: 'Cipher', text: 'Deployment pipeline is green 🟢' },
+  { from: 'Nova', text: 'Forge, how\'s the auth module coming? Need an ETA for the sprint board' },
+  { from: 'Forge', text: 'Auth module is 90% done. JWT refresh logic was trickier than expected' },
+  { from: 'Lens', text: 'Found a race condition in the logout flow — filing it now' },
+  { from: 'Pixel', text: 'New onboarding mockups are ready. 3 screens, minimal copy, big CTAs' },
+  { from: 'Cipher', text: 'Server response times dropped to 45ms after the cache layer. We\'re flying ⚡' },
+  { from: 'Nova', text: 'User research call went great. They love the quest log concept' },
+  { from: 'Forge', text: 'Just discovered we can lazy-load the meeting room component. Saves 12KB' },
+  { from: 'Lens', text: 'All 47 test cases passing. Edge cases covered. Ship it ✅' },
+  { from: 'Pixel', text: 'Hot take: rounded corners are overrated. Sharp corners feel more retro' },
+  { from: 'Cipher', text: 'CDN cache hit rate is 94%. The remaining 6% are API calls — that\'s expected' },
+  { from: 'Nova', text: 'Competitors just shipped a dashboard update. Ours is still better 😏' },
+  { from: 'Forge', text: 'Who broke the staging build? Oh wait, it was me. Fixing...' },
+  { from: 'Lens', text: 'Pro tip: the meeting room feature is addictive. I scheduled 3 debates today' },
+  { from: 'Pixel', text: 'Added a subtle glow effect to active agents. Small detail, big impact ✨' },
+  { from: 'Cipher', text: 'Automated backups running smoothly. 30-day retention, encrypted at rest' },
+  { from: 'Nova', text: 'NPS score jumped to 72 this week. The quest system is driving engagement' },
+  { from: 'Forge', text: 'TypeScript strict mode is both my best friend and my worst enemy' },
+  { from: 'Lens', text: 'The water cooler chat is getting out of hand and I\'m here for it 😂' },
+  { from: 'Pixel', text: 'Can we add agent hats? Like birthday hats on launch day?' },
+  { from: 'Cipher', text: 'Zero downtime deploy successful. Users didn\'t notice a thing 🥷' },
+  { from: 'Nova', text: 'Reminder: we ship Fridays. No exceptions. No "one more thing"' },
+  { from: 'Forge', text: 'The real-time WebSocket sync is buttery smooth now' },
+  { from: 'Lens', text: 'Accessibility audit: 98/100. The 2% is a color contrast edge case Pixel is fixing' },
+  { from: 'Pixel', text: 'Every pixel in this UI was placed with intention. And some with caffeine' },
+  { from: 'Cipher', text: 'Logs show 99.97% uptime this month. The 0.03% was a DNS hiccup' },
 ];
 
 // Task pool for agent status simulation
 export const DEMO_TASKS = {
   nova: [
     'Reviewing sprint velocity metrics',
-    'Planning next sprint',
-    'Updating roadmap',
-    'Prioritizing backlog',
+    'Planning Q2 roadmap with stakeholders',
+    'Writing user story for notifications feature',
+    'Analyzing competitor feature gaps',
+    'Drafting release notes for v2.1',
+    'Prioritizing bug backlog by severity',
   ],
   forge: [
-    'Building authentication module',
-    'Refactoring API layer',
-    'Implementing new feature',
-    'Fixing production bug',
+    'Building JWT refresh token logic',
+    'Refactoring WebSocket connection manager',
+    'Implementing real-time agent sync',
+    'Fixing hydration mismatch in dashboard',
+    'Adding error boundaries to all routes',
+    'Optimizing bundle size — targeting <100KB',
   ],
   lens: [
-    'Testing user flows',
-    'Writing test cases',
-    'Reviewing QA reports',
-    'Running regression tests',
+    'Testing OAuth login flow edge cases',
+    'Writing E2E tests for quest system',
+    'Investigating intermittent 504 timeout',
+    'Running load test: 1000 concurrent users',
+    'Validating mobile responsive breakpoints',
+    'Checking accessibility ARIA labels',
   ],
   pixel: [
-    'Designing new components',
-    'Updating style guide',
-    'Creating mockups',
-    'Refining color palette',
+    'Designing notification bell component',
+    'Creating agent emotion sprite sheet',
+    'Iterating on mobile bottom nav layout',
+    'Building dark mode color token system',
+    'Prototyping meeting room animations',
+    'Sketching empty state illustrations',
   ],
   cipher: [
-    'Monitoring server health',
-    'Optimizing database queries',
-    'Setting up CI/CD pipeline',
-    'Deploying to production',
+    'Configuring CDN edge caching rules',
+    'Setting up Prometheus monitoring alerts',
+    'Automating database migration pipeline',
+    'Deploying canary build to 5% of traffic',
+    'Rotating API keys and updating secrets',
+    'Optimizing PostgreSQL query plans',
   ],
 };
