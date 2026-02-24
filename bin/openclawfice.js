@@ -476,8 +476,9 @@ if (command === 'status' || command === '--status') {
   const url = `http://localhost:${p}/api/office`;
   
   const startTime = Date.now();
+  const headers = token ? { 'X-OpenClawfice-Token': token } : {};
   
-  http.get(url, (res) => {
+  http.get(url, { headers }, (res) => {
     let data = '';
     res.on('data', (chunk) => { data += chunk; });
     res.on('end', () => {
