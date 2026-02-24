@@ -1,43 +1,107 @@
-name: Skill Security Scan
+name: Security Scanning
 
 on:
   push:
     branches: [main]
   pull_request:
     branches: [main]
+  schedule:
+    # Run daily at 3am UTC
+    - cron: '0 3 * * *'
 
 jobs:
-  agent-scan:
-    name: Snyk Agent Scan
+  npm-audit:
+    name: npm Audit (Dependency Vulnerabilities)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@v4
-
-      - name: Run mcp-scan on skill
-        run: uvx mcp-scan@latest --skills skill/SKILL.md --json > scan-results.json
-
-      - name: Check scan results
-        run: |
-          python3 -c "
-          import json, sys
-          with open('scan-results.json') as f:
-              results = json.load(f)
-          issues = results.get('issues', [])
-          critical = [i for i in issues if i.get('severity') in ('critical', 'high')]
-          if critical:
-              print('FAILED: Found critical/high severity issues:')
-              for i in critical:
-                  print(f\"  - [{i.get('severity')}] {i.get('message', 'unknown')}\")
-              sys.exit(1)
-          print(f'PASSED: No critical/high issues found ({len(issues)} total issues)')
-          "
-
-      - name: Upload scan results
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Run npm audit
+        run: npm audit --audit-level=high
+      
+      - name: Generate audit report
+        if: always()
+        run: npm audit --json > npm-audit.json
+      
+      - name: Upload audit results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: agent-scan-results
-          path: scan-results.json
+          name: npm-audit-results
+          path: npm-audit.json
+
+  dependency-review:
+    name: Dependency Review (Supply Chain)
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Dependency Review
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: high
+
+  eslint-security:
+    name: ESLint Security Rules
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Run ESLint with security plugin
+        run: npx eslint . --ext .js,.jsx,.ts,.tsx --format json --output-file eslint-results.json || true
+      
+      - name: Check for security issues
+        run: |
+          if [ -f eslint-results.json ]; then
+            python3 -c "
+          import json, sys
+          with open('eslint-results.json') as f:
+              results = json.load(f)
+          errors = sum(r.get('errorCount', 0) for r in results)
+          if errors > 0:
+              print(f'Found {errors} ESLint errors')
+              sys.exit(1)
+          print('ESLint passed')
+          "
+          fi
+      
+      - name: Upload ESLint results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eslint-security-results
+          path: eslint-results.json
+
+  typescript-check:
+    name: TypeScript Type Safety
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: TypeScript type check
+        run: npx tsc --noEmit

@@ -2,7 +2,8 @@
 
 [![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL_3.0-blue.svg)](https://opensource.org/licenses/AGPL-3.0)
 [![Version](https://img.shields.io/badge/version-0.1.0-green.svg)](https://github.com/openclawfice/openclawfice/releases)
-[![Security: Verified & Malware Scanned](https://img.shields.io/badge/Security-Verified%20%26%20Scanned-brightgreen.svg)](https://github.com/openclawfice/openclawfice/security)
+[![Security Scanning](https://github.com/openclawfice/openclawfice/actions/workflows/security-scan.yml/badge.svg)](https://github.com/openclawfice/openclawfice/actions/workflows/security-scan.yml)
+[![CodeQL](https://github.com/openclawfice/openclawfice/actions/workflows/codeql.yml/badge.svg)](https://github.com/openclawfice/openclawfice/security/code-scanning)
 [![Next.js](https://img.shields.io/badge/Next.js-15-black?logo=next.js)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript)](https://www.typescriptlang.org/)
 
