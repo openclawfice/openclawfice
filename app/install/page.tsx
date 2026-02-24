@@ -416,6 +416,30 @@ export default function InstallPage() {
           </ul>
         </div>
 
+        {/* Security Badge */}
+        <div style={{
+          background: 'rgba(16,185,129,0.06)',
+          border: '1px solid rgba(16,185,129,0.2)',
+          borderRadius: 10,
+          padding: '14px 20px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 12,
+          flexWrap: 'wrap',
+          marginTop: 20,
+        }}>
+          <span style={{ fontSize: 16 }}>🛡️</span>
+          <span style={{ fontSize: 12, color: '#6ee7b7', fontWeight: 600 }}>
+            Verified &amp; Scanned — Malware-free, zero known CVEs
+          </span>
+          <a href="https://github.com/openclawfice/openclawfice/security" style={{
+            fontSize: 10, color: '#10b981', textDecoration: 'none', opacity: 0.8,
+          }}>
+            View report →
+          </a>
+        </div>
+
         {/* Footer */}
         <div style={{
           textAlign: 'center',

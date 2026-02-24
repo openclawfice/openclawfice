@@ -1,12 +1,92 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export function DemoBanner() {
   const [dismissed, setDismissed] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
 
   if (dismissed) return null;
 
+  if (isMobile) {
+    // Slim single-line banner on mobile
+    return (
+      <div style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+        color: '#fff',
+        padding: '8px 12px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        zIndex: 9999,
+        boxShadow: '0 2px 12px rgba(99, 102, 241, 0.3)',
+        animation: 'slideDown 0.3s ease-out',
+      }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 6,
+        }}>
+          <span style={{ fontSize: 14 }}>🎮</span>
+          <span style={{ fontSize: 11, fontWeight: 700 }}>Demo Mode</span>
+        </div>
+        <div style={{
+          display: 'flex',
+          gap: 8,
+          alignItems: 'center',
+        }}>
+          <a
+            href="/install"
+            style={{
+              background: 'rgba(255, 255, 255, 0.25)',
+              border: '1px solid rgba(255, 255, 255, 0.3)',
+              color: '#fff',
+              padding: '4px 12px',
+              borderRadius: 4,
+              fontSize: 10,
+              fontWeight: 600,
+              textDecoration: 'none',
+            }}
+          >
+            Install
+          </a>
+          <button
+            onClick={() => setDismissed(true)}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              color: 'rgba(255, 255, 255, 0.7)',
+              fontSize: 16,
+              cursor: 'pointer',
+              padding: 2,
+              lineHeight: 1,
+            }}
+          >
+            ×
+          </button>
+        </div>
+        <style jsx>{`
+          @keyframes slideDown {
+            from { transform: translateY(-100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+          }
+        `}</style>
+      </div>
+    );
+  }
+
+  // Full banner on desktop
   return (
     <div style={{
       position: 'fixed',
@@ -15,7 +95,7 @@ export function DemoBanner() {
       right: 0,
       background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
       color: '#fff',
-      padding: '12px 20px',
+      padding: '10px 20px',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-between',
@@ -32,17 +112,17 @@ export function DemoBanner() {
         <span style={{ fontSize: 20 }}>🎮</span>
         <div>
           <div style={{
-            fontSize: 14,
+            fontSize: 13,
             fontWeight: 700,
-            marginBottom: 2,
+            marginBottom: 1,
           }}>
             Demo Mode — See OpenClawfice in Action!
           </div>
           <div style={{
-            fontSize: 11,
+            fontSize: 10,
             opacity: 0.9,
           }}>
-            This is a simulated office. Install OpenClawfice to create your own team.
+            Simulated office. Install to create your own team.
           </div>
         </div>
       </div>
@@ -59,9 +139,9 @@ export function DemoBanner() {
             backdropFilter: 'blur(10px)',
             border: '1px solid rgba(255, 255, 255, 0.3)',
             color: '#fff',
-            padding: '8px 20px',
+            padding: '6px 16px',
             borderRadius: 6,
-            fontSize: 12,
+            fontSize: 11,
             fontWeight: 600,
             textDecoration: 'none',
             transition: 'all 0.2s',
@@ -83,19 +163,11 @@ export function DemoBanner() {
             background: 'transparent',
             border: 'none',
             color: 'rgba(255, 255, 255, 0.8)',
-            padding: '8px 16px',
-            borderRadius: 6,
-            fontSize: 11,
+            padding: '6px 12px',
+            fontSize: 10,
             fontWeight: 600,
             textDecoration: 'none',
             cursor: 'pointer',
-            transition: 'all 0.2s',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.color = '#fff';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.color = 'rgba(255, 255, 255, 0.8)';
           }}
         >
           Exit Demo
@@ -110,21 +182,7 @@ export function DemoBanner() {
             fontSize: 16,
             cursor: 'pointer',
             padding: 4,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: 24,
-            height: 24,
-            borderRadius: 4,
-            transition: 'all 0.2s',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = 'rgba(0, 0, 0, 0.1)';
-            e.currentTarget.style.color = '#fff';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = 'transparent';
-            e.currentTarget.style.color = 'rgba(255, 255, 255, 0.7)';
+            lineHeight: 1,
           }}
         >
           ×
@@ -133,14 +191,8 @@ export function DemoBanner() {
 
       <style jsx>{`
         @keyframes slideDown {
-          from {
-            transform: translateY(-100%);
-            opacity: 0;
-          }
-          to {
-            transform: translateY(0);
-            opacity: 1;
-          }
+          from { transform: translateY(-100%); opacity: 0; }
+          to { transform: translateY(0); opacity: 1; }
         }
       `}</style>
     </div>

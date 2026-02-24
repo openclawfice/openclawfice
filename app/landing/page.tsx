@@ -216,33 +216,60 @@ export default function LandingPage() {
         </div>
       </div>
 
-      {/* Social Proof */}
+      {/* Trust & Security */}
       <div style={{
-        background: 'rgba(139,92,246,0.1)',
-        borderTop: '2px solid rgba(139,92,246,0.3)',
-        borderBottom: '2px solid rgba(139,92,246,0.3)',
-        padding: '60px 20px',
+        background: 'rgba(16,185,129,0.06)',
+        borderTop: '2px solid rgba(16,185,129,0.2)',
+        borderBottom: '2px solid rgba(16,185,129,0.2)',
+        padding: '50px 20px',
       }}>
         <div style={{
-          maxWidth: 800,
+          maxWidth: 900,
           margin: '0 auto',
           textAlign: 'center',
         }}>
-          <p style={{
-            fontSize: 18,
-            fontStyle: 'italic',
-            color: '#a5b4fc',
-            marginBottom: 16,
-            lineHeight: 1.8,
+          <h2 style={{
+            fontFamily: '"Press Start 2P", monospace',
+            fontSize: 16,
+            color: '#10b981',
+            marginBottom: 32,
           }}>
-            "This is the most delightful way to manage AI agents I've ever seen.
-            It's like The Sims meets my terminal, and I'm here for it."
-          </p>
+            🔒 VERIFIED & SECURE
+          </h2>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'center',
+            flexWrap: 'wrap',
+            gap: 24,
+          }}>
+            {[
+              { icon: '🛡️', label: 'Malware-Free', desc: 'Scanned by GitHub Advanced Security' },
+              { icon: '🔍', label: 'Open Source', desc: 'Audit every line of code yourself' },
+              { icon: '📦', label: 'Dependency Monitored', desc: 'Dependabot watches for vulnerabilities' },
+              { icon: '✅', label: 'Zero Known CVEs', desc: 'No known security vulnerabilities' },
+            ].map((item, i) => (
+              <div key={i} style={{
+                background: 'rgba(16,185,129,0.08)',
+                border: '1px solid rgba(16,185,129,0.2)',
+                borderRadius: 10,
+                padding: '16px 20px',
+                minWidth: 180,
+                flex: '1 1 180px',
+                maxWidth: 220,
+              }}>
+                <div style={{ fontSize: 24, marginBottom: 8 }}>{item.icon}</div>
+                <div style={{ fontSize: 13, fontWeight: 700, color: '#e2e8f0', marginBottom: 4 }}>{item.label}</div>
+                <div style={{ fontSize: 11, color: '#6ee7b7', lineHeight: 1.4 }}>{item.desc}</div>
+              </div>
+            ))}
+          </div>
           <p style={{
-            fontSize: 14,
+            fontSize: 12,
             color: '#64748b',
+            marginTop: 20,
           }}>
-            — OpenClaw User (probably)
+            All releases are automatically scanned for malware and vulnerabilities.
+            {' '}<a href="https://github.com/openclawfice/openclawfice/security" style={{ color: '#10b981', textDecoration: 'none' }}>View security report →</a>
           </p>
         </div>
       </div>

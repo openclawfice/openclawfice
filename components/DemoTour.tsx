@@ -5,31 +5,31 @@ import React, { useState, useEffect } from 'react';
 const TOUR_STEPS = [
   {
     title: '🏠 Your AI Office',
-    body: 'This is your team of AI agents. Each one has a role, personality, and mood — just like The Sims, but they actually get work done.',
+    body: 'Your AI agents are pixel-art NPCs with roles, personalities, and moods — like The Sims, but they ship code.',
     target: 'work-room',
     position: 'bottom' as const,
   },
   {
     title: '⚔️ Quest Log',
-    body: 'Agents raise quests when they need your decision. Review, respond, and watch them execute. You\'re the boss.',
+    body: 'Agents raise quests when they need your decision. Approve, reject, or pick an option — you\'re the boss.',
     target: 'quest-log',
     position: 'top' as const,
   },
   {
     title: '💬 Water Cooler',
-    body: 'Your agents chat, debate, and collaborate here. Send group messages or just watch the banter.',
+    body: 'Agents chat, debate, and collaborate. Send group messages or just watch the banter unfold.',
     target: 'water-cooler',
     position: 'left' as const,
   },
   {
     title: '🏆 Accomplishments',
-    body: 'Every completed task gets logged with a video replay. Track your team\'s progress like a leaderboard.',
+    body: 'Every completed task gets logged with a video replay. Your team\'s highlight reel.',
     target: 'accomplishments',
     position: 'top' as const,
   },
   {
     title: '🎮 Click an Agent!',
-    body: 'Click any NPC to see their stats, send them a DM, set auto-work schedules, or stop them. Try it now!',
+    body: 'Tap any NPC to see stats, send a DM, or set auto-work schedules. Try it!',
     target: 'work-room',
     position: 'bottom' as const,
   },
@@ -41,19 +41,25 @@ export function DemoTour({ isDemoMode }: { isDemoMode: boolean }) {
   const [step, setStep] = useState(0);
   const [visible, setVisible] = useState(false);
   const [position, setPosition] = useState({ top: 0, left: 0 });
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
 
   useEffect(() => {
     if (!isDemoMode) return;
-    // Only show tour once per browser
     const seen = localStorage.getItem(STORAGE_KEY);
     if (seen) return;
-    // Delay start so the page has time to render
     const timer = setTimeout(() => setVisible(true), 2500);
     return () => clearTimeout(timer);
   }, [isDemoMode]);
 
   useEffect(() => {
-    if (!visible) return;
+    if (!visible || isMobile) return;
     const current = TOUR_STEPS[step];
     const el = document.querySelector(`[data-tour="${current.target}"]`);
     if (!el) return;
@@ -64,20 +70,20 @@ export function DemoTour({ isDemoMode }: { isDemoMode: boolean }) {
     switch (current.position) {
       case 'bottom':
         pos.top = rect.bottom + 12;
-        pos.left = rect.left + rect.width / 2;
+        pos.left = Math.min(Math.max(rect.left + rect.width / 2, 160), window.innerWidth - 160);
         break;
       case 'top':
         pos.top = rect.top - 12;
-        pos.left = rect.left + rect.width / 2;
+        pos.left = Math.min(Math.max(rect.left + rect.width / 2, 160), window.innerWidth - 160);
         break;
       case 'left':
         pos.top = rect.top + rect.height / 2;
-        pos.left = rect.left - 12;
+        pos.left = Math.max(rect.left - 12, 160);
         break;
     }
 
     setPosition(pos);
-  }, [step, visible]);
+  }, [step, visible, isMobile]);
 
   if (!visible) return null;
 
@@ -94,10 +100,17 @@ export function DemoTour({ isDemoMode }: { isDemoMode: boolean }) {
       dismiss();
     } else {
       setStep(s => s + 1);
+      // On mobile, scroll the target into view
+      if (isMobile) {
+        const nextTarget = TOUR_STEPS[step + 1]?.target;
+        if (nextTarget) {
+          const el = document.querySelector(`[data-tour="${nextTarget}"]`);
+          el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }
     }
   };
 
-  // Transform based on position direction
   const getTransform = () => {
     switch (current.position) {
       case 'bottom': return 'translateX(-50%)';
@@ -107,13 +120,8 @@ export function DemoTour({ isDemoMode }: { isDemoMode: boolean }) {
     }
   };
 
-  // Arrow direction
   const getArrow = (): React.CSSProperties => {
-    const base: React.CSSProperties = {
-      position: 'absolute',
-      width: 0,
-      height: 0,
-    };
+    const base: React.CSSProperties = { position: 'absolute', width: 0, height: 0 };
     switch (current.position) {
       case 'bottom':
         return { ...base, top: -8, left: '50%', transform: 'translateX(-50%)',
@@ -132,9 +140,117 @@ export function DemoTour({ isDemoMode }: { isDemoMode: boolean }) {
     }
   };
 
+  // Step counter dots
+  const stepDots = (
+    <div style={{ display: 'flex', gap: 4, marginBottom: 10 }}>
+      {TOUR_STEPS.map((_, i) => (
+        <div key={i} style={{
+          width: i === step ? 16 : 6,
+          height: 6,
+          borderRadius: 3,
+          background: i === step ? '#6366f1' : i < step ? '#818cf8' : '#334155',
+          transition: 'all 0.3s',
+        }} />
+      ))}
+    </div>
+  );
+
+  const actions = (
+    <div style={{
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    }}>
+      <button
+        onClick={dismiss}
+        style={{
+          background: 'none',
+          border: 'none',
+          color: '#475569',
+          fontSize: 11,
+          cursor: 'pointer',
+          padding: '6px 8px',
+        }}
+      >
+        Skip tour
+      </button>
+      <button
+        onClick={next}
+        style={{
+          background: '#6366f1',
+          border: 'none',
+          color: '#fff',
+          borderRadius: 6,
+          padding: '8px 16px',
+          fontSize: 10,
+          fontFamily: '"Press Start 2P", monospace',
+          cursor: 'pointer',
+          minHeight: 36,
+        }}
+      >
+        {isLast ? '🎮 Got it!' : 'Next →'}
+      </button>
+    </div>
+  );
+
+  // MOBILE: bottom sheet style
+  if (isMobile) {
+    return (
+      <>
+        <div
+          onClick={dismiss}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.5)',
+            zIndex: 9998,
+          }}
+        />
+        <div style={{
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          zIndex: 9999,
+          background: '#1e293b',
+          borderTop: '2px solid #6366f1',
+          borderRadius: '16px 16px 0 0',
+          padding: '16px 20px 24px',
+          boxShadow: '0 -8px 32px rgba(99,102,241,0.3)',
+          animation: 'slideUp 0.3s ease-out',
+        }}>
+          {stepDots}
+          <div style={{
+            fontFamily: '"Press Start 2P", monospace',
+            fontSize: 11,
+            color: '#e2e8f0',
+            marginBottom: 8,
+          }}>
+            {current.title}
+          </div>
+          <div style={{
+            fontSize: 13,
+            color: '#94a3b8',
+            lineHeight: 1.5,
+            marginBottom: 14,
+          }}>
+            {current.body}
+          </div>
+          {actions}
+          <style jsx>{`
+            @keyframes slideUp {
+              from { transform: translateY(100%); opacity: 0; }
+              to { transform: translateY(0); opacity: 1; }
+            }
+          `}</style>
+        </div>
+      </>
+    );
+  }
+
+  // DESKTOP: anchored tooltip
   return (
     <>
-      {/* Spotlight overlay */}
       <div
         onClick={dismiss}
         style={{
@@ -145,8 +261,6 @@ export function DemoTour({ isDemoMode }: { isDemoMode: boolean }) {
           cursor: 'pointer',
         }}
       />
-
-      {/* Tooltip */}
       <div
         style={{
           position: 'fixed',
@@ -159,31 +273,12 @@ export function DemoTour({ isDemoMode }: { isDemoMode: boolean }) {
           border: '2px solid #6366f1',
           borderRadius: 12,
           padding: 16,
-          boxShadow: '0 8px 32px rgba(99,102,241,0.3), 0 0 0 1px rgba(99,102,241,0.1)',
+          boxShadow: '0 8px 32px rgba(99,102,241,0.3)',
           animation: 'fadeSlideIn 0.3s ease-out',
         }}
       >
-        {/* Arrow */}
         <div style={getArrow()} />
-
-        {/* Step counter */}
-        <div style={{
-          display: 'flex',
-          gap: 4,
-          marginBottom: 10,
-        }}>
-          {TOUR_STEPS.map((_, i) => (
-            <div key={i} style={{
-              width: i === step ? 16 : 6,
-              height: 6,
-              borderRadius: 3,
-              background: i === step ? '#6366f1' : i < step ? '#818cf8' : '#334155',
-              transition: 'all 0.3s',
-            }} />
-          ))}
-        </div>
-
-        {/* Title */}
+        {stepDots}
         <div style={{
           fontFamily: '"Press Start 2P", monospace',
           fontSize: 10,
@@ -192,8 +287,6 @@ export function DemoTour({ isDemoMode }: { isDemoMode: boolean }) {
         }}>
           {current.title}
         </div>
-
-        {/* Body */}
         <div style={{
           fontSize: 12,
           color: '#94a3b8',
@@ -202,43 +295,7 @@ export function DemoTour({ isDemoMode }: { isDemoMode: boolean }) {
         }}>
           {current.body}
         </div>
-
-        {/* Actions */}
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-        }}>
-          <button
-            onClick={dismiss}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: '#475569',
-              fontSize: 10,
-              cursor: 'pointer',
-              padding: '4px 8px',
-            }}
-          >
-            Skip tour
-          </button>
-          <button
-            onClick={next}
-            style={{
-              background: '#6366f1',
-              border: 'none',
-              color: '#fff',
-              borderRadius: 6,
-              padding: '6px 14px',
-              fontSize: 10,
-              fontFamily: '"Press Start 2P", monospace',
-              cursor: 'pointer',
-              transition: 'all 0.2s',
-            }}
-          >
-            {isLast ? '🎮 Got it!' : 'Next →'}
-          </button>
-        </div>
+        {actions}
       </div>
     </>
   );
