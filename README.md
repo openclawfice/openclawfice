@@ -131,6 +131,7 @@ Full guide: [TROUBLESHOOTING.md](./TROUBLESHOOTING.md)
 
 - ✅ No known vulnerabilities
 - ✅ Malware-free (verified by GitHub Advanced Security)  
+- ✅ AI security scanning (Snyk Agent Scan for prompt injections)
 - ✅ Dependencies monitored via Dependabot
 - ✅ Open source (audit the code yourself)
 

@@ -12,12 +12,14 @@ Every code change is automatically scanned for:
 - ✅ **Vulnerabilities** - Known security issues in dependencies  
 - ✅ **Code Quality** - Suspicious patterns and backdoors
 - ✅ **Supply Chain** - Dependency integrity verification
+- ✅ **AI Security** - Prompt injections, agent vulnerabilities, skill poisoning
 
 **Scanned by:**
 - GitHub Advanced Security
 - Dependabot (dependency vulnerability alerts)
 - CodeQL (static analysis)
 - npm audit (package security)
+- **Snyk Agent Scan** (AI agent security, prompt injection detection)
 
 ---
 

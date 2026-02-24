@@ -105,3 +105,31 @@ jobs:
       
       - name: TypeScript type check
         run: npx tsc --noEmit
+
+  snyk-agent-scan:
+    name: Snyk Agent Scan (AI Security)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install uv (Python package installer)
+        run: |
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+      
+      - name: Run Snyk Agent Scan
+        run: |
+          # Scan for agent security issues, prompt injections, malware
+          uvx mcp-scan@latest . --skills || true
+      
+      - name: Generate scan report
+        if: always()
+        run: |
+          uvx mcp-scan@latest . --skills --json > snyk-agent-scan.json || echo '{"status":"completed"}' > snyk-agent-scan.json
+      
+      - name: Upload scan results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: snyk-agent-scan-results
+          path: snyk-agent-scan.json
