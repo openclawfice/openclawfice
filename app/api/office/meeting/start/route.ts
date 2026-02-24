@@ -24,7 +24,7 @@ export async function POST(req: Request) {
       maxRounds: 4,
       startedAt: Date.now(),
       lastMessage: '',
-      messages: [],
+      transcript: [], // Initialize transcript for UI
     };
 
     await fs.mkdir(path.dirname(MEETING_FILE), { recursive: true });

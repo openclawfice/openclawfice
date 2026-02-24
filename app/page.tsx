@@ -240,6 +240,16 @@ export default function HomePage() {
         const res = await fetch(getApiPath('/api/office/meeting'));
         const data = await res.json();
         setMeeting(data);
+        
+        // If meeting is active (and not in demo mode), simulate conversation
+        if (data.active && !isDemoMode) {
+          try {
+            await fetch(getApiPath('/api/office/meeting/simulate'), { method: 'POST' });
+          } catch (err) {
+            // Simulation is optional, don't break if it fails
+            console.debug('Meeting simulation skipped:', err);
+          }
+        }
       } catch (err) {
         console.error('Failed to fetch meeting status:', err);
       }
@@ -247,7 +257,7 @@ export default function HomePage() {
     fetchMeeting();
     const i = setInterval(fetchMeeting, 3000);
     return () => clearInterval(i);
-  }, [getApiPath]);
+  }, [getApiPath, isDemoMode]);
 
   // Poll actions/accomplishments every 5s
   useEffect(() => {
