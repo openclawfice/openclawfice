@@ -1218,12 +1218,58 @@ function AgentPanel({ agent, onClose, autowork, onAutoworkUpdate, onStop, pendin
   );
 }
 
+// Pixel-art room decorations — small ambient details for Sims vibe
+function RoomDecor({ type }: { type: 'work' | 'lounge' | 'meeting' }) {
+  const s = 3; // pixel scale
+  const common: React.CSSProperties = { position: 'absolute', imageRendering: 'pixelated' as any, opacity: 0.4, zIndex: 0 };
+  
+  if (type === 'work') return (<>
+    {/* Computer monitor */}
+    <div style={{ ...common, bottom: 6, right: 10 }}>
+      <div style={{ width: s*6, height: s*4, background: '#334155', borderRadius: 1, border: `${s*0.3}px solid #475569` }} />
+      <div style={{ width: s*2, height: s*1.5, background: '#475569', margin: '0 auto' }} />
+      <div style={{ width: s*4, height: s*0.5, background: '#475569', margin: '0 auto', borderRadius: 1 }} />
+    </div>
+    {/* Plant */}
+    <div style={{ ...common, bottom: 8, left: 8 }}>
+      <div style={{ width: s*2, height: s*3, background: '#065f46', borderRadius: `${s}px ${s}px 0 0` }} />
+      <div style={{ width: s*3, height: s*2.5, background: '#059669', borderRadius: '50%', marginTop: -s*2, marginLeft: -s*0.5 }} />
+      <div style={{ width: s*1.5, height: s*1.5, background: '#6b4226', margin: '0 auto', borderRadius: 1 }} />
+    </div>
+  </>);
+  
+  if (type === 'lounge') return (<>
+    {/* Coffee cup */}
+    <div style={{ ...common, bottom: 6, right: 12 }}>
+      <div style={{ width: s*2.5, height: s*3, background: '#f5f5f4', borderRadius: `0 0 ${s*0.5}px ${s*0.5}px` }} />
+      <div style={{ width: s*3, height: s*0.6, background: '#f5f5f4', borderRadius: s*0.3, marginTop: -s*3 }} />
+      <div style={{ width: s*1, height: s*1.5, background: '#f5f5f4', borderRadius: `0 ${s}px ${s}px 0`, position: 'absolute' as any, right: -s*0.8, top: s*0.8 }} />
+    </div>
+    {/* Couch */}
+    <div style={{ ...common, bottom: 4, left: 6 }}>
+      <div style={{ width: s*8, height: s*3, background: '#7c3aed', borderRadius: `${s}px ${s}px ${s*0.5}px ${s*0.5}px` }} />
+      <div style={{ width: s*1.5, height: s*1.5, background: '#6d28d9', borderRadius: `${s}px 0 0 0`, position: 'absolute' as any, left: 0, top: -s*1 }} />
+      <div style={{ width: s*1.5, height: s*1.5, background: '#6d28d9', borderRadius: `0 ${s}px 0 0`, position: 'absolute' as any, right: 0, top: -s*1 }} />
+    </div>
+  </>);
+  
+  // meeting
+  return (<>
+    {/* Whiteboard */}
+    <div style={{ ...common, top: 22, right: 8 }}>
+      <div style={{ width: s*8, height: s*5, background: '#f1f5f9', borderRadius: 1, border: `${s*0.3}px solid #94a3b8` }} />
+      <div style={{ width: s*0.5, height: s*2, background: '#94a3b8', margin: '0 auto' }} />
+    </div>
+  </>);
+}
+
 function Room({
   title,
   icon,
   color,
   borderColor,
   children,
+  roomType,
   style: extraStyle,
 }: {
   title: string;
@@ -1231,6 +1277,7 @@ function Room({
   color: string;
   borderColor: string;
   children: React.ReactNode;
+  roomType?: 'work' | 'lounge' | 'meeting';
   style?: React.CSSProperties;
 }) {
   return (
@@ -1273,6 +1320,7 @@ function Room({
         opacity: 0.05,
         backgroundImage: `repeating-linear-gradient(0deg, transparent, transparent 39px, ${borderColor} 39px, ${borderColor} 40px), repeating-linear-gradient(90deg, transparent, transparent 39px, ${borderColor} 39px, ${borderColor} 40px)`,
       }} />
+      {roomType && <RoomDecor type={roomType} />}
       <div style={{
         position: 'relative',
         padding: '24px 8px 6px',
@@ -2349,6 +2397,7 @@ export default function HomePage() {
             icon="💻"
             color="#0a1a10"
             borderColor="#166534"
+            roomType="work"
             style={{ flex: '1 1 auto' }}
           >
             <div style={{
@@ -2434,6 +2483,7 @@ export default function HomePage() {
               icon="🤝"
               color="#1a0a2e"
               borderColor="#7c3aed"
+              roomType="meeting"
               style={{
                 flex: '0 0 auto',
                 animation: 'fadeSlideIn 0.5s ease-out',
@@ -2558,7 +2608,7 @@ export default function HomePage() {
             gap: 6,
             flex: '0 0 auto',
           }}>
-            <Room title="The Lounge" icon="☕" color="#1a150a" borderColor="#92400e">
+            <Room title="The Lounge" icon="☕" color="#1a150a" borderColor="#92400e" roomType="lounge">
               <div style={{
                 display: 'flex',
                 flexWrap: 'wrap',
