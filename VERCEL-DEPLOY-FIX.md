@@ -75,7 +75,9 @@ vercel --prod --force
 
 ## How to Verify Fix Worked
 
-After deploying, check these URLs:
+**Quick way:** Open https://openclawfice.com/verify-deploy.html (instant 6-check dashboard)
+
+**Manual way:** Check these URLs:
 
 ### 1. Security Badge (Header)
 ```bash
