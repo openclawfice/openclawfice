@@ -4,124 +4,164 @@ set -e
 INSTALL_DIR="$HOME/openclawfice"
 REPO_URL="https://github.com/openclawfice/openclawfice.git"
 LAUNCHER="$HOME/.local/bin/openclawfice"
+MIN_NODE=18
 
 echo ""
 echo "🏢 OpenClawfice Installer"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 
-# Check if OpenClaw is installed
-if [ ! -f "$HOME/.openclaw/openclaw.json" ]; then
-  echo "❌ OpenClaw not found!"
-  echo ""
-  echo "OpenClawfice requires OpenClaw to be installed and configured."
-  echo "Expected config at: $HOME/.openclaw/openclaw.json"
-  echo ""
-  echo "Visit https://openclaw.ai to get started."
-  echo ""
+# ── Preflight Checks ─────────────────────────────
+
+# Check git
+if ! command -v git &>/dev/null; then
+  echo "❌ git not found. Install git first:"
+  echo "   macOS: xcode-select --install"
+  echo "   Ubuntu: sudo apt install git"
   exit 1
 fi
 
-echo "✅ OpenClaw detected"
+# Check Node.js
+if ! command -v node &>/dev/null; then
+  echo "❌ Node.js not found. Install Node.js $MIN_NODE+:"
+  echo "   https://nodejs.org"
+  exit 1
+fi
+
+NODE_VER=$(node -e "console.log(process.versions.node.split('.')[0])")
+if [ "$NODE_VER" -lt "$MIN_NODE" ] 2>/dev/null; then
+  echo "❌ Node.js $MIN_NODE+ required (found v$NODE_VER)"
+  echo "   Update at https://nodejs.org"
+  exit 1
+fi
+echo "✅ Node.js v$(node -v | tr -d 'v') detected"
+
+# Check npm
+if ! command -v npm &>/dev/null; then
+  echo "❌ npm not found. Comes with Node.js — reinstall from https://nodejs.org"
+  exit 1
+fi
+
+# Check if OpenClaw is installed
+if [ ! -f "$HOME/.openclaw/openclaw.json" ]; then
+  echo ""
+  echo "⚠️  OpenClaw config not found at ~/.openclaw/openclaw.json"
+  echo ""
+  echo "OpenClawfice works best with OpenClaw, but you can still try the demo!"
+  echo "Visit https://openclaw.ai to install OpenClaw."
+  echo ""
+  read -p "Continue anyway? (y/N) " -n 1 -r
+  echo ""
+  if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    exit 0
+  fi
+else
+  echo "✅ OpenClaw detected"
+fi
 echo ""
+
+# ── Installation ────────────────────────────────
 
 # Check if already installed
 if [ -d "$INSTALL_DIR" ]; then
-  echo "⚠️  OpenClawfice is already installed at $INSTALL_DIR"
+  echo "⚠️  OpenClawfice already installed at $INSTALL_DIR"
   echo ""
-  read -p "Reinstall? This will delete the existing installation. (y/N) " -n 1 -r
+  read -p "Update to latest version? (Y/n) " -n 1 -r
   echo ""
-  if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-    echo "Cancelled. To launch your existing installation, run: openclawfice"
+  if [[ $REPLY =~ ^[Nn]$ ]]; then
+    echo "Cancelled. Run 'openclawfice' to launch."
     exit 0
   fi
   echo ""
-  echo "🗑️  Removing old installation..."
-  rm -rf "$INSTALL_DIR"
+  echo "📦 Updating..."
+  cd "$INSTALL_DIR"
+  git pull --ff-only origin main 2>/dev/null || {
+    echo "⚠️  Could not fast-forward. Doing clean reinstall..."
+    cd "$HOME"
+    rm -rf "$INSTALL_DIR"
+    git clone -q --depth 1 "$REPO_URL" "$INSTALL_DIR"
+  }
+else
+  # Fresh clone (shallow for speed)
+  echo "📦 Cloning repository..."
+  if ! git clone -q --depth 1 "$REPO_URL" "$INSTALL_DIR" 2>/dev/null; then
+    echo "❌ Failed to clone repository"
+    echo "   Check your internet connection and try again."
+    exit 1
+  fi
 fi
-
-# Clone repo
-echo "📦 Cloning repository..."
-if ! git clone -q "$REPO_URL" "$INSTALL_DIR" 2>/dev/null; then
-  echo "❌ Failed to clone repository"
-  echo "Make sure you have git installed and internet access."
-  exit 1
-fi
-echo "✅ Repository cloned"
+echo "✅ Repository ready"
 echo ""
 
 # Install dependencies
 echo "📚 Installing dependencies (this may take a minute)..."
 cd "$INSTALL_DIR"
-if ! npm install 2>&1 | tail -3; then
-  echo "❌ Failed to install dependencies"
-  echo "Make sure you have Node.js (v18+) and npm installed."
+if ! npm install --no-audit --no-fund 2>&1 | tail -3; then
+  echo ""
+  echo "❌ npm install failed. Try manually:"
+  echo "   cd $INSTALL_DIR && npm install"
   exit 1
 fi
 echo "✅ Dependencies installed"
 echo ""
 
-# Create launcher
+# ── Launcher ────────────────────────────────────
+
 echo "🚀 Creating launcher..."
 mkdir -p "$(dirname "$LAUNCHER")"
-cat > "$LAUNCHER" <<'EOF'
+cat > "$LAUNCHER" <<'LAUNCHER'
 #!/bin/bash
-# OpenClawfice launcher
 PORT=${PORT:-3333}
-cd ~/openclawfice && npx next dev -p $PORT
-EOF
+cd ~/openclawfice && npx next dev -p $PORT --turbopack 2>/dev/null || npx next dev -p $PORT
+LAUNCHER
 chmod +x "$LAUNCHER"
 
 # Add to PATH if needed
 if [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
-  echo ""
-  echo "⚠️  Adding $HOME/.local/bin to your PATH..."
-  if [ -f "$HOME/.bashrc" ]; then
-    echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$HOME/.bashrc"
-    echo "Added to ~/.bashrc (restart terminal or run: source ~/.bashrc)"
-  elif [ -f "$HOME/.zshrc" ]; then
-    echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$HOME/.zshrc"
-    echo "Added to ~/.zshrc (restart terminal or run: source ~/.zshrc)"
+  SHELL_RC=""
+  [ -f "$HOME/.zshrc" ] && SHELL_RC="$HOME/.zshrc"
+  [ -f "$HOME/.bashrc" ] && SHELL_RC="$HOME/.bashrc"
+  if [ -n "$SHELL_RC" ]; then
+    echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$SHELL_RC"
+    export PATH="$HOME/.local/bin:$PATH"
+    echo "   Added to PATH via $SHELL_RC"
   fi
 fi
 
 echo "✅ Launcher created"
 echo ""
+
+# ── Done ────────────────────────────────────────
+
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
-echo "🎉 OpenClawfice installed successfully!"
+echo "🎉 OpenClawfice installed!"
 echo ""
-echo "To launch:"
-echo "  openclawfice"
-echo ""
-echo "Or visit: http://localhost:3333"
+echo "  Launch:  openclawfice"
+echo "  Demo:    http://localhost:3333/?demo=true"
+echo "  Docs:    http://localhost:3333/install"
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 
-# Ask if they want to launch now
+# Ask to launch
 read -p "Launch now? (Y/n) " -n 1 -r
 echo ""
 if [[ ! $REPLY =~ ^[Nn]$ ]]; then
   echo ""
-  echo "🏢 Starting OpenClawfice..."
-  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-  echo ""
-  echo "Opening http://localhost:3333 in your browser..."
+  echo "🏢 Starting OpenClawfice on http://localhost:3333 ..."
   echo ""
   
-  # Open browser
-  sleep 2
-  if command -v open &> /dev/null; then
-    open http://localhost:3333
-  elif command -v xdg-open &> /dev/null; then
-    xdg-open http://localhost:3333
-  fi
+  # Open browser after short delay
+  (sleep 3 && {
+    if command -v open &>/dev/null; then
+      open http://localhost:3333
+    elif command -v xdg-open &>/dev/null; then
+      xdg-open http://localhost:3333
+    fi
+  }) &
   
-  # Launch server
   exec "$LAUNCHER"
 else
-  echo ""
-  echo "Run 'openclawfice' when you're ready to start."
-  echo ""
+  echo "Run 'openclawfice' when ready."
 fi
