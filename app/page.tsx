@@ -512,7 +512,7 @@ export default function HomePage() {
         const allAgentData = agents
           .filter(a => a.id !== '_owner')
           .map(a => ({ id: a.id, name: a.name, role: a.role, status: a.status, task: a.task }));
-        await fetch('/api/office/chat', {
+        const res = await fetch('/api/office/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -520,8 +520,24 @@ export default function HomePage() {
             allAgents: allAgentData,
           }),
         });
+        // Immediately fetch updated chat so we don't wait for the next poll cycle
+        if (res.ok) {
+          try {
+            const chatRes = await fetch('/api/office/chat');
+            const msgs = await chatRes.json();
+            if (Array.isArray(msgs)) {
+              setChatLog(msgs);
+              setTimeout(() => {
+                if (chatRef.current) chatRef.current.scrollTop = chatRef.current.scrollHeight;
+              }, 100);
+            }
+          } catch {}
+        }
       } catch {}
+      // Trigger re-schedule by updating nextChatIn to 0 which will cause effect to re-run
       setNextChatIn(0);
+      // Force re-trigger of the scheduling effect by touching chatLogLen dependency
+      setChatLog(prev => [...prev]);
     }, delay);
 
     return () => {
@@ -727,6 +743,8 @@ export default function HomePage() {
 
       {/* Demo Mode Banner */}
       {isDemoMode && <DemoBanner />}
+      {/* Spacer for fixed demo banner */}
+      {isDemoMode && <div style={{ height: isMobile ? 36 : 48, flexShrink: 0 }} />}
 
       {/* Header */}
       <div style={{
