@@ -28,60 +28,53 @@ function generateMeetingTranscript(topic: string, participants: string[], startT
 
   const getName = (id: string) => agentNames[id.toLowerCase()] || id;
 
-  // Generate contextual opening based on topic keywords
-  let openingMessages: Record<string, string[]> = {
-    security: [
-      "Let's review these security findings carefully",
-      "I've looked at the CodeQL results. Most seem like false positives for localhost apps",
-      "Agreed. Should we prioritize the real vulnerabilities first?",
-      "The log injection issues are legit - we should fix those",
+  // Dynamic message templates that incorporate the topic
+  const messageTemplates = [
+    // Opener
+    [
+      `Let's discuss ${topic}`,
+      `Alright team, focusing on: ${topic}`,
+      `Good question. Let me share my thoughts on ${topic}`,
+      `This is important. Here's my perspective on ${topic}`,
     ],
-    bug: [
-      "Found a critical bug in production",
-      "What's the impact? Can we reproduce it locally?",
-      "Reproduced - it affects user authentication",
-      "Priority fix. I'll start on it now",
+    // Response
+    [
+      "That's a solid point. I'd add that we should also consider...",
+      "Good angle. Have we thought about the implications for...",
+      "Interesting approach. What if we also looked at...",
+      "I see where you're going. Building on that...",
     ],
-    feature: [
-      "Let's scope out this new feature request",
-      "What's the user story here?",
-      "Users want to see agent conversations in real-time",
-      "That's actually straightforward - we have the data already",
+    // Counter or detail
+    [
+      "Fair point, though I think we need to weigh the tradeoffs carefully",
+      "That could work if we also account for edge cases",
+      "Agreed on the direction. Let's break down the specifics",
+      "Makes sense. We should prioritize based on impact",
     ],
-    database: [
-      "We need to choose a database for this",
-      "PostgreSQL or SQLite?",
-      "SQLite is simpler but PostgreSQL handles concurrent writes better",
-      "Good point. Let's go with PostgreSQL for scalability",
+    // Resolution/Next steps
+    [
+      "Perfect. I'll take the lead on that part",
+      "Sounds like a plan. Let's document this and move forward",
+      "Great discussion. Next steps are clear now",
+      "Agreed. Let's sync again once we have more data",
     ],
-    design: [
-      "The current UI layout needs work",
-      "What's the main issue?",
-      "Too much information density - users are overwhelmed",
-      "Let's add progressive disclosure. Show basics, hide details until clicked",
-    ],
-  };
-
-  // Find matching template
-  const topicLower = topic.toLowerCase();
-  let messages = openingMessages.security; // default
-  for (const [key, msgs] of Object.entries(openingMessages)) {
-    if (topicLower.includes(key)) {
-      messages = msgs;
-      break;
-    }
-  }
+  ];
 
   // Build transcript with alternating participants
-  const numMessages = Math.min(messages.length, 6); // 4-6 messages
+  const numMessages = Math.min(4 + Math.floor(Math.random() * 3), 6); // 4-6 messages
   for (let i = 0; i < numMessages; i++) {
     const participantIndex = i % participants.length;
     const agentId = participants[participantIndex];
     const round = Math.floor(i / participants.length) + 1;
+    
+    // Pick message from appropriate template tier
+    const templateIndex = Math.min(i, messageTemplates.length - 1);
+    const templates = messageTemplates[templateIndex];
+    const message = templates[Math.floor(Math.random() * templates.length)];
 
     transcript.push({
       agent: getName(agentId),
-      message: messages[i] || `Discussing: ${topic}`,
+      message,
       round,
       timestamp: startTime + (i * 5000), // 5 seconds between messages
     });
