@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { existsSync, statSync, createReadStream } from 'fs';
 import { join, extname } from 'path';
 import { homedir } from 'os';
+import { validateFilename } from '@/lib/input-validation';
 
 const STATUS_DIR = join(homedir(), '.openclaw', '.status', 'screenshots');
 
@@ -9,8 +10,8 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const file = searchParams.get('file');
 
-  if (!file || file.includes('..') || file.includes('/')) {
-    return NextResponse.json({ error: 'invalid file' }, { status: 400 });
+  if (!file || !validateFilename(file)) {
+    return NextResponse.json({ error: 'Invalid filename' }, { status: 400 });
   }
 
   const filePath = join(STATUS_DIR, file);
