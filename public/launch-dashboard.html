@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OpenClawfice Launch Dashboard</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: #e2e8f0;
+      padding: 20px;
+      min-height: 100vh;
+    }
+    
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    
+    h1 {
+      font-size: 28px;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, #f59e0b, #ec4899);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .subtitle {
+      color: #94a3b8;
+      margin-bottom: 24px;
+      font-size: 14px;
+    }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    
+    .stat-card {
+      background: rgba(30, 41, 59, 0.6);
+      border: 1px solid rgba(251, 146, 60, 0.3);
+      border-radius: 12px;
+      padding: 20px;
+      transition: all 0.3s;
+    }
+    
+    .stat-card:hover {
+      border-color: rgba(251, 146, 60, 0.6);
+      transform: translateY(-2px);
+    }
+    
+    .stat-label {
+      font-size: 12px;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+    
+    .stat-value {
+      font-size: 36px;
+      font-weight: bold;
+      background: linear-gradient(135deg, #f59e0b, #ec4899);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .stat-change {
+      font-size: 12px;
+      margin-top: 4px;
+      color: #10b981;
+    }
+    
+    .quick-links {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    
+    .quick-link {
+      background: rgba(30, 41, 59, 0.6);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      border-radius: 8px;
+      padding: 16px;
+      text-decoration: none;
+      color: #e2e8f0;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .quick-link:hover {
+      border-color: rgba(139, 92, 246, 0.6);
+      transform: translateX(4px);
+    }
+    
+    .quick-link-icon {
+      font-size: 24px;
+    }
+    
+    .quick-link-text {
+      flex: 1;
+    }
+    
+    .quick-link-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+    
+    .quick-link-desc {
+      font-size: 11px;
+      color: #64748b;
+    }
+    
+    .checklist {
+      background: rgba(30, 41, 59, 0.6);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+    
+    .checklist h2 {
+      font-size: 18px;
+      margin-bottom: 16px;
+      color: #10b981;
+    }
+    
+    .checklist-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      margin-bottom: 8px;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .checklist-item:hover {
+      background: rgba(0, 0, 0, 0.3);
+    }
+    
+    .checklist-checkbox {
+      width: 20px;
+      height: 20px;
+      border: 2px solid #10b981;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+    }
+    
+    .checklist-item.checked .checklist-checkbox {
+      background: #10b981;
+      color: #0f172a;
+    }
+    
+    .checklist-text {
+      flex: 1;
+      font-size: 14px;
+    }
+    
+    .checklist-time {
+      font-size: 11px;
+      color: #64748b;
+    }
+    
+    .refresh-btn {
+      background: linear-gradient(135deg, #8b5cf6, #ec4899);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    
+    .refresh-btn:hover {
+      transform: scale(1.05);
+    }
+    
+    .timestamp {
+      text-align: center;
+      color: #64748b;
+      font-size: 12px;
+      margin-top: 24px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🚀 Launch Dashboard</h1>
+    <p class="subtitle">Real-time monitoring for OpenClawfice viral launch</p>
+    
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">GitHub Stars</div>
+        <div class="stat-value" id="stars">--</div>
+        <div class="stat-change">Target: 50+ in 24h</div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-label">Production Status</div>
+        <div class="stat-value" id="health">--</div>
+        <div class="stat-change">Last checked: <span id="health-time">never</span></div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-label">Hours Since Launch</div>
+        <div class="stat-value" id="hours">0</div>
+        <div class="stat-change">Target: Monitor first 24h closely</div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-label">Next Check In</div>
+        <div class="stat-value" id="next-check">--</div>
+        <div class="stat-change">Every hour for first 6h</div>
+      </div>
+    </div>
+    
+    <div class="quick-links">
+      <a href="https://github.com/openclaw/openclawfice" target="_blank" class="quick-link">
+        <div class="quick-link-icon">⭐</div>
+        <div class="quick-link-text">
+          <div class="quick-link-title">GitHub Repo</div>
+          <div class="quick-link-desc">Watch stars & issues</div>
+        </div>
+      </a>
+      
+      <a href="https://discord.com/channels/openclaw/announcements" target="_blank" class="quick-link">
+        <div class="quick-link-icon">💬</div>
+        <div class="quick-link-text">
+          <div class="quick-link-title">Discord</div>
+          <div class="quick-link-desc">Monitor reactions</div>
+        </div>
+      </a>
+      
+      <a href="https://twitter.com" target="_blank" class="quick-link">
+        <div class="quick-link-icon">🐦</div>
+        <div class="quick-link-text">
+          <div class="quick-link-title">Twitter</div>
+          <div class="quick-link-desc">Check engagement</div>
+        </div>
+      </a>
+      
+      <a href="/verify-deploy.html" target="_blank" class="quick-link">
+        <div class="quick-link-icon">✅</div>
+        <div class="quick-link-text">
+          <div class="quick-link-title">Health Check</div>
+          <div class="quick-link-desc">Verify production</div>
+        </div>
+      </a>
+      
+      <a href="https://vercel.com/dashboard" target="_blank" class="quick-link">
+        <div class="quick-link-icon">▲</div>
+        <div class="quick-link-text">
+          <div class="quick-link-title">Vercel Logs</div>
+          <div class="quick-link-desc">Monitor errors</div>
+        </div>
+      </a>
+      
+      <a href="https://openclawfice.com/?demo=true" target="_blank" class="quick-link">
+        <div class="quick-link-icon">🎮</div>
+        <div class="quick-link-text">
+          <div class="quick-link-title">Demo Mode</div>
+          <div class="quick-link-desc">Verify working</div>
+        </div>
+      </a>
+    </div>
+    
+    <div class="checklist">
+      <h2>First Hour Checklist</h2>
+      <div class="checklist-item" onclick="toggleCheck(this)">
+        <div class="checklist-checkbox"></div>
+        <div class="checklist-text">Launch tweet posted</div>
+        <div class="checklist-time">0-5 min</div>
+      </div>
+      <div class="checklist-item" onclick="toggleCheck(this)">
+        <div class="checklist-checkbox"></div>
+        <div class="checklist-text">Discord announcement posted</div>
+        <div class="checklist-time">0-5 min</div>
+      </div>
+      <div class="checklist-item" onclick="toggleCheck(this)">
+        <div class="checklist-checkbox"></div>
+        <div class="checklist-text">Production health verified (verify-deploy.html)</div>
+        <div class="checklist-time">0-10 min</div>
+      </div>
+      <div class="checklist-item" onclick="toggleCheck(this)">
+        <div class="checklist-checkbox"></div>
+        <div class="checklist-text">Pin Discord & Twitter posts</div>
+        <div class="checklist-time">5-10 min</div>
+      </div>
+      <div class="checklist-item" onclick="toggleCheck(this)">
+        <div class="checklist-checkbox"></div>
+        <div class="checklist-text">Reply to first 5 comments/reactions</div>
+        <div class="checklist-time">15-30 min</div>
+      </div>
+      <div class="checklist-item" onclick="toggleCheck(this)">
+        <div class="checklist-checkbox"></div>
+        <div class="checklist-text">Check GitHub for first issues</div>
+        <div class="checklist-time">30-60 min</div>
+      </div>
+    </div>
+    
+    <div style="text-align: center;">
+      <button class="refresh-btn" onclick="refreshStats()">🔄 Refresh Stats</button>
+    </div>
+    
+    <div class="timestamp">
+      Last updated: <span id="timestamp"></span><br>
+      <small>Auto-refreshes every 5 minutes</small>
+    </div>
+  </div>
+
+  <script>
+    let launchTime = null;
+    
+    function toggleCheck(item) {
+      item.classList.toggle('checked');
+      if (item.classList.contains('checked')) {
+        item.querySelector('.checklist-checkbox').innerHTML = '✓';
+      } else {
+        item.querySelector('.checklist-checkbox').innerHTML = '';
+      }
+      saveChecklist();
+    }
+    
+    function saveChecklist() {
+      const checks = Array.from(document.querySelectorAll('.checklist-item')).map(item => 
+        item.classList.contains('checked')
+      );
+      localStorage.setItem('launch-checklist', JSON.stringify(checks));
+    }
+    
+    function loadChecklist() {
+      const saved = localStorage.getItem('launch-checklist');
+      if (saved) {
+        const checks = JSON.parse(saved);
+        document.querySelectorAll('.checklist-item').forEach((item, i) => {
+          if (checks[i]) {
+            item.classList.add('checked');
+            item.querySelector('.checklist-checkbox').innerHTML = '✓';
+          }
+        });
+      }
+    }
+    
+    function updateTimestamp() {
+      document.getElementById('timestamp').textContent = new Date().toLocaleString();
+    }
+    
+    function updateHoursSinceLaunch() {
+      if (!launchTime) {
+        launchTime = localStorage.getItem('launch-time');
+        if (!launchTime) {
+          launchTime = Date.now();
+          localStorage.setItem('launch-time', launchTime);
+        } else {
+          launchTime = parseInt(launchTime);
+        }
+      }
+      
+      const hours = Math.floor((Date.now() - launchTime) / (1000 * 60 * 60));
+      document.getElementById('hours').textContent = hours;
+      
+      // Calculate next check-in
+      const minutes = Math.floor((Date.now() - launchTime) / (1000 * 60));
+      const nextCheck = 60 - (minutes % 60);
+      document.getElementById('next-check').textContent = nextCheck + 'm';
+    }
+    
+    async function checkProductionHealth() {
+      try {
+        const response = await fetch('https://openclawfice.com', {
+          method: 'HEAD',
+          cache: 'no-store'
+        });
+        
+        if (response.ok) {
+          document.getElementById('health').textContent = '✅';
+          document.getElementById('health').style.color = '#10b981';
+        } else {
+          document.getElementById('health').textContent = '❌';
+          document.getElementById('health').style.color = '#ef4444';
+        }
+        
+        document.getElementById('health-time').textContent = new Date().toLocaleTimeString();
+      } catch (error) {
+        document.getElementById('health').textContent = '⚠️';
+        document.getElementById('health').style.color = '#f59e0b';
+        document.getElementById('health-time').textContent = 'Error: ' + error.message;
+      }
+    }
+    
+    async function refreshStats() {
+      updateTimestamp();
+      updateHoursSinceLaunch();
+      await checkProductionHealth();
+      
+      // Note: GitHub stars would need API call with auth
+      // For now, user can check manually by clicking the link
+      document.getElementById('stars').textContent = '--';
+    }
+    
+    // Initial load
+    loadChecklist();
+    refreshStats();
+    
+    // Auto-refresh every 5 minutes
+    setInterval(refreshStats, 5 * 60 * 1000);
+    
+    // Update hours counter every minute
+    setInterval(updateHoursSinceLaunch, 60 * 1000);
+  </script>
+</body>
+</html>

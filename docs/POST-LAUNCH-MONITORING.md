@@ -1,370 +1,367 @@
-# 📊 Post-Launch Monitoring Guide
+# Post-Launch Monitoring — First 24 Hours
 
-**Purpose:** What to watch, measure, and respond to in the first 24-48 hours after launching OpenClawfice.
-
-**Audience:** Tyler + team (for rapid response to issues/opportunities)
-
-**When to use:** Starting immediately after Discord/Twitter launch posts go live.
+**You just launched! Here's how to monitor success and catch issues fast.**
 
 ---
 
-## 🎯 Critical Success Metrics (First 24 Hours)
+## Quick Monitoring Dashboard
 
-### Engagement Metrics
-| Metric | Target | Where to Check |
-|--------|--------|----------------|
-| **Discord reactions** | 10+ 👍/🔥 | OpenClaw Discord #general |
-| **Twitter engagement** | 20+ likes, 5+ RTs | Twitter notifications |
-| **Demo mode visits** | 50+ unique visitors | Vercel/Netlify analytics (if deployed) |
-| **GitHub stars** | 10+ | https://github.com/openclawfice/openclawfice |
-| **Install attempts** | 5+ | Check install.sh download count or GitHub clone metrics |
+### 1. GitHub Stats (Every Hour)
+**URL:** https://github.com/openclaw/openclawfice
 
-### Sentiment Indicators
-- ✅ **Good:** "This is cool!" / "Love the pixel art" / "Works great"
-- ⚠️ **Neutral:** "Interesting..." / "What does this do?"
-- ❌ **Bad:** "Doesn't work" / "Install failed" / "Confused"
+**Watch:**
+- ⭐ **Stars** — Goal: 50+ in first 24h
+- 🍴 **Forks** — Indicates developers installing
+- 👁️ **Watchers** — Long-term interest
+- 🐛 **Issues** — User problems (respond within 2 hours)
 
-**Action:** If >30% responses are ❌ or ⚠️ within 4 hours → investigate immediately.
+**Action:** Reply to ALL issues within 2 hours (even just "investigating")
 
 ---
 
-## 🚨 Critical Issues to Monitor
+### 2. Discord Reactions (Every 30 Minutes)
+**URL:** https://discord.com/channels/openclaw/announcements
 
-### P0 (Fix immediately)
-- [ ] **Install script fails** (check GitHub issues + Discord DMs)
-- [ ] **Demo mode crashes/broken** (test every 2 hours)
-- [ ] **Production build fails** (verify Vercel/Netlify deployment status)
-- [ ] **Major security issue** (AGPL violation, data leak, XSS)
+**Watch:**
+- 🎉 Reactions on announcement post
+- 💬 Comments/questions in thread
+- 🔥 Screenshots shared by users
 
-**Response time:** <30 minutes during first 24 hours
-
-### P1 (Fix within 4 hours)
-- [ ] **README confusing** (>3 people ask "what is this?")
-- [ ] **Key feature broken** (XP celebrations, quest log, NPC movement)
-- [ ] **Mobile completely broken** (test on iOS + Android)
-- [ ] **Performance issues** (page load >5 seconds)
-
-### P2 (Fix within 24 hours)
-- [ ] **Minor visual bugs** (NPC positioning, animations glitchy)
-- [ ] **Documentation gaps** (people ask same question repeatedly)
-- [ ] **Feature requests** (log for v0.2.0)
+**Action:** React to ALL user screenshots with 🔥 or ❤️ (social proof)
 
 ---
 
-## 🔍 Where to Monitor
+### 3. Twitter Engagement (Every Hour)
+**Your launch tweet**
 
-### Primary Channels (check every 2 hours)
-1. **OpenClaw Discord #general**
-   - Watch for: Install questions, bug reports, "this is cool" reactions
-   - Respond within: 30 minutes
+**Watch:**
+- ♥️ Likes — Passive interest
+- 🔄 Retweets — Amplification (MOST IMPORTANT)
+- 💬 Replies — Questions/feedback
+- 👀 Views — Reach
 
-2. **GitHub Issues**
-   - URL: https://github.com/openclawfice/openclawfice/issues
-   - Watch for: Bug reports, install failures, feature requests
-   - Respond within: 1 hour (acknowledge), 4 hours (fix or workaround)
-
-3. **Twitter Notifications**
-   - Watch for: Replies, mentions, quote tweets
-   - Respond within: 1 hour
-   - Retweet: Positive feedback, cool screenshots
-
-4. **GitHub Discussions** (if enabled)
-   - Watch for: General questions, ideas
-   - Respond within: 2 hours
-
-### Secondary Channels (check daily)
-- Reddit (if posted to /r/opensource, /r/selfhosted, etc.)
-- Hacker News (if it gets traction)
-- Email (if people email directly)
+**Action:** 
+- Like every reply
+- Retweet screenshots from users
+- Answer questions publicly (others have same question)
 
 ---
 
-## 📱 Response Templates
+### 4. Production Health (Every 2 Hours)
+**URL:** https://openclawfice.com/verify-deploy.html
 
-### Install Failed
-```
-Sorry you're hitting issues! A few quick checks:
+**Watch:**
+- ✅ All 6 checks green
+- 🌐 Site loading fast (<2s)
+- 🎮 Demo mode working
 
-1. Node.js 18+? Run: node -v
-2. OpenClaw installed? Check: ls ~/.openclaw/openclaw.json
-3. Full error output? Paste it here or in a GitHub issue: [link]
+**Action:** If ANY check red → investigate immediately
 
-Common fix: npm install failed → cd ~/openclawfice && npm install
-
-If still stuck, share your error and I'll help debug!
-```
-
-### "What is this?"
-```
-OpenClawfice turns your AI agents into pixel art NPCs in a virtual office. See who's working, who's idle, send them tasks, watch them earn XP.
-
-Think: The Sims meets your dev team.
-
-Try the 10-second demo (no install): https://openclawfice.com/?demo=true
-
-Visual walkthrough: [link to WHAT-IS-THIS.md]
-```
-
-### "Doesn't work on mobile"
-```
-Thanks for testing! What device/browser? (iOS Safari, Android Chrome, etc.)
-
-Known issue or new bug? Screenshot/screen recording helps!
-
-Current mobile status: Tested on iOS 16+ and Android 12+, responsive layout working. Specific issues we can fix fast.
-```
-
-### Feature Request
-```
-Great idea! I'll add it to the backlog.
-
-For v0.2.0 we're planning:
-- [list top 3-5 planned features]
-
-Want to contribute? Check CONTRIBUTING.md or drop into Discord!
-```
-
----
-
-## 🛠️ Quick Fix Procedures
-
-### Emergency Production Fix
-
+**Quick check:**
 ```bash
-# 1. Reproduce the bug locally
-cd ~/clawd-openclawfice/openclawfice
-npm run dev
-
-# 2. Fix the bug (test thoroughly)
-
-# 3. Commit and push
-git add .
-git commit -m "hotfix: [brief description]"
-git push origin main
-
-# 4. Verify deploy (Vercel auto-deploys on push)
-# Check: https://vercel.com/[project]/deployments
-
-# 5. Announce fix in Discord/GitHub
-"Fixed in v0.1.1 — refresh your browser!"
+curl -s -o /dev/null -w "%{http_code} %{time_total}s" https://openclawfice.com
+# Should return: 200 <2s
 ```
 
-### Update Install Script
+---
 
+### 5. Error Monitoring (Continuous)
+**Check:** Browser console + Vercel logs
+
+**Watch for:**
+- 🔴 404s on key pages
+- ⚠️ JavaScript errors in console
+- 💥 Failed API calls
+- 🐌 Slow load times
+
+**How to check Vercel logs:**
+1. https://vercel.com/dashboard
+2. Click `openclawfice` → Logs
+3. Filter by "error" or "500"
+
+**Action:** Fix critical errors within 1 hour
+
+---
+
+### 6. User Installations (Every 3 Hours)
+**Signals:**
+- GitHub traffic (Insights → Traffic)
+- Install script downloads (Vercel Analytics)
+- New GitHub issues/discussions
+
+**Proxy metrics:**
+- npm package downloads (if published)
+- Demo page views
+- README views on GitHub
+
+**Action:** Note patterns (what countries, what times)
+
+---
+
+## First 24 Hours Checklist
+
+### Hour 1-3 (Critical Window)
+- [ ] Launch tweet posted ✅
+- [ ] Discord announcement posted ✅
+- [ ] Pin both posts
+- [ ] Check for immediate errors (verify-deploy.html)
+- [ ] Reply to first 5 comments/reactions
+- [ ] Monitor GitHub stars (should start trickling in)
+
+### Hour 4-6
+- [ ] Check GitHub Issues (respond to ALL)
+- [ ] Retweet any user screenshots
+- [ ] Update Discord with engagement stats ("20 stars in 4 hours! 🚀")
+- [ ] Verify demo mode still working
+
+### Hour 7-12
+- [ ] Summary post in Discord ("First 6 hours: X stars, Y installs, Z screenshots shared")
+- [ ] Thank top contributors publicly
+- [ ] Fix any reported bugs (prioritize install issues)
+- [ ] Check production health
+
+### Hour 13-24
+- [ ] Second engagement post on Twitter ("24 hours later...")
+- [ ] Document common questions → add to README/FAQ
+- [ ] Plan next feature based on feedback
+- [ ] Celebrate wins in Discord
+
+---
+
+## Warning Signs (Fix Immediately)
+
+### 🔴 CRITICAL
+- **Production down** → Redeploy immediately
+- **Install script broken** → Fix within 30 minutes
+- **Demo mode 404** → Breaks viral loop, fix NOW
+
+### 🟡 URGENT
+- **GitHub issues mentioning "can't install"** → Priority #1
+- **Multiple users reporting same bug** → Hotfix needed
+- **Twitter thread going negative** → Engage and fix
+
+### 🟢 MONITOR
+- **Feature requests** → Collect for v0.2
+- **"This is cool but..."** → Useful feedback
+- **Competitors mentioned** → Note their strengths
+
+---
+
+## Quick Response Templates
+
+### For GitHub Issues
+```markdown
+Thanks for trying OpenClawfice! 🎉
+
+I'm looking into this now. In the meantime, can you share:
+- Output of `node --version` and `npm --version`
+- Any error messages from the terminal
+- Screenshot if possible
+
+Will update you within the hour!
+```
+
+### For Twitter Questions
+```
+Great question! [Answer in 1-2 sentences]
+
+Full details here: [link to docs if applicable]
+
+Let me know if that helps! 🚀
+```
+
+### For Discord Feedback
+```
+Love this feedback! Added to our v0.2 roadmap.
+
+In the meantime, you might like [workaround if exists]
+
+Keep the ideas coming! 🎨
+```
+
+---
+
+## Success Metrics (First 24 Hours)
+
+### 🎯 Good Launch
+- 30-50 GitHub stars
+- 5-10 user screenshots shared
+- 100+ Discord reactions
+- 1-2 bug reports (shows real usage)
+- 0 critical issues
+
+### 🚀 Great Launch
+- 50-100 GitHub stars
+- 10-20 user screenshots
+- 200+ Discord reactions
+- 3-5 feature requests
+- Multiple "this is amazing" comments
+
+### 🔥 Viral Launch
+- 100+ GitHub stars
+- 20+ user screenshots
+- 500+ Discord reactions
+- Hacker News front page
+- Influencers sharing organically
+
+---
+
+## Tools to Keep Open
+
+### Browser Tabs
+1. https://github.com/openclaw/openclawfice (watch stars)
+2. https://discord.com/channels/openclaw/announcements (watch reactions)
+3. https://twitter.com (your launch tweet)
+4. https://vercel.com/dashboard (logs)
+5. https://openclawfice.com/verify-deploy.html (health check)
+
+### Terminal Commands
 ```bash
-# If install.sh needs urgent fix
-cd ~/clawd-openclawfice/openclawfice
+# Check production health
+bash scripts/check.sh prod
 
-# Edit public/install.sh
-# Test locally:
-bash public/install.sh
+# Watch GitHub stars (updates every 5s)
+watch -n 5 'gh repo view openclaw/openclawfice --json stargazerCount'
 
-# Push update
-git add public/install.sh
-git commit -m "fix: install script [issue]"
-git push
+# Monitor Vercel logs
+vercel logs openclawfice --follow
 
-# Users get latest automatically:
-# curl -fsSL https://openclawfice.com/install.sh | bash
-```
-
-### Kill a Bad Demo
-
-```bash
-# If demo mode is broken/crashing
-cd ~/clawd-openclawfice/openclawfice
-
-# Quick disable (redirect to install page)
-# Edit app/page.tsx line ~1650:
-# if (isDemoMode) return <Navigate to="/install" />
-
-# Or fix the actual bug in app/api/demo/route.ts
+# Quick deploy if needed
+cd ~/clawd-openclawfice/openclawfice && vercel --prod
 ```
 
 ---
 
-## 📈 Success Patterns to Amplify
+## Common First-Day Issues
 
-### Positive Feedback
-**When someone tweets:** "This is so cool!"
+### "Install script fails"
+**Fix:** Check install.sh is pushed and deployed
+**Response time:** 15 minutes
 
-**Action:**
-1. ✅ Like + retweet immediately
-2. 💬 Reply: "Thanks! Here's a pro tip: [share a cool feature]"
-3. 📸 Ask: "Got a screenshot of your office? We'll feature it!"
+### "Demo mode broken"
+**Fix:** Verify /api/demo returns 5 agents
+**Response time:** 10 minutes
 
-### Viral Moment
-**When something gets >50 likes/shares:**
+### "No agents showing"
+**Cause:** User doesn't have OpenClaw installed
+**Fix:** Add clearer prerequisite docs
+**Response time:** 1 hour
 
-**Action:**
-1. 📊 Screenshot the engagement
-2. 🎯 Create follow-up content (thread, video, demo)
-3. 🔄 Cross-post to other channels (Reddit, HN, Discord)
-4. 📝 Document what worked (for future launches)
-
-### Power User
-**When someone installs + configures + tweets:**
-
-**Action:**
-1. 🏆 Feature them in README (with permission)
-2. 🎁 Offer early access to v0.2.0 features
-3. 💡 Ask for feedback: "What would make this 10x better?"
-
-### Bug Report with Fix
-**When someone reports a bug AND suggests a fix:**
-
-**Action:**
-1. ✅ Thank them profusely
-2. 🚀 Implement the fix within 2 hours (if good)
-3. 🙏 Credit them in CHANGELOG: "Thanks to @username"
-4. 🌟 Invite them to contribute more
+### "Port 3333 already in use"
+**Fix:** Document how to change port in README
+**Response time:** 30 minutes
 
 ---
 
-## ⏰ First 48 Hours Schedule
+## Engagement Amplification
 
-### Hour 0-2 (Launch!)
-- [ ] Post to Discord
-- [ ] Tweet announcement
-- [ ] Watch initial reactions
-- [ ] Test demo mode live
-- [ ] Monitor error logs (Vercel/Netlify)
+### When Someone Shares a Screenshot
+1. **Retweet** with comment: "Love this! [specific thing you like] 🔥"
+2. **Add to README** as testimonial (with permission)
+3. **Thank them publicly** in Discord
+4. **Follow them** (build community)
 
-### Hour 2-6 (Early Feedback)
-- [ ] Respond to all Discord messages
-- [ ] Respond to all Twitter replies
-- [ ] Check GitHub issues (set up issue templates if needed)
-- [ ] Fix any P0 bugs immediately
-- [ ] Document common questions → add to FAQ
+### When Someone Stars the Repo
+1. **Check their profile** — are they an influencer?
+2. **If yes:** DM thanking them, offer early access to v0.2
+3. **If contributor:** Invite to contributors channel
 
-### Hour 6-12 (Momentum Build)
-- [ ] Retweet positive feedback
-- [ ] Share screenshots in Discord
-- [ ] Update README if confusion detected
-- [ ] Plan follow-up content (GIF, video, thread)
-
-### Hour 12-24 (Sustain)
-- [ ] Check metrics (stars, clones, demo visits)
-- [ ] Respond to GitHub issues
-- [ ] Write first bug fix if needed
-- [ ] Plan week 2 content (follow FIRST-24-HOURS-PLAYBOOK.md)
-
-### Hour 24-48 (Stabilize)
-- [ ] Review all feedback (categorize: bugs, features, praise)
-- [ ] Prioritize bug fixes for v0.1.1
-- [ ] Update documentation based on FAQ
-- [ ] Plan outreach to creators (Scout's list)
-- [ ] Celebrate 🎉
+### When Someone Reports a Bug
+1. **Thank them** for finding it
+2. **Fix it** within 2 hours if critical
+3. **Update them** when deployed
+4. **Add to changelog** crediting them
 
 ---
 
-## 🎯 Key Questions to Answer
+## End of Day 1 Summary
 
-Track these in a spreadsheet or GitHub discussion:
+**Post in Discord:**
+```
+🎉 First 24 hours of OpenClawfice!
 
-| Question | Answer |
-|----------|--------|
-| What % of people try demo before installing? | ___ |
-| Most common install failure? | ___ |
-| Most requested feature? | ___ |
-| Which docs do people read most? | ___ |
-| Where did most traffic come from? | ___ |
-| What was the best piece of feedback? | ___ |
-| What surprised us? | ___ |
+⭐ [X] GitHub stars
+📸 [Y] screenshots shared
+🚀 [Z] installs (estimated)
+🐛 [N] bugs fixed
+💡 [M] feature requests
+
+Biggest win: [highlight coolest user contribution]
+Biggest learning: [what surprised you]
+
+Thank you all! Tomorrow we [next thing]. 🏢✨
+```
 
 ---
 
-## 🚀 Momentum Tactics
+## Long-Term Monitoring (Week 1)
 
-### Day 1: Launch + Watch
-- Ship it
-- Monitor closely
-- Fix critical bugs fast
-- Respond to everyone
+### Daily (30 minutes)
+- Check GitHub issues
+- Respond to Discord questions
+- Update roadmap based on feedback
 
-### Day 2: Amplify + Improve
-- Retweet the best reactions
-- Ship bug fixes (v0.1.1)
-- Add most-requested feature (if quick)
+### Every 3 Days
+- Ship hotfix for common bugs
+- Update README/docs with FAQs
 - Thank contributors publicly
 
-### Day 3: Content + Outreach
-- Create follow-up content (GIF, demo video, tutorial)
-- Post to secondary channels (Reddit, HN)
-- Reach out to creators (Scout's list)
-- Plan week 2 strategy
+### End of Week
+- Ship v0.1.1 with bug fixes
+- Plan v0.2 features
+- Write "Week 1 Retrospective" blog post
 
 ---
 
-## ✅ Daily Checklist (First Week)
+## Emergency Contacts
 
-**Morning (9 AM):**
-- [ ] Check GitHub issues/stars
-- [ ] Read Discord overnight messages
-- [ ] Review analytics (if deployed)
-- [ ] Plan daily priorities
+### If Production Breaks
+```bash
+# Quick redeploy
+cd ~/clawd-openclawfice/openclawfice
+vercel --prod
 
-**Afternoon (2 PM):**
-- [ ] Respond to new feedback
-- [ ] Push bug fixes (if any)
-- [ ] Create content (thread, demo, tip)
-- [ ] Engage with users
+# Check what broke
+vercel logs openclawfice --follow
+```
 
-**Evening (8 PM):**
-- [ ] Final check on critical issues
-- [ ] Update team on progress
-- [ ] Document learnings
-- [ ] Plan tomorrow
+### If GitHub Issue Spam
+1. Enable issue templates (already done)
+2. Close duplicates kindly
+3. Pin FAQ issue at top
 
----
-
-## 🎉 Success Criteria (End of Week 1)
-
-**Minimum Viable Success:**
-- 25+ GitHub stars
-- 5+ successful installs (reported in Discord/issues)
-- 0 critical bugs unfixed
-- Positive sentiment (>70% ✅ reactions)
-
-**Strong Success:**
-- 50+ GitHub stars
-- 15+ successful installs
-- 1+ community contribution (PR, issue, doc improvement)
-- 1+ "this is awesome!" tweet with >100 likes
-
-**Viral Success:**
-- 100+ GitHub stars
-- Front page of Hacker News
-- Multiple YouTubers/creators mention it
-- 50+ installs
-
-**Remember:** Even "minimum viable success" means OpenClawfice is working and people like it. Everything beyond that is bonus. 🚀
+### If Negative Viral Thread
+1. Don't argue
+2. Acknowledge feedback: "Thanks, we'll improve X"
+3. Ship fix within 24h
+4. Update thread: "Fixed in v0.1.1"
 
 ---
 
-## 🆘 Emergency Contacts
+## Success Accelerators
 
-**Critical bug during launch:**
-1. Tyler (you're here!)
-2. Cipher (development fixes)
-3. Scout (community management)
-4. Nova (project triage)
+### Make it Easy to Share
+- ✅ Demo mode (no install needed)
+- ✅ Beautiful GIF in README
+- ✅ Share Office Card generator
+- ✅ One-click install script
 
-**Delegate Response:**
-- Discord questions → Scout or Nova
-- GitHub issues (bugs) → Forge or Cipher
-- GitHub issues (docs) → Scout
-- Twitter engagement → Tyler or Nova
+### Make it Easy to Contribute
+- Document good first issues
+- Respond to PRs within 24h
+- Thank contributors publicly
+- Add contributor names to README
 
----
-
-## 📚 Related Resources
-
-- [FIRST-24-HOURS-PLAYBOOK.md](./FIRST-24-HOURS-PLAYBOOK.md) - Marketing/outreach tactics
-- [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) - Common install issues + fixes
-- [CONTRIBUTING.md](./CONTRIBUTING.md) - How others can help
-- [CHANGELOG.md](./CHANGELOG.md) - Track bug fixes and updates
+### Make it Easy to Support
+- Star repo button in app
+- "Share" button in dashboard
+- Discord invite in app
+- Twitter handle in footer
 
 ---
 
-**Final Note:** The goal isn't perfection on day 1. It's **responsiveness**. People remember how fast you fixed their issue, not that the issue existed. Ship it, monitor it, fix it fast, and celebrate the wins. 🎉
+**Created:** Feb 24, 2026  
+**For:** Launch day monitoring  
+**Update:** Daily for first week, then weekly
+
+**Remember:** Fast response time > perfect response. Engagement > perfection.
