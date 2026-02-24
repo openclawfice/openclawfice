@@ -16,7 +16,6 @@ import { ShareModal } from '../components/ShareModal';
 import { Celebration } from '../components/Celebration';
 import { AchievementToastContainer, AchievementToastData } from '../components/AchievementToast';
 import { DemoTour } from '../components/DemoTour';
-import Leaderboard from '../components/Leaderboard';
 
 export default function HomePage() {
   const { isDemoMode, getApiPath } = useDemoMode();
@@ -1409,11 +1408,6 @@ export default function HomePage() {
                 )}
               </div>
             </Room>
-
-            {/* Agent Leaderboard */}
-            <div style={{ marginTop: 16 }}>
-              <Leaderboard agents={agents} />
-            </div>
           </div>
 
           {/* ACCOMPLISHMENTS */}
