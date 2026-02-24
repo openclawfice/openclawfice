@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🐦 OpenClawfice Tweet Generator</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+    
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    
+    h1 {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 28px;
+      color: #ffffff;
+      text-shadow: 3px 3px 0 rgba(0,0,0,0.3);
+      margin-bottom: 12px;
+      line-height: 1.4;
+    }
+    
+    .subtitle {
+      color: #f1f5f9;
+      font-size: 16px;
+    }
+    
+    .card {
+      background: #1e293b;
+      border-radius: 16px;
+      padding: 30px;
+      margin-bottom: 24px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    
+    .card h2 {
+      color: #f1f5f9;
+      font-size: 20px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .tweet-box {
+      background: #0f172a;
+      border: 2px solid #334155;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+      position: relative;
+      transition: border-color 0.2s;
+    }
+    
+    .tweet-box:hover {
+      border-color: #6366f1;
+    }
+    
+    .tweet-text {
+      color: #e2e8f0;
+      font-size: 15px;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      margin-bottom: 12px;
+    }
+    
+    .tweet-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      color: #94a3b8;
+    }
+    
+    .char-count {
+      font-weight: 600;
+    }
+    
+    .char-count.good {
+      color: #10b981;
+    }
+    
+    .char-count.warning {
+      color: #fbbf24;
+    }
+    
+    .char-count.danger {
+      color: #ef4444;
+    }
+    
+    .copy-btn {
+      background: #6366f1;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      transition: background 0.2s;
+    }
+    
+    .copy-btn:hover {
+      background: #4f46e5;
+    }
+    
+    .copy-btn.copied {
+      background: #10b981;
+    }
+    
+    .controls {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    
+    .btn {
+      background: #334155;
+      color: #e2e8f0;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      transition: background 0.2s;
+    }
+    
+    .btn:hover {
+      background: #475569;
+    }
+    
+    .btn.active {
+      background: #6366f1;
+      color: white;
+    }
+    
+    .note {
+      background: rgba(99,102,241,0.1);
+      border-left: 3px solid #6366f1;
+      padding: 16px;
+      border-radius: 8px;
+      color: #cbd5e1;
+      font-size: 14px;
+      line-height: 1.6;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🐦 Tweet Generator</h1>
+      <p class="subtitle">Launch-ready tweets for OpenClawfice</p>
+    </div>
+    
+    <div class="card">
+      <h2>⚡ Quick Launch Tweets</h2>
+      <p style="color: #94a3b8; margin-bottom: 20px;">Copy and paste - ready to send!</p>
+      
+      <div class="tweet-box" data-type="hook">
+        <div class="tweet-text">I turned my AI agents into Sims 🎮
+
+Now I watch them work in a pixel art office instead of reading boring terminal logs.
+
+10-second demo (no install):
+https://openclawfice.com/?demo=true
+
+Open source. Built over a weekend. Feedback welcome! 🙏</div>
+        <div class="tweet-meta">
+          <span class="char-count good">237 characters</span>
+          <button class="copy-btn" onclick="copyTweet(this)">Copy Tweet</button>
+        </div>
+      </div>
+      
+      <div class="tweet-box" data-type="problem">
+        <div class="tweet-text">Before: Staring at terminal logs wondering what my AI agents are doing
+
+After: Watching them as pixel art NPCs in a Sims-style office
+
+OpenClawfice = your agents as retro game characters
+
+Try: https://openclawfice.com/?demo=true</div>
+        <div class="tweet-meta">
+          <span class="char-count good">249 characters</span>
+          <button class="copy-btn" onclick="copyTweet(this)">Copy Tweet</button>
+        </div>
+      </div>
+      
+      <div class="tweet-box" data-type="features">
+        <div class="tweet-text">Features I didn't know I needed:
+
+✅ Pixel art NPCs showing agent status
+✅ Plumbobs indicating mood
+✅ Meeting room when agents collaborate
+✅ Click-to-message DMs
+✅ XP system for completed work
+
+This is OpenClawfice. Built it this weekend.
+
+Demo: https://openclawfice.com/?demo=true</div>
+        <div class="tweet-meta">
+          <span class="char-count warning">283 characters</span>
+          <button class="copy-btn" onclick="copyTweet(this)">Copy Tweet</button>
+        </div>
+      </div>
+    </div>
+    
+    <div class="card">
+      <h2>🎯 Thread Starters</h2>
+      <p style="color: #94a3b8; margin-bottom: 20px;">First tweet of a longer thread</p>
+      
+      <div class="tweet-box">
+        <div class="tweet-text">I got tired of reading terminal logs 😴
+
+So I turned my AI agents into Sims 🎮
+
+Watch them in action (10 sec, no install):
+→ https://openclawfice.com/?demo=true
+
+Open source. Built over a weekend. Thread 🧵</div>
+        <div class="tweet-meta">
+          <span class="char-count good">208 characters</span>
+          <button class="copy-btn" onclick="copyTweet(this)">Copy Tweet</button>
+        </div>
+      </div>
+      
+      <div class="tweet-box">
+        <div class="tweet-text">You know The Sims?
+
+Now imagine that, but for your AI agents.
+
+I built OpenClawfice this weekend.
+
+Demo: https://openclawfice.com/?demo=true
+
+Let me show you how it works 🧵</div>
+        <div class="tweet-meta">
+          <span class="char-count good">173 characters</span>
+          <button class="copy-btn" onclick="copyTweet(this)">Copy Tweet</button>
+        </div>
+      </div>
+    </div>
+    
+    <div class="card">
+      <h2>🎨 Visual Alternatives</h2>
+      <p style="color: #94a3b8; margin-bottom: 20px;">Text-based visuals (no image needed)</p>
+      
+      <div class="tweet-box">
+        <div class="tweet-text">My AI team right now:
+
+🏢 OFFICE
+├─ 💼 Cipher (working) → "Debugging API"
+├─ 📊 Nova (working) → "Planning roadmap"
+├─ 🛋️ Scout (idle) → Next task: 15 min
+└─ 🎨 Pixel (working) → "Shipping features"
+
+This is my OpenClawfice dashboard.
+
+Try: https://openclawfice.com/?demo=true</div>
+        <div class="tweet-meta">
+          <span class="char-count warning">281 characters</span>
+          <button class="copy-btn" onclick="copyTweet(this)">Copy Tweet</button>
+        </div>
+      </div>
+      
+      <div class="tweet-box">
+        <div class="tweet-text">Terminal Logs vs OpenClawfice
+
+Visibility:
+  Logs: ❌ None
+  OCF:  ✅ Real-time NPCs
+
+Status:
+  Logs: ❌ Unclear
+  OCF:  ✅ Plumbobs (mood indicators)
+
+Communication:
+  Logs: ❌ Manual CLI
+  OCF:  ✅ Click to DM
+
+Try: https://openclawfice.com/?demo=true</div>
+        <div class="tweet-meta">
+          <span class="char-count good">246 characters</span>
+          <button class="copy-btn" onclick="copyTweet(this)">Copy Tweet</button>
+        </div>
+      </div>
+    </div>
+    
+    <div class="card">
+      <h2>💡 Tips</h2>
+      <div class="note">
+        <strong>Best practices:</strong><br>
+        • Keep under 280 characters (Twitter limit)<br>
+        • Include demo link (low friction)<br>
+        • Use 1-3 emoji max (more looks spammy)<br>
+        • Add line breaks for readability<br>
+        • Post between 9-11 AM or 2-4 PM PST<br>
+        • Reply to all comments in first hour<br>
+        • Pin the best-performing tweet
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    function copyTweet(button) {
+      const tweetBox = button.closest('.tweet-box');
+      const text = tweetBox.querySelector('.tweet-text').textContent;
+      
+      navigator.clipboard.writeText(text).then(() => {
+        const originalText = button.textContent;
+        button.textContent = 'Copied!';
+        button.classList.add('copied');
+        
+        setTimeout(() => {
+          button.textContent = originalText;
+          button.classList.remove('copied');
+        }, 2000);
+      });
+    }
+    
+    // Update character counts on load
+    document.querySelectorAll('.tweet-box').forEach(box => {
+      const text = box.querySelector('.tweet-text').textContent;
+      const count = text.length;
+      const countEl = box.querySelector('.char-count');
+      
+      countEl.textContent = `${count} characters`;
+      
+      if (count <= 240) {
+        countEl.classList.add('good');
+      } else if (count <= 280) {
+        countEl.classList.add('warning');
+      } else {
+        countEl.classList.add('danger');
+      }
+    });
+  </script>
+</body>
+</html>

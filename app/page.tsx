@@ -15,6 +15,8 @@ import { DemoBanner } from '../components/DemoBanner';
 import { ShareModal } from '../components/ShareModal';
 import { Celebration } from '../components/Celebration';
 import { AchievementToastContainer, AchievementToastData } from '../components/AchievementToast';
+import { DemoTour } from '../components/DemoTour';
+import Leaderboard from '../components/Leaderboard';
 
 export default function HomePage() {
   const { isDemoMode, getApiPath } = useDemoMode();
@@ -992,6 +994,7 @@ export default function HomePage() {
             color="#0a1a10"
             borderColor="#166534"
             roomType="work"
+            dataTour="work-room"
             style={{ flex: '1 1 auto' }}
           >
             <div style={{
@@ -1268,7 +1271,7 @@ export default function HomePage() {
               </div>
             </Room>
 
-            <Room title="Quest Log" icon="⚔️" color="#0a0a1f" borderColor="#4f46e5">
+            <Room title="Quest Log" icon="⚔️" color="#0a0a1f" borderColor="#4f46e5" dataTour="quest-log">
               <div style={{
                 padding: '10px 4px 4px',
                 minHeight: 80,
@@ -1406,10 +1409,15 @@ export default function HomePage() {
                 )}
               </div>
             </Room>
+
+            {/* Agent Leaderboard */}
+            <div style={{ marginTop: 16 }}>
+              <Leaderboard agents={agents} />
+            </div>
           </div>
 
           {/* ACCOMPLISHMENTS */}
-          <div style={{
+          <div data-tour="accomplishments" style={{
             background: '#0f172a',
             border: '2px solid #1e293b',
             borderRadius: 8,
@@ -1653,7 +1661,7 @@ export default function HomePage() {
           overflow: isMobile ? 'visible' : 'hidden',
           maxHeight: isMobile ? '400px' : undefined,
         }}>
-          <div style={{
+          <div data-tour="water-cooler" style={{
             background: '#0f172a',
             border: '2px solid #44320a',
             borderRadius: 12,
@@ -2574,6 +2582,7 @@ export default function HomePage() {
         toasts={achievementToasts}
         onDismiss={(id) => setAchievementToasts(prev => prev.filter(t => t.id !== id))}
       />
+      <DemoTour isDemoMode={isDemoMode} />
     </div>
   );
 }

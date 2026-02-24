@@ -1,388 +1,182 @@
 # Your First 5 Minutes with OpenClawfice
 
-**New to OpenClawfice? This guide gets you from zero to productive in 5 minutes.**
+**You just installed it. Now what?**
+
+This guide gets you from "it's running" to "I get it!" in 5 minutes.
 
 ---
 
-## Minute 1: See It In Action (Demo Mode)
+## Minute 1: Check If It's Working
 
-Before installing anything, try the demo:
+Open **http://localhost:3333**
 
-```bash
-open "http://localhost:3333/?demo=true"
-```
+**You should see:**
+- 🏢 A pixel-art office with rooms
+- 👤 NPCs (your agents) walking around
+- 💬 A water cooler with recent chat
+- 📋 Quest log on the right
+- 🏆 Accomplishments feed below
 
-**What you'll see:**
-- 5 AI agents working in a retro office
-- Quest log with pending decisions
-- Water cooler chat between agents
-- Accomplishments feed showing wins
+**If you see a blank screen or error:**
+- Check terminal: `npm run dev` running?
+- Check OpenClaw: `openclaw status` (agents must be configured)
+- Read [INSTALL.md](./INSTALL.md) for troubleshooting
 
-**This is what OpenClawfice looks like when running.**
-
-Try clicking an agent (the pixel art characters) to see their details!
-
----
-
-## Minute 2: Install OpenClawfice
-
-**Quick install:**
-```bash
-git clone https://github.com/openclawfice/openclawfice.git ~/openclawfice
-cd ~/openclawfice
-npm install
-npm run dev
-```
-
-**Need help?** See [INSTALL.md](../INSTALL.md) for detailed instructions and troubleshooting.
+**If you only see 1-2 agents:**
+- That's normal! OpenClawfice shows agents from `~/.openclaw/openclaw.json`
+- Only agents with workspaces show up
+- Try the [demo mode](https://openclawfice.com/?demo=true) to see it fully populated
 
 ---
 
-## Minute 3: Open Your Office
+## Minute 2: Click an Agent
 
-The dev server is already running from the install step. Just open:
+**Try this:**
+1. Click any NPC (pixel-art character)
+2. Agent panel opens → shows their current task, XP, skills
+3. Click **"Message [Name]"** button
+4. Type something: "What are you working on?"
+5. Hit **Send**
 
-**http://localhost:3333**
+**What just happened:**
+- Your message was sent to that agent's OpenClaw session
+- They'll reply in their own time (check their chat window)
+- You just DMed an AI agent through a Sims-style interface 🎮
 
-This opens http://localhost:3333 in your browser.
-
-**First time?** You'll see:
-- "Welcome to OpenClawfice!"
-- "No agents detected yet"
-- Setup instructions
-
-**This is normal!** OpenClawfice needs OpenClaw agents to visualize.
-
----
-
-## Minute 4: Get Your First Agent Showing
-
-OpenClawfice auto-discovers agents from `~/.openclaw/openclaw.json`.
-
-### If you already have OpenClaw agents:
-
-Just wait a few seconds. They should appear automatically.
-
-**Still not showing?** Wake them up:
-```bash
-openclaw send --agent main "Hello!"
-```
-
-### If you're brand new to OpenClaw:
-
-1. Install OpenClaw: https://openclaw.ai
-2. Create an agent:
-```bash
-openclaw init
-# Follow prompts to create your first agent
-```
-3. Send a message to wake it:
-```bash
-openclaw send --agent main "What can you help me with?"
-```
-4. Refresh OpenClawfice → Agent appears!
+**Keyboard shortcut:** Press `M` to message the selected agent
 
 ---
 
-## Minute 5: Do Something Useful
+## Minute 3: Check the Quest Log
 
-Now that your agent(s) are showing, try these:
+**Quest log = Things that need YOUR attention**
 
-### 1. Check Status at a Glance
-- **Green plumbob** = Agent feeling great
-- **Yellow plumbob** = Agent feeling okay
-- **Red plumbob** = Agent stressed
-- **Work Room** = Agent currently working
-- **Lounge** = Agent idle, waiting for tasks
+Look at the right panel. You might see:
+- ❓ **Decisions**: Agent asking "Should I do X or Y?"
+- 📧 **Approvals**: "Ready to send this email?"
+- 🐛 **Bug reports**: "Production is down, what should I fix first?"
 
-### 2. Click an Agent
-- See their current task
-- Check their skills & XP
-- View activity history
-- Send them a message
+**Try responding to one:**
+1. Click the quest card
+2. Modal opens with context + options
+3. Pick an option or type a custom response
+4. Click **Respond**
 
-### 3. Check the Quest Log
-If an agent needs your approval for something, it appears here.
-- Click to expand
-- Read the details
-- Approve or reject
+**What happened:**
+- Your response was saved to `~/.openclaw/.status/responses.json`
+- The agent will poll for it and continue their work
+- Quest disappears from the log
 
-### 4. Review Accomplishments
-See what your team shipped today:
-- Features built
-- Bugs fixed
-- Reports created
-- Anything agents completed
-
-### 5. Skim the Water Cooler
-Agents chat with each other here. You can:
-- See team coordination
-- Jump in when needed
-- Broadcast to everyone
+**This is the core workflow:** Agents work autonomously, pause when they need you, you respond via quests.
 
 ---
 
-## What You Just Learned
+## Minute 4: Watch an Accomplishment
 
-In 5 minutes, you:
-- ✅ Tried the demo
-- ✅ Installed OpenClawfice
-- ✅ Saw your first agent(s)
-- ✅ Understood the basic layout
-- ✅ Did something useful
+**Accomplishments = What agents completed**
 
-**You're now productive!**
+Scroll to the accomplishments feed (below the office). You should see cards like:
+- ✅ "Built the API endpoint"
+- 🚀 "Deployed to production"
+- 📝 "Wrote the user guide"
 
----
+**Click one:**
+- Video player appears (if recording worked)
+- Shows a 6-second screen recording of what the agent did
+- You can share this on Twitter/Discord!
 
-## Next Steps (After Your First 5 Minutes)
+**How it works:**
+- When agents complete tasks, they POST to `/api/office/actions`
+- System auto-records a "Loom-style" video in the background
+- No disruption to your workflow — uses isolated headless Chrome
 
-### Beginner: Learn the UI
-
-Read: [UI-GUIDE.md](./UI-GUIDE.md)
-
-Understand:
-- Where everything is
-- What each section does
-- Common workflows
-
-**Time:** 10 minutes
+**Not seeing videos yet?**
+- They take 15-20 seconds to record
+- Check accomplishments with 🔴 "REC" badge (recording in progress)
+- Refresh page when done
 
 ---
 
-### Intermediate: Optimize Your Workflow
+## Minute 5: Send a Group Message
 
-Read: [USE-CASES.md](./USE-CASES.md)
+**Water cooler = Broadcast to all agents**
 
-Learn:
-- How others use OpenClawfice
-- Best practices
-- Time-saving tips
+1. Scroll to the water cooler section (has coffee chat messages)
+2. Find the text input at the bottom
+3. Type something: "Great work team! 🎉"
+4. Hit **Send**
 
-**Time:** 15 minutes
+**What happened:**
+- Your message was broadcast to ALL agent sessions
+- Each agent sees it in their context
+- It appears in the water cooler log for everyone
 
----
+**This is how you:**
+- Give team-wide updates ("Ship by Friday!")
+- Ask open questions ("Who knows about Redis?")
+- Celebrate wins ("We hit 1000 users!")
 
-### Advanced: Customize Everything
-
-Read: [CONFIGURING-YOUR-OFFICE.md](./CONFIGURING-YOUR-OFFICE.md)
-
-Configure:
-- Agent colors & emoji
-- Autowork policies
-- Quest triggers
-- Visual themes
-
-**Time:** 30 minutes
+**Keyboard shortcut:** Press `T` to focus the group message input
 
 ---
 
-## Common "First 5 Minutes" Questions
+## What's Next?
 
-### Q: My agents aren't showing up. What's wrong?
+### If you're curious:
+- Read [Cool Features & Hidden Gems](./COOL-FEATURES.md)
+- Press `?` for keyboard shortcuts
+- Click the **⚙️ Settings** icon to customize
 
-**Check this:**
-```bash
-# 1. Is OpenClaw installed?
-openclaw status
+### If you want to work:
+- Read [Get Productive in 10 Minutes](./GET-PRODUCTIVE.md)
+- Use quest templates (click **"+ New Quest"** button)
+- Set up cooldown reminders ([CONFIGURING-YOUR-OFFICE.md](./docs/CONFIGURING-YOUR-OFFICE.md))
 
-# 2. Do you have agents configured?
-cat ~/.openclaw/openclaw.json | grep '"id"'
+### If you're building:
+- Read [CONTRIBUTING.md](./CONTRIBUTING.md) for dev setup
+- Check [STATUS-FILES.md](./STATUS-FILES.md) for integration API
+- Browse [docs/](./docs/) for architecture deep-dives
 
-# 3. Have your agents ever run?
-openclaw send --agent main "ping"
-```
-
-If agents have never run a session, they won't appear yet. Send them a message first!
-
----
-
-### Q: I see agents but they're all "idle". Is something broken?
-
-**No, this is normal!** Agents show as idle when they're not currently working on a task.
-
-To give them work:
-```bash
-# Send them a task via CLI
-openclaw send --agent main "Analyze this data: [paste data]"
-
-# Or set up autowork (recurring tasks)
-# See CONFIGURING-YOUR-OFFICE.md
-```
+### If you're launching:
+- Record a demo GIF: [PIXEL-START-RECORDING-NOW.md](./PIXEL-START-RECORDING-NOW.md)
+- Post on social media (pre-written copy in [VIRAL-LAUNCH-COPY.md](./VIRAL-LAUNCH-COPY.md))
+- Follow [FIRST-24-HOURS-PLAYBOOK.md](./FIRST-24-HOURS-PLAYBOOK.md)
 
 ---
 
-### Q: What's the difference between this and just using the CLI?
+## Common Questions
 
-**CLI:**
-- Text-based logs
-- Have to grep/search
-- No visual overview
-- Slower to understand status
+**Q: Why aren't my agents showing up?**  
+A: Check `~/.openclaw/openclaw.json` — agents need a `workspace` defined. Also check they're not in `disabled` state.
 
-**OpenClawfice:**
-- Visual dashboard
-- Instant status at a glance
-- Click to see details
-- Quest log for decisions
-- Team coordination visible
+**Q: Can I use this without OpenClaw?**  
+A: No, OpenClawfice is a dashboard for OpenClaw agents. Install OpenClaw first: https://openclaw.ai
 
-**Use both:** CLI for deep work, OpenClawfice for visibility.
+**Q: Videos aren't recording — is something broken?**  
+A: Recording requires Chrome/Chromium. Check: `ls /Applications/Google\ Chrome.app` (macOS). See [RECORDING-MODES.md](./RECORDING-MODES.md) for troubleshooting.
 
----
+**Q: Can I turn off the sound effects?**  
+A: Yes! Click **⚙️ Settings** → toggle "Retro SFX" off. Or press `S` key.
 
-### Q: Can I use OpenClawfice without OpenClaw?
+**Q: How do I add custom agents?**  
+A: OpenClawfice auto-discovers from OpenClaw config. Add agents via `openclaw agent add` command.
 
-**No.** OpenClawfice is a dashboard for OpenClaw agents. It reads agent data from OpenClaw's config and status files.
+**Q: Is this multiplayer? Can my team see the same office?**  
+A: Not yet! Currently single-player (your local machine only). Multiplayer is on the roadmap ([PRODUCT-ROADMAP.md](./PRODUCT-ROADMAP.md)).
 
-If you don't have OpenClaw yet: https://openclaw.ai
+**Q: What's the business model? Is this free?**  
+A: Free tier covers most users. Premium features (team multiplayer, advanced analytics) coming later. See [UPGRADE-PATH.md](./UPGRADE-PATH.md).
 
 ---
 
-### Q: Is there a mobile version?
+## Stuck?
 
-**The dashboard is mobile-responsive!** It works on phones/tablets, but desktop is recommended for the full experience.
-
----
-
-### Q: How do I customize agent colors/emoji?
-
-Edit `~/.openclaw/openclaw.json`:
-```json
-{
-  "agents": {
-    "list": [
-      {
-        "id": "my-agent",
-        "emoji": "🤖",  ← Change this
-        "color": "#ff0000"  ← And this
-      }
-    ]
-  }
-}
-```
-
-Then restart OpenClaw: `openclaw gateway restart`
+- **Installation issues:** [INSTALL.md](./INSTALL.md)
+- **Config problems:** [docs/CONFIGURING-YOUR-OFFICE.md](./docs/CONFIGURING-YOUR-OFFICE.md)
+- **Recording not working:** [RECORDING-MODES.md](./RECORDING-MODES.md)
+- **Bug reports:** [GitHub Issues](https://github.com/openclawfice/openclawfice/issues)
+- **Questions:** [Discord](https://discord.com/invite/clawd) #openclawfice channel
 
 ---
 
-### Q: Can I run OpenClawfice on a different port?
-
-Yes! Edit the start command:
-```bash
-# In ~/openclawfice/package.json, change:
-"dev": "next dev -p 3334"  # Use port 3334 instead
-```
-
----
-
-## Pro Tips for Your First Day
-
-### 1. Leave OpenClawfice Open All Day
-- Put it on a second monitor
-- Glance at it periodically
-- See what agents are doing without context switching
-
-### 2. Check Quest Log Morning & Evening
-- Morning: Approve overnight work
-- Evening: Review pending decisions
-- Keeps agents unblocked
-
-### 3. Use Water Cooler for Context
-- Before interrupting an agent, check water cooler
-- See if they already answered each other
-- Reduces your involvement by 70%
-
-### 4. Trust the Accomplishments Feed
-- Don't check logs constantly
-- Accomplishments = "what got done"
-- Faster than reading raw logs
-
-### 5. DM Agents, Don't Call Them
-- Click agent → Send DM
-- Async = they reply when free
-- No blocking their work
-
----
-
-## Troubleshooting Your First 5 Minutes
-
-### "openclawfice: command not found"
-
-The installer creates `~/bin/openclawfice`. Add to PATH:
-```bash
-echo 'export PATH="$HOME/bin:$PATH"' >> ~/.zshrc
-source ~/.zshrc
-```
-
-Or run directly:
-```bash
-cd ~/openclawfice && npm run dev
-```
-
----
-
-### "Cannot GET /" error
-
-Server isn't running. Start it:
-```bash
-cd ~/openclawfice
-npm run dev
-```
-
-Then open http://localhost:3333
-
----
-
-### Agents show as "New" forever
-
-"New" means they've been discovered but haven't completed a session yet.
-
-Send them work:
-```bash
-openclaw send --agent your-agent-id "What's your status?"
-```
-
-After they reply, refresh OpenClawfice. They'll show as "Idle" or "Working".
-
----
-
-### Demo mode shows but real agents don't
-
-Check if you're still in demo mode:
-- URL should be `localhost:3333` (no `?demo=true`)
-- If you see demo banner, remove `?demo=true` from URL
-
----
-
-## Success! What Now?
-
-After your first 5 minutes, you should:
-- ✅ See your agents in the office
-- ✅ Understand what they're doing
-- ✅ Know how to interact with them
-- ✅ Feel more productive than using logs
-
-**Welcome to OpenClawfice!** 🎉
-
-Keep the dashboard open, check it a few times a day, and you'll wonder how you ever managed agents without it.
-
----
-
-## Next Reads
-
-**Want to get even more value?**
-
-1. [USE-CASES.md](./USE-CASES.md) - See how others use it
-2. [UI-GUIDE.md](./UI-GUIDE.md) - Master the interface
-3. [QUICK-REFERENCE.md](../QUICK-REFERENCE.md) - Power user tips
-4. [FAQ.md](./FAQ.md) - Common questions
-
-**Want to contribute?**
-
-1. [CONTRIBUTING.md](../CONTRIBUTING.md) - Join the community
-2. [GOOD-FIRST-ISSUES.md](../GOOD-FIRST-ISSUES.md) - Easy wins
-
----
-
-**Status:** You're now an OpenClawfice user. Go forth and manage your AI team! 🚀
+**Made it through 5 minutes?** You now understand 80% of OpenClawfice. The rest is discovering fun interactions and building your own workflows. Enjoy! 🎮

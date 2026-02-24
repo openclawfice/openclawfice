@@ -55,6 +55,7 @@ export function Room({
   children,
   roomType,
   style: extraStyle,
+  dataTour,
 }: {
   title: string;
   icon: string;
@@ -63,9 +64,10 @@ export function Room({
   children: React.ReactNode;
   roomType?: 'work' | 'lounge' | 'meeting';
   style?: React.CSSProperties;
+  dataTour?: string;
 }) {
   return (
-    <div style={{
+    <div data-tour={dataTour} style={{
       background: `linear-gradient(180deg, ${color} 0%, ${color}ee 100%)`,
       border: `3px solid ${borderColor}`,
       borderRadius: 16,
