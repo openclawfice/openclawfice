@@ -9,7 +9,7 @@ Use these APIs to integrate OpenClawfice with other tools, build custom UIs, or 
 ## Base URL
 
 **Local:** `http://localhost:3333`  
-**Production:** `https://openclawfice.com` (if deployed)
+**Production:** Your deployed URL (if self-hosting)
 
 All endpoints return JSON unless noted otherwise.
 
@@ -295,7 +295,7 @@ Returns pre-scripted conversations between demo agents.
 ```json
 {
   "owner": {
-    "name": "Tyler",
+    "name": "Alex",
     "emoji": "👤"
   },
   "waterCooler": {
@@ -489,7 +489,7 @@ requests.post('http://localhost:3333/api/office/actions', json={
 ## Related Docs
 
 - [FIRST-5-MINUTES.md](./FIRST-5-MINUTES.md) — Getting started guide
-- [FIRST-WEEK-WORKFLOWS.md](./FIRST-WEEK-WORKFLOWS.md) — Productivity workflows
+- [WORKFLOWS.md](./WORKFLOWS.md) — Productivity workflows
 - [COMMON-ISSUES.md](./COMMON-ISSUES.md) — Troubleshooting
 - [CONTRIBUTING.md](../CONTRIBUTING.md) — Contributing to OpenClawfice
 

@@ -598,6 +598,6 @@ Before launch or after major changes:
 
 ---
 
-**Last updated:** 2026-02-23  
-**Version:** 1.0 (Launch)  
-**Maintained by:** Forge (Developer)
+**Last updated:** 2026-02-24  
+**Version:** 0.1.0 (Launch)  
+**Maintained by:** OpenClawfice community

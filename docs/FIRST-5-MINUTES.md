@@ -81,19 +81,17 @@ Scroll to the accomplishments feed (below the office). You should see cards like
 - 📝 "Wrote the user guide"
 
 **Click one:**
-- Video player appears (if recording worked)
-- Shows a 6-second screen recording of what the agent did
-- You can share this on Twitter/Discord!
+- Detail modal opens with full description
+- Shows who completed it and when
+- See XP earned for the accomplishment
 
 **How it works:**
 - When agents complete tasks, they POST to `/api/office/actions`
-- System auto-records a "Loom-style" video in the background
-- No disruption to your workflow — uses isolated headless Chrome
+- System logs the accomplishment with timestamp
+- XP is calculated and awarded automatically
+- Accomplishments appear in chronological order
 
-**Not seeing videos yet?**
-- They take 15-20 seconds to record
-- Check accomplishments with 🔴 "REC" badge (recording in progress)
-- Refresh page when done
+**Future feature:** Video recordings of agent work (Loom-style screen recordings coming in v0.2)
 
 ---
 
@@ -138,9 +136,9 @@ Scroll to the accomplishments feed (below the office). You should see cards like
 - Browse [docs/](./docs/) for architecture deep-dives
 
 ### If you're launching:
-- Record a demo GIF: [PIXEL-START-RECORDING-NOW.md](./PIXEL-START-RECORDING-NOW.md)
-- Post on social media (pre-written copy in [VIRAL-LAUNCH-COPY.md](./VIRAL-LAUNCH-COPY.md))
-- Follow [FIRST-24-HOURS-PLAYBOOK.md](./FIRST-24-HOURS-PLAYBOOK.md)
+- Share screenshots of your office on social media
+- Star on GitHub to show support
+- Join the community Discord
 
 ---
 
@@ -150,10 +148,10 @@ Scroll to the accomplishments feed (below the office). You should see cards like
 A: Check `~/.openclaw/openclaw.json` — agents need a `workspace` defined. Also check they're not in `disabled` state.
 
 **Q: Can I use this without OpenClaw?**  
-A: No, OpenClawfice is a dashboard for OpenClaw agents. Install OpenClaw first: https://openclaw.ai
+A: No, OpenClawfice is a dashboard for OpenClaw agents. Install OpenClaw first: https://docs.openclaw.ai
 
 **Q: Videos aren't recording — is something broken?**  
-A: Recording requires Chrome/Chromium. Check: `ls /Applications/Google\ Chrome.app` (macOS). See [RECORDING-MODES.md](./RECORDING-MODES.md) for troubleshooting.
+A: Video recording for accomplishments is a planned feature coming soon. Currently only screenshots are supported.
 
 **Q: Can I turn off the sound effects?**  
 A: Yes! Click **⚙️ Settings** → toggle "Retro SFX" off. Or press `S` key.

@@ -260,8 +260,8 @@
 ## Questions?
 
 **Found a security issue?**
-- Email: security@openclawfice.com (coming soon)
-- GitHub: https://github.com/openclawfice/openclawfice/security
+- GitHub: https://github.com/openclaw/openclawfice/security (preferred)
+- Email: security@openclaw.ai
 - Responsible disclosure welcome
 
 **Want to contribute security improvements?**

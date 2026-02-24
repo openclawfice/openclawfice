@@ -379,5 +379,5 @@ Should return "ALL CLEAR 🚀"
 ---
 
 **Last updated:** Feb 24, 2026  
-**For version:** 1.0.0+  
+**For version:** 0.1.0+  
 **Maintainer:** OpenClawfice community

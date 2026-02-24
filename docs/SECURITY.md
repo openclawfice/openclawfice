@@ -101,8 +101,8 @@ OpenClawfice runs locally and only reads:
 Found a security issue?
 
 **DO:**
-1. Report privately via GitHub Security tab
-2. Email: security@openclawfice.com (if urgent)
+1. Report privately via [GitHub Security tab](https://github.com/openclaw/openclawfice/security)
+2. Email: security@openclaw.ai (if urgent)
 3. Include: Steps to reproduce, impact assessment
 
 **DON'T:**

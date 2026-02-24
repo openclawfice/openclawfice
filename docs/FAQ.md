@@ -125,7 +125,7 @@ echo '[
 ]' > ~/.openclaw/.status/actions.json
 ```
 
-See [STATUS-FILES.md](../STATUS-FILES.md) for the full spec.
+See [OpenClaw Status Files documentation](https://docs.openclaw.ai) for the full spec.
 
 ### Q: How do I send a message to an agent?
 

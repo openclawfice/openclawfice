@@ -246,8 +246,8 @@ We're working on:
 - Sharing screenshots
 - Chatting with other users
 
-**Join:** https://discord.gg/clawd  
-**Channel:** `#openclawfice`
+**Join:** https://discord.com/invite/clawd  
+**Channel:** `#general` (or `#openclawfice` if available)
 
 **Typical response time:** Minutes to hours
 
@@ -297,9 +297,9 @@ We're working on:
 - Sharing screenshots
 - Viral moments
 
-**Tag:** `@openclawfice` or `#OpenClawfice`
+**Tag:** `#OpenClawfice`
 
-**Follow:** [@openclawfice](https://twitter.com/openclawfice)
+**Follow:** [@openclaw](https://twitter.com/openclaw)
 
 **We'll reshare cool setups!**
 
@@ -411,8 +411,8 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) for:
 
 ## Emergency Contacts
 
-**Critical security issue?** Email: security@openclaw.ai  
-**Maintainer:** Tyler Henkel ([@tylerhenkel](https://github.com/tylerhenkel))
+**Critical security issue?** Report via [GitHub Security tab](https://github.com/openclaw/openclawfice/security) or email: security@openclaw.ai  
+**Maintainer:** OpenClawfice community
 
 **Business inquiries:** partnerships@openclaw.ai
 

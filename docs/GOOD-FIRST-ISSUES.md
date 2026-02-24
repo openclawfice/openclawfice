@@ -1,10 +1,11 @@
-# 🎯 Good First Issues (Ready to Create)
+# 🎯 Good First Issues - Contributors Guide
 
-**Purpose:** Pre-written GitHub issues to attract first-time contributors after launch  
-**When to use:** Within 48 hours of launch, create 10-15 of these issues  
+**Purpose:** Pre-written GitHub issues to attract first-time contributors  
+**For maintainers:** Copy/paste these into GitHub Issues after launch  
+**For contributors:** Pick an issue that matches your skill level and dive in!  
 **Label:** `good first issue` + `help wanted`
 
-Copy/paste these into GitHub Issues to lower barrier for new contributors.
+These issues are specifically designed to lower the barrier for new contributors.
 
 ---
 
@@ -41,7 +42,7 @@ useEffect(() => {
 }, []);
 ```
 
-**Mentor:** @Nova will review your PR!
+**Mentor:** Maintainers will review your PR!
 
 ---
 
@@ -74,7 +75,7 @@ When users click an agent to see details, add a "Copy ID" button next to the age
 </button>
 ```
 
-**Mentor:** @Forge can help with React patterns!
+**Mentor:** Maintainers can help with React patterns!
 
 ---
 
@@ -100,7 +101,7 @@ Allow users to mark accomplishments as "read" so they fade out or move to a coll
 2. POST to `/api/office/actions` with `{type: "mark_read", id: "..."}`
 3. Update UI to filter/style read accomplishments
 
-**Mentor:** @Forge can walk through the API structure!
+**Mentor:** Maintainers can walk through the API structure!
 
 ---
 
@@ -130,7 +131,7 @@ Show priority (high/medium/low) with colored badges in quest log.
 )}
 ```
 
-**Mentor:** @Cipher can help with Tailwind styling!
+**Mentor:** Maintainers can help with Tailwind styling!
 
 ---
 
@@ -159,7 +160,7 @@ Create `TROUBLESHOOTING.md` with solutions to common install/setup problems.
 **Getting started:**
 Look at existing install script and docs, anticipate failure points.
 
-**Mentor:** @Nova can share common issues from user feedback!
+**Mentor:** Maintainers can share common issues from user feedback!
 
 ---
 
@@ -187,7 +188,7 @@ Write a script for a 5-minute YouTube tutorial: "Build an AI Office in 5 Minutes
 **Getting started:**
 Watch existing product demos on YouTube for structure.
 
-**Mentor:** @Nova can review for accuracy!
+**Mentor:** Maintainers will review for accuracy!
 
 ---
 
@@ -214,7 +215,7 @@ Create `ARCHITECTURE.md` explaining how OpenClawfice discovers agents and displa
 **Getting started:**
 Read through `app/api/office/route.ts` to understand flow.
 
-**Mentor:** @Forge knows the codebase deeply!
+**Mentor:** Maintainers know the codebase deeply!
 
 ---
 
@@ -244,7 +245,7 @@ Add a button in header to manually trigger status refresh (without waiting for a
 </button>
 ```
 
-**Mentor:** @Forge can help test!
+**Mentor:** Maintainers will help test!
 
 ---
 
@@ -274,7 +275,7 @@ const filteredMessages = messages.filter(m =>
 );
 ```
 
-**Mentor:** @Cipher can review UX!
+**Mentor:** Maintainers will review UX!
 
 ---
 
@@ -307,7 +308,7 @@ const exportQuests = () => {
 };
 ```
 
-**Mentor:** @Nova can help prioritize!
+**Mentor:** Maintainers will help prioritize!
 
 ---
 
@@ -334,7 +335,7 @@ Wrap the app in React Error Boundary to catch crashes and show friendly error me
 **Getting started:**
 Use React's `ErrorBoundary` component or library like `react-error-boundary`.
 
-**Mentor:** @Forge knows React patterns!
+**Mentor:** Maintainers know React patterns!
 
 ---
 
@@ -362,7 +363,7 @@ npm install --save-dev @playwright/test
 npx playwright test
 ```
 
-**Mentor:** @Cipher can help with CI/CD!
+**Mentor:** Maintainers can help with CI/CD!
 
 ---
 
@@ -390,7 +391,7 @@ Let users switch between dark mode (current) and light mode.
 **Getting started:**
 Use Tailwind's `dark:` modifier and `localStorage.setItem('theme', 'dark')`.
 
-**Mentor:** @Pixel can help with color palette!
+**Mentor:** Maintainers can help with color palette!
 
 ---
 
@@ -444,7 +445,7 @@ Animate plumbobs to bounce/pulse based on agent mood.
 }
 ```
 
-**Mentor:** @Pixel knows animation timing!
+**Mentor:** Maintainers know animation timing!
 
 ---
 

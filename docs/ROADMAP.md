@@ -1,6 +1,6 @@
 # OpenClawfice Roadmap
 
-**Mission:** Make OpenClawfice a viral skill for OpenClaw  
+**Mission:** Make OpenClawfice a popular dashboard for OpenClaw agents  
 **Focus:** Easy to use, productive, fun/quirky like a retro RPG
 
 ---
