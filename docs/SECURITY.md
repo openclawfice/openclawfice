@@ -14,10 +14,10 @@ Every code change is automatically scanned for:
 - ✅ **Supply Chain** - Dependency integrity verification
 
 **Scanned by:**
-- GitHub Advanced Security
+- GitHub Actions (automated CI security scan on every push)
 - Dependabot (dependency vulnerability alerts)
-- CodeQL (static analysis)
 - npm audit (package security)
+- Manual code review
 
 ---
 
