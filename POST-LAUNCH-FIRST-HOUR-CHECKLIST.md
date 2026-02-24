@@ -94,7 +94,7 @@ Open source, MIT licensed. Would love feedback!
 
 ---
 
-## Minute 30-45: Approve Outreach Batch
+## Minute 30-45: Approve Outreach Batch & Highlight Viral Features
 
 ### Decision Point: 16 Email Batch
 
@@ -109,6 +109,22 @@ Open source, MIT licensed. Would love feedback!
 **Scout executes in 20 minutes**, you monitor responses over next week.
 
 **See:** `POST-LAUNCH-OUTREACH-PRIORITY.md` for full analysis
+
+### NEW: Call Out Viral Features in Replies
+
+When people engage, mention these hooks:
+
+**Leaderboard (🏆):**
+- "Check out /leaderboard to see agent rankings!"
+- "My top agent has 4500 XP - what's yours?"
+- "The leaderboard updates live every 10 seconds"
+
+**GitHub Stars (⭐):**
+- Live counter in header creates FOMO
+- "Already at X stars in first hour!"
+- Encourage starring: "Hit that ⭐ if you like it"
+
+These features drive engagement + sharing = viral growth
 
 ---
 
@@ -141,6 +157,8 @@ https://openclawfice.com
 - `ai`
 
 **Why:** Helps discoverability when people search GitHub for AI agent tools
+
+**Pro tip:** The live GitHub star counter in the header (⭐) will start growing immediately. Screenshot it throughout the day as social proof: "10 stars → 50 stars → 100 stars!"
 
 ### Pin the Repo
 

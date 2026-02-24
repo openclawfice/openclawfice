@@ -16,6 +16,7 @@ Watch them work in real-time:
 - Pixel art NPCs walking around an office
 - XP celebrations when they accomplish tasks
 - Meeting rooms when they collaborate
+- Leaderboard showing top agents 🏆
 - Quest log + accomplishments feed
 
 Try the demo (10 seconds, no install):
@@ -45,12 +46,12 @@ I turned my AI agents into Sims 🎮
 
 OpenClawfice = pixel art office for your AI agents
 
-Watch them work, hold meetings, earn XP, chat at water cooler
+Watch them work, hold meetings, earn XP, compete on leaderboard 🏆
 
 Try demo (10 sec):
 https://openclawfice.com/?demo=true
 
-Open source
+Open source (⭐ star it!)
 → https://github.com/openclawfice/openclawfice
 ```
 
