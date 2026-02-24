@@ -20,7 +20,29 @@ import { DemoTour } from '../components/DemoTour';
 import { BootSequence } from '../components/BootSequence';
 
 
+function Clock() {
+  const [time, setTime] = useState(new Date());
+  useEffect(() => {
+    const i = setInterval(() => setTime(new Date()), 1000);
+    return () => clearInterval(i);
+  }, []);
+  return (
+    <div style={{ fontFamily: '"Press Start 2P", monospace', fontSize: 9, color: '#64748b' }}>
+      {time.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', timeZone: 'America/New_York' })}
+    </div>
+  );
+}
+
+const renderCount = { current: 0 };
+const renderLog: { ts: number; delta: number }[] = [];
+
 export default function HomePage() {
+  renderCount.current++;
+  const now = performance.now();
+  const last = renderLog.length > 0 ? renderLog[renderLog.length - 1].ts : now;
+  renderLog.push({ ts: now, delta: now - last });
+  if (renderLog.length > 50) renderLog.shift();
+
   const { isDemoMode, getApiPath } = useDemoMode();
   const sfx = useRetroSFX();
   const authenticatedFetch = useAuthenticatedFetch();
@@ -104,29 +126,55 @@ export default function HomePage() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Load config
+  // Initial data load — single effect, single render batch
+  const initialLoaded = useRef(false);
   useEffect(() => {
-    const fetchConfig = async () => {
-      try {
-        const res = await secureFetch(getApiPath('/api/office/config'));
-        const data = await res.json();
-        setConfig(data);
-      } catch (err) {
-        console.error('Failed to load config:', err);
+    if (initialLoaded.current) return;
+    initialLoaded.current = true;
+    const load = async () => {
+      const [configRes, starsRes, officeRes, meetingRes, actionsRes, archiveRes, autoworkRes] = await Promise.allSettled([
+        secureFetch(getApiPath('/api/office/config')).then(r => r.json()),
+        fetch('/api/github/stars').then(r => r.json()),
+        secureFetch(getApiPath('/api/office')).then(r => r.json()),
+        secureFetch(getApiPath('/api/office/meeting')).then(r => r.json()),
+        secureFetch(getApiPath('/api/office/actions')).then(r => r.json()),
+        secureFetch(getApiPath('/api/office/actions') + '?archiveOffset=0&limit=0').then(r => r.json()),
+        secureFetch(getApiPath('/api/office/autowork')).then(r => r.json()),
+      ]);
+      // Batch all state updates in one go
+      if (configRes.status === 'fulfilled') setConfig(configRes.value);
+      if (starsRes.status === 'fulfilled') setGithubStars(starsRes.value.stars);
+      if (officeRes.status === 'fulfilled') {
+        const data = officeRes.value;
+        if (data.agents) {
+          setAgents(data.agents.map((a: any) => {
+            const defaults = generateAgentDefaults(a.id);
+            return {
+              ...a,
+              color: a.color || randomColor(a.id),
+              mood: (a.mood || 'good') as Mood,
+              needs: defaults.needs,
+              skills: a.skills || defaults.skills,
+              xp: a.xp || defaults.xp,
+              level: a.level || defaults.level,
+            };
+          }));
+        }
+        if (data.activityLog?.length > 0) setActivityLog(data.activityLog);
+        if (data.chatLog && Array.isArray(data.chatLog)) setChatLog(data.chatLog);
       }
+      if (meetingRes.status === 'fulfilled') setMeeting(meetingRes.value);
+      if (actionsRes.status === 'fulfilled') {
+        const data = actionsRes.value;
+        if (data.actions) setPendingActions(data.actions);
+        if (data.accomplishments) setAccomplishments(data.accomplishments);
+      }
+      if (archiveRes.status === 'fulfilled' && typeof archiveRes.value.archiveTotal === 'number') {
+        setArchiveTotal(archiveRes.value.archiveTotal);
+      }
+      if (autoworkRes.status === 'fulfilled') setAutoworkPolicies(autoworkRes.value.policies || {});
     };
-    fetchConfig();
-  }, []);
-
-  // Fetch GitHub stars once
-  const starsFetched = useRef(false);
-  useEffect(() => {
-    if (starsFetched.current) return;
-    starsFetched.current = true;
-    fetch('/api/github/stars')
-      .then(r => r.json())
-      .then(d => setGithubStars(d.stars))
-      .catch(() => {});
+    load();
   }, []);
 
   // Listen for demo triggers (from isolated recording script)
@@ -182,7 +230,7 @@ export default function HomePage() {
     return () => window.removeEventListener('message', handleDemoTrigger);
   }, [pendingActions, accomplishments, sfx]);
 
-  // Load autowork policies every 15s
+  // Poll autowork policies every 15s (initial load handled above)
   useEffect(() => {
     const fetchAutowork = async () => {
       try {
@@ -193,7 +241,6 @@ export default function HomePage() {
         }
       } catch {}
     };
-    fetchAutowork();
     const i = setInterval(fetchAutowork, 15_000);
     return () => clearInterval(i);
   }, []);
@@ -225,7 +272,7 @@ export default function HomePage() {
     return () => clearInterval(i);
   }, [autoworkPolicies]);
 
-  // Poll API for live status every 3s
+  // Poll status + chat every 3s (initial load handled above)
   useEffect(() => {
     const fetchStatus = async () => {
       try {
@@ -249,37 +296,42 @@ export default function HomePage() {
             return updated;
           });
         }
-        // Update activity log if present
         if (data.activityLog && data.activityLog.length > 0) {
           setActivityLog(data.activityLog);
+        }
+        if (data.chatLog && Array.isArray(data.chatLog)) {
+          setChatLog(prev => {
+            if (JSON.stringify(prev) !== JSON.stringify(data.chatLog)) {
+              setTimeout(() => {
+                if (chatRef.current) chatRef.current.scrollTop = chatRef.current.scrollHeight;
+              }, 100);
+            }
+            return data.chatLog;
+          });
         }
       } catch (err) {
         console.error('Failed to fetch agent status:', err);
       }
     };
-    fetchStatus();
     const i = setInterval(fetchStatus, 3000);
     return () => clearInterval(i);
   }, []);
 
-  // Poll meeting status every 3s
+  // Poll meeting status every 3s (initial load handled above)
   useEffect(() => {
     const fetchMeeting = async () => {
       try {
         const res = await secureFetch(getApiPath('/api/office/meeting'));
         const data = await res.json();
         setMeeting(data);
-      } catch (err) {
-        console.error('Failed to fetch meeting status:', err);
-      }
+      } catch {}
     };
-    fetchMeeting();
     const i = setInterval(fetchMeeting, 3000);
     return () => clearInterval(i);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Poll actions/accomplishments every 5s
+  // Poll actions/accomplishments every 5s (initial load handled above)
   useEffect(() => {
     const fetchActions = async () => {
       try {
@@ -294,7 +346,6 @@ export default function HomePage() {
         if (typeof ad.archiveTotal === 'number') setArchiveTotal(ad.archiveTotal);
       } catch {}
     };
-    fetchActions();
     const i = setInterval(fetchActions, 5000);
     return () => clearInterval(i);
   }, []);
@@ -446,40 +497,27 @@ export default function HomePage() {
   };
 
   // Poll chat — uses demo chat API in demo mode, real office API otherwise
+  // Demo mode chat poll (non-demo chat is handled by the status poll above)
   useEffect(() => {
-    const fetchChat = async () => {
+    if (!isDemoMode) return;
+    const fetchDemoChat = async () => {
       try {
-        if (isDemoMode) {
-          const res = await secureFetch(getApiPath('/api/office/chat'));
-          const data = await res.json();
-          if (data.messages && Array.isArray(data.messages)) {
-            setChatLog(prev => {
-              if (JSON.stringify(prev) !== JSON.stringify(data.messages)) {
-                setTimeout(() => {
-                  if (chatRef.current) chatRef.current.scrollTop = chatRef.current.scrollHeight;
-                }, 100);
-              }
-              return data.messages;
-            });
-          }
-        } else {
-          const res = await secureFetch('/api/office');
-          const data = await res.json();
-          if (data.chatLog && Array.isArray(data.chatLog)) {
-            setChatLog(prev => {
-              if (JSON.stringify(prev) !== JSON.stringify(data.chatLog)) {
-                setTimeout(() => {
-                  if (chatRef.current) chatRef.current.scrollTop = chatRef.current.scrollHeight;
-                }, 100);
-              }
-              return data.chatLog;
-            });
-          }
+        const res = await secureFetch(getApiPath('/api/office/chat'));
+        const data = await res.json();
+        if (data.messages && Array.isArray(data.messages)) {
+          setChatLog(prev => {
+            if (JSON.stringify(prev) !== JSON.stringify(data.messages)) {
+              setTimeout(() => {
+                if (chatRef.current) chatRef.current.scrollTop = chatRef.current.scrollHeight;
+              }, 100);
+            }
+            return data.messages;
+          });
         }
       } catch {}
     };
-    fetchChat();
-    const i = setInterval(fetchChat, isDemoMode ? 3000 : 5000);
+    fetchDemoChat();
+    const i = setInterval(fetchDemoChat, 3000);
     return () => clearInterval(i);
   }, [isDemoMode]);
 
@@ -780,6 +818,10 @@ export default function HomePage() {
   const baseFontSize = isMobile ? 10 : isTablet ? 9 : 8;
   const headerFontSize = isMobile ? 12 : 14;
 
+  const recentRenders = renderLog.slice(-20);
+  const rendersPerSec = renderLog.filter(r => now - r.ts < 1000).length;
+  const rendersLast5s = renderLog.filter(r => now - r.ts < 5000).length;
+
   return (
     <div style={{
       height: '100vh',
@@ -788,6 +830,30 @@ export default function HomePage() {
       color: '#e2e8f0',
       fontFamily: 'system-ui',
     }}>
+      {/* Debug Render Monitor */}
+      <div style={{
+        position: 'fixed',
+        top: 4,
+        left: 4,
+        zIndex: 99999,
+        background: rendersPerSec > 3 ? 'rgba(239,68,68,0.95)' : rendersPerSec > 1 ? 'rgba(245,158,11,0.95)' : 'rgba(16,185,129,0.95)',
+        color: '#fff',
+        borderRadius: 6,
+        padding: '4px 8px',
+        fontFamily: 'monospace',
+        fontSize: 10,
+        lineHeight: 1.4,
+        pointerEvents: 'none',
+        minWidth: 140,
+      }}>
+        <div style={{ fontWeight: 700 }}>RENDERS: {renderCount.current}</div>
+        <div>{rendersPerSec}/sec | {rendersLast5s}/5s</div>
+        <div style={{ fontSize: 8, marginTop: 2, opacity: 0.8 }}>
+          {recentRenders.slice(-5).map((r, i) => (
+            <span key={i}>{r.delta < 10 ? '<10' : Math.round(r.delta)}ms </span>
+          ))}
+        </div>
+      </div>
       <link
         href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap"
         rel="stylesheet"
