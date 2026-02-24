@@ -18,6 +18,7 @@ import { Celebration } from '../components/Celebration';
 import { AchievementToastContainer, AchievementToastData } from '../components/AchievementToast';
 import { DemoTour } from '../components/DemoTour';
 import { BootSequence } from '../components/BootSequence';
+import { DailyChallenge } from '../components/DailyChallenge';
 
 export default function HomePage() {
   const { isDemoMode, getApiPath } = useDemoMode();
@@ -117,11 +118,11 @@ export default function HomePage() {
     fetchConfig();
   }, []);
 
-  // Fetch GitHub stars
+  // Fetch GitHub stars (once on mount)
   useEffect(() => {
     const fetchStars = async () => {
       try {
-        const res = await fetch(getApiPath('/api/github/stars'));
+        const res = await fetch('/api/github/stars');
         const data = await res.json();
         setGithubStars(data.stars);
       } catch (err) {
@@ -129,7 +130,7 @@ export default function HomePage() {
       }
     };
     fetchStars();
-  }, [getApiPath]);
+  }, []);
 
   // Listen for demo triggers (from isolated recording script)
   useEffect(() => {
@@ -278,7 +279,8 @@ export default function HomePage() {
     fetchMeeting();
     const i = setInterval(fetchMeeting, 3000);
     return () => clearInterval(i);
-  }, [getApiPath]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Poll actions/accomplishments every 5s
   useEffect(() => {
@@ -1677,6 +1679,13 @@ export default function HomePage() {
                 )}
               </div>
             </Room>
+          </div>
+
+          {/* DAILY CHALLENGE */}
+          <div style={{
+            padding: '0 12px',
+          }}>
+            <DailyChallenge getApiPath={getApiPath} />
           </div>
 
           {/* ACCOMPLISHMENTS */}
