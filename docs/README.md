@@ -2,6 +2,8 @@
 
 ## Getting Started
 - **[First 5 Minutes](FIRST-5-MINUTES.md)** — Quick setup and first steps
+- **[Cool Features](COOL-FEATURES.md)** — Hidden gems and delightful details
+- **[Get Productive](GET-PRODUCTIVE.md)** — 10-minute guide to daily productivity
 - **[Configuration](CONFIGURING-YOUR-OFFICE.md)** — Customize your office
 - **[Keyboard Shortcuts](KEYBOARD-SHORTCUTS.md)** — Power user shortcuts
 
