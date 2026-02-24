@@ -8,3 +8,10 @@ import { DEMO_MEETING } from '../../../demo/data';
 export async function GET() {
   return NextResponse.json(DEMO_MEETING);
 }
+
+/**
+ * Demo Mode: End meeting
+ */
+export async function DELETE() {
+  return NextResponse.json({ active: false });
+}
