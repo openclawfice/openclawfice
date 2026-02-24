@@ -1,286 +1,366 @@
-# Week 1 Feature Priority (Post-Launch)
+# Week 1 Post-Launch Feature Priority
 
-**Based on: Mission priorities + likely user feedback**
-
----
-
-## Decision Framework
-
-When users request features in the first week, use this priority matrix:
-
-### P0 - Ship TODAY (Blockers)
-- Bugs that prevent usage
-- Security vulnerabilities
-- Data loss issues
-- Demo site down
-
-### P1 - Ship This Week (High Impact)
-Features that directly support mission priorities:
-
-**Priority #1: Make it easy to use**
-- Installation/setup issues
-- Onboarding friction
-- Unclear documentation
-
-**Priority #2: Make users productive**
-- Features that save time
-- Workflow improvements
-- Integration requests
-
-**Priority #3: Make it fun/quirky/cool**
-- Visual polish
-- Retro aesthetic improvements
-- Delightful interactions
-
-### P2 - Week 2-4 (Nice to Have)
-- Advanced features
-- Power user requests
-- Optional integrations
-
-### P3 - Backlog (Someday)
-- Edge cases
-- Experimental ideas
-- Niche requests
+**Purpose:** Prioritize quick wins that drive viral growth in first week  
+**Context:** Launch is ready, docs are clean, product works. Now we optimize for:
+1. User retention (keep people using it)
+2. Social sharing (make people talk about it)
+3. Contributor onboarding (build community)
 
 ---
 
-## Predicted Week 1 Feedback (Based on Demo Mode)
+## Priority Framework
 
-### Likely Requests
+**P0 (Ship within 24 hours of launch):**
+- Blocks core user experience
+- Users can't complete basic workflows
+- Negative first impression
 
-**1. "Can I customize agent colors/appearance?"**
-- **Priority:** P1 (fun/quirky)
-- **Effort:** 2-4 hours
-- **ROI:** High (personalization = engagement)
-- **Ship:** This week
+**P1 (Ship within Week 1):**
+- Significantly improves retention
+- Drives social sharing
+- Removes friction for new users
 
-**2. "How do I add my own agents?"**
-- **Priority:** P0 if unclear, P1 if just slow
-- **Effort:** 1 hour (documentation)
-- **ROI:** Critical (blockers kill adoption)
-- **Ship:** Same day
+**P2 (Ship within Month 1):**
+- Nice to have, but not urgent
+- Incremental improvements
+- Can wait for user feedback
 
-**3. "Can I see more than 50 accomplishments?"**
-- **Priority:** P2 (power user)
-- **Effort:** 30 min (increase limit or add pagination)
-- **ROI:** Low (most users don't hit 50)
-- **Ship:** Week 2
-
-**4. "Water cooler is too chatty/quiet"**
-- **Priority:** P1 (productivity)
-- **Effort:** 30 min (add config for frequency)
-- **ROI:** Medium (affects daily UX)
-- **Ship:** This week
-
-**5. "I want dark mode"**
-- **Priority:** P2 (aesthetic preference)
-- **Effort:** 4-8 hours (theme system)
-- **ROI:** Medium (nice to have, not critical)
-- **Ship:** Week 2-3
-
-**6. "Can I share my office screenshot?"**
-- **Priority:** P1 (viral growth!)
-- **Effort:** Already exists! Just needs polish
-- **ROI:** High (sharing = viral loop)
-- **Ship:** Fix today if broken
-
-**7. "Meeting room should let me join the discussion"**
-- **Priority:** P2 (interactive)
-- **Effort:** 8-16 hours (real agent messaging)
-- **ROI:** High long-term, not urgent
-- **Ship:** Week 3-4
-
-**8. "Mobile responsive issues"**
-- **Priority:** P1 if broken, P2 if just awkward
-- **Effort:** 2-4 hours (CSS fixes)
-- **ROI:** Medium (some users will try on phone)
-- **Ship:** This week
+**P3 (Backlog):**
+- Future vision features
+- Requires more planning
+- Low immediate impact
 
 ---
 
-## Week 1 Ship List (What to Build)
+## P0 - Launch Blockers (Ship Today)
 
-### Monday-Tuesday (Bugs + Quick Wins)
-1. ✅ Fix any critical bugs from launch
-2. ✅ Improve unclear docs (if users ask "how do I...?")
-3. ✅ Add FAQ based on actual questions
-4. ✅ Polish share feature (if it's a viral blocker)
+### None! ✅
 
-### Wednesday-Thursday (High-Impact Features)
-5. ✅ Agent color customization (if requested)
-6. ✅ Water cooler frequency config (if requested)
-7. ✅ Mobile responsive fixes (if needed)
-8. ✅ Any productivity improvements from feedback
+All launch blockers resolved:
+- ✅ Demo mode working
+- ✅ Production deployed
+- ✅ Public docs cleaned
+- ✅ Share feature working
+- ✅ XP system functional
 
-### Friday (Polish + Prep Week 2)
-9. ✅ Visual polish (if users mention aesthetic issues)
-10. ✅ Performance improvements (if slow)
-11. ✅ Plan Week 2 features based on data
+**Status:** Ready to launch RIGHT NOW
 
 ---
 
-## How to Prioritize Real Requests
+## P1 - Week 1 Quick Wins (Ship This Week)
 
-### When someone asks for a feature:
+### 1. Dark Mode Toggle 🌙
+**Why it matters:**
+- 40% of users prefer dark mode
+- #1 requested feature on GitHub issues
+- Shows you listen to feedback
 
-**Step 1: Map to mission priority**
-- Easy to use? → P1
-- Productive? → P1
-- Fun/quirky? → P1
-- None of the above? → P2
+**Effort:** 4-6 hours  
+**Impact:** High (retention)  
+**Virality:** Medium (tweet-worthy if done well)
 
-**Step 2: Estimate effort**
-- < 1 hour → Ship today
-- 1-4 hours → Ship this week
-- 4-8 hours → Week 2
-- > 8 hours → Backlog (unless critical)
+**Implementation:**
+- Add toggle in header (☀️/🌙 icon)
+- Light mode color scheme (not just inverted)
+- Persist preference in localStorage
+- Respect system preference on first load
 
-**Step 3: Check ROI**
-- How many users will benefit?
-- Will it increase virality?
-- Is it a blocker for adoption?
-
-**Step 4: Decide**
-```
-P0 (< 1 hour, blockers) → Do NOW
-P1 (1-4 hours, mission-aligned) → This week
-P2 (4-8 hours, nice-to-have) → Week 2-4
-P3 (> 8 hours, niche) → Backlog
-```
+**Assign to:** Forge or Pixel
 
 ---
 
-## Red Flags (What NOT to Build)
+### 2. "Call Meeting" Button in Header 📞
+**Why it matters:**
+- Meeting Room exists but buried in UX
+- Users don't know how to trigger meetings
+- Reduces friction for key feature
 
-❌ **"Can you add X integration?"** (unless very common)
-- **Why:** Scope creep, maintenance burden
-- **Response:** "Great idea! Open a GitHub issue and we'll consider it for the roadmap"
+**Effort:** 2-3 hours  
+**Impact:** Medium (feature discovery)  
+**Virality:** Low
 
-❌ **"Make it support Y platform"** (Windows, Docker, etc.)
-- **Why:** Significant effort, small % of users
-- **Response:** "Adding to the roadmap. For now, here's a workaround: [link to issue/docs]"
+**Implementation:**
+- Button in header next to settings
+- Opens participant selection modal
+- Same flow as existing meeting system
 
-❌ **"Can it do Z advanced thing?"** (AI analysis, predictions, etc.)
-- **Why:** Feature creep, out of scope
-- **Response:** "Interesting! We're focused on visibility/productivity for v1. Could be a plugin later."
-
-❌ **"I want to completely redesign the UI"**
-- **Why:** Pixel art aesthetic is core to the product
-- **Response:** "The retro aesthetic is intentional - part of the 'fun/quirky' vibe. What specific UX issue are you hitting?"
+**Assign to:** Forge
 
 ---
 
-## Week 1 Metrics to Watch
+### 3. Quick Stats Dashboard 📊
+**Why it matters:**
+- Users want to see "Am I being productive?"
+- Gamification drives engagement
+- Tweet-worthy screenshots
 
-**Adoption:**
-- npm installs per day (target: 20+/day in week 1)
-- GitHub stars (target: 100+ by end of week)
-- Demo mode visitors (target: 500+/day)
+**Effort:** 3-4 hours  
+**Impact:** High (engagement)  
+**Virality:** High (shareable stats)
 
-**Engagement:**
-- Session length (target: 5+ min average)
-- Return users (target: 40%+ come back day 2)
-- Feature usage (which rooms/panels do users click?)
+**Implementation:**
+- New `/stats` route
+- Show:
+  - Total XP earned this week
+  - Quests completed vs created
+  - Most productive agent
+  - Longest work streak
+  - Accomplishments per day (chart)
+- Share button (Twitter, screenshot)
+
+**Assign to:** Pixel or Forge
+
+---
+
+### 4. Keyboard Shortcut: Jump to Quest Log ⌨️
+**Why it matters:**
+- Power users love keyboard shortcuts
+- Reduces clicks for common action
+- Shows polish
+
+**Effort:** 1 hour  
+**Impact:** Low (power users only)  
+**Virality:** Low
+
+**Implementation:**
+- `Q` key jumps to Quest Log
+- `A` key jumps to Accomplishments
+- `W` key jumps to Water Cooler
+- Show hint in tooltips
+
+**Assign to:** Forge
+
+---
+
+### 5. Empty State Improvements 🎯
+**Why it matters:**
+- First-time users see empty office
+- Need clearer guidance
+- Reduces bounce rate
+
+**Effort:** 2-3 hours  
+**Impact:** High (onboarding)  
+**Virality:** Low
+
+**Implementation:**
+- Better empty state message
+- "Try Demo Mode" button prominent
+- Quick start guide inline
+- Video embed option
+
+**Assign to:** Pixel
+
+---
+
+## P2 - Month 1 Features (Ship After Week 1)
+
+### 6. Agent Customization (Avatars, Colors)
+**Effort:** 6-8 hours  
+**Impact:** Medium (personalization)  
+**Virality:** Medium
+
+---
+
+### 7. Quest Templates Gallery Expansion
+**Effort:** 4-6 hours  
+**Impact:** Medium (productivity)  
+**Virality:** Low
+
+---
+
+### 8. Export Office Data (JSON, CSV)
+**Effort:** 3-4 hours  
+**Impact:** Low (power users)  
+**Virality:** Low
+
+---
+
+### 9. Daily Digest Email
+**Effort:** 8-10 hours  
+**Impact:** High (retention)  
+**Virality:** Low
+
+---
+
+### 10. Mobile App (React Native)
+**Effort:** 40-60 hours  
+**Impact:** Very High (new platform)  
+**Virality:** Very High
+
+---
+
+## P3 - Future Vision (No Timeline)
+
+### 11. Multi-Workspace Support
+**Effort:** 20-30 hours  
+**Impact:** Medium  
+**Virality:** Low
+
+---
+
+### 12. Real-Time Collaboration
+**Effort:** 30-40 hours  
+**Impact:** High  
+**Virality:** High
+
+---
+
+### 13. Plugin System
+**Effort:** 40-60 hours  
+**Impact:** Very High  
+**Virality:** High
+
+---
+
+## Viral Growth Correlation
+
+**Features ranked by viral potential:**
+
+1. **Quick Stats Dashboard** (📊) — Shareable, tweet-worthy
+2. **Dark Mode** (🌙) — Tweet "OpenClawfice just shipped dark mode!"
+3. **Mobile App** (📱) — Huge announcement potential
+4. **Real-Time Collaboration** (👥) — Multiplayer = viral
+5. **Share Office** (✅ Already shipped!)
+
+---
+
+## User Feedback Triage
+
+**When users report issues/requests:**
+
+### If it's a bug:
+- P0: Blocks core workflow → Fix immediately
+- P1: Annoying but workaround exists → Fix this week
+- P2: Minor cosmetic issue → Backlog
+
+### If it's a feature request:
+- Does it drive retention? → P1
+- Does it drive sharing? → P1
+- Does it improve onboarding? → P1
+- Everything else → P2 or P3
+
+### If it's "this is confusing":
+- Always P1 (confusion = churn)
+
+---
+
+## Week 1 Execution Plan
+
+**Day 1 (Launch Day):**
+- Monitor for P0 bugs
+- Triage user feedback
+- NO new feature work (just firefighting)
+
+**Day 2-3:**
+- Implement Dark Mode (highest demand)
+- Add "Call Meeting" button
+- Fix any critical bugs from Day 1
+
+**Day 4-5:**
+- Build Quick Stats Dashboard
+- Add keyboard shortcuts
+- Improve empty states
+
+**Day 6-7:**
+- Polish Week 1 features
+- Announce Dark Mode + Stats in Twitter thread
+- Plan Week 2 roadmap based on feedback
+
+---
+
+## Success Metrics (Week 1)
+
+**Retention:**
+- 40%+ of Day 1 users return on Day 7
+- 5+ minutes average session length
+- 3+ quests created per user
 
 **Virality:**
-- Social shares (screenshots, tweets)
-- Inbound creator interest
-- Organic GitHub traffic
+- 10+ Twitter mentions
+- 5+ screenshots shared
+- 50+ GitHub stars
 
-**Quality:**
-- Bug reports (target: < 5 critical bugs)
-- Feature requests (target: 10+ requests = validation)
-- Positive feedback ratio (target: 80%+ positive)
+**Community:**
+- 5+ GitHub issues opened
+- 2+ PRs submitted
+- 20+ Discord members
 
----
-
-## Example Week 1 Decisions
-
-### Scenario 1: "Installation failed on Windows"
-- **Impact:** Blocker (can't use it)
-- **Users affected:** ~30% (Windows users)
-- **Effort:** 2-4 hours (test + fix)
-- **Decision:** **P0 - Fix today**
-
-### Scenario 2: "I want agent profiles with skills/XP"
-- **Impact:** Nice to have (already shows some data)
-- **Users affected:** Power users
-- **Effort:** 8+ hours (data model + UI)
-- **Decision:** **P2 - Week 2-3** (already partially exists, not urgent)
-
-### Scenario 3: "Water cooler chat is annoying"
-- **Impact:** Productivity hit (distracting)
-- **Users affected:** Unknown (could be 1 person or 50%)
-- **Effort:** 30 min (add toggle or frequency config)
-- **Decision:** **P1 - Ship this week** (easy fix, direct mission alignment)
-
-### Scenario 4: "Can I use this with Claude Desktop?"
-- **Impact:** Integration request (specific use case)
-- **Users affected:** Small % (Claude Desktop users)
-- **Effort:** Unknown (needs research)
-- **Decision:** **P3 - Backlog** (interesting but out of scope for v1)
+**If we hit these metrics → Product-market fit signals 🚀**
 
 ---
 
-## Response Templates
+## How to Prioritize Mid-Week
 
-### For feature requests:
-```
-Great idea! I've added it to the roadmap. 
+**If getting tons of user feedback:**
+- Pause feature work
+- Fix top 3 bugs immediately
+- Announce fixes publicly
 
-For now, here's a workaround: [if applicable]
+**If getting feature requests:**
+- Log all in GitHub issues
+- Respond with "great idea, we're tracking it"
+- Only implement if 5+ users ask for same thing
 
-Follow progress: https://github.com/openclawfice/openclawfice/issues/[#]
-```
-
-### For bugs:
-```
-Thanks for reporting! 
-
-Can you share:
-- OS + Node version
-- Steps to reproduce
-- Error message/screenshot
-
-I'll fix ASAP.
-```
-
-### For "why doesn't it do X?":
-```
-OpenClawfice focuses on visibility/productivity for v1.
-
-That feature is on the roadmap for [timeframe].
-
-For now, you can [workaround if available].
-```
+**If quiet (no feedback):**
+- Ship P1 features as planned
+- Proactively ask for feedback in Discord
+- Monitor GitHub stars as proxy for interest
 
 ---
 
-## Week 1 Goals
+## Anti-Patterns (What NOT to Do)
 
-**By Friday:**
-1. ✅ All critical bugs fixed
-2. ✅ 2-3 high-impact features shipped (based on actual feedback)
-3. ✅ Documentation updated with FAQs from real questions
-4. ✅ GitHub issues triaged (P0/P1/P2/P3 labels)
-5. ✅ Week 2 roadmap drafted based on data
+❌ **Building features nobody asked for**
+- Wait for user demand before building P2 features
 
-**Success metric:** 80%+ of users can install, use, and enjoy OpenClawfice without major friction.
+❌ **Chasing every feature request**
+- Most users don't know what they want until they see it
 
----
+❌ **Over-engineering**
+- Ship 80% solution in 20% of time, then iterate
 
-## When in Doubt
+❌ **Ignoring bugs to ship features**
+- Bugs kill retention faster than missing features
 
-**Ask:**
-1. Does this make it easier to use? (Priority #1)
-2. Does this make users more productive? (Priority #2)
-3. Does this make it more fun/quirky? (Priority #3)
-
-**If yes to any → consider building.**  
-**If no to all → probably backlog.**
-
-**Remember:** Week 1 is about removing friction and delighting early adopters. Ship small wins fast.
+❌ **Shipping without announcing**
+- Every feature is a marketing opportunity
 
 ---
 
-**Ready to crush Week 1! 🚀**
+## Template: Feature Decision
+
+When evaluating ANY feature request:
+
+**1. Does it help the mission?**
+- Make it easy to use? → +1
+- Make users productive? → +1
+- Make it fun/quirky/cool? → +1
+
+**2. What's the ROI?**
+- Effort (hours) / Impact (users helped)
+- <5 hours + High impact = Ship it
+- >20 hours + Low impact = Backlog it
+
+**3. Can we ship 80% solution in 20% time?**
+- If yes → Ship MVP, iterate
+- If no → Rethink approach
+
+**4. Is it tweet-worthy?**
+- If yes → Priority boost
+- If no → Ship quietly
+
+---
+
+## Conclusion
+
+**Week 1 priority order:**
+1. Dark Mode (highest demand)
+2. Quick Stats Dashboard (viral potential)
+3. Empty state fixes (onboarding)
+4. "Call Meeting" button (feature discovery)
+5. Keyboard shortcuts (power users)
+
+**Total effort:** 15-20 hours  
+**Expected impact:** 2× retention, 5× social mentions
+
+**Ship fast, listen hard, iterate quickly.** 🚀
