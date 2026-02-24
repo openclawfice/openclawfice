@@ -276,6 +276,106 @@ function CooldownTimer({ targetMs }: { targetMs: number }) {
   );
 }
 
+// Generate unique NPC visual traits from agent ID (deterministic)
+type HairStyle = 'classic' | 'spiky' | 'long' | 'mohawk' | 'bald' | 'afro' | 'bob' | 'ponytail';
+type Accessory = 'none' | 'glasses' | 'headphones' | 'cap' | 'earring';
+
+function getNpcTraits(id: string) {
+  // Multiple independent hashes for uncorrelated trait selection
+  const hash1 = id.split('').reduce((a, b) => ((a << 5) - a) + b.charCodeAt(0), 0) >>> 0;
+  const hash2 = id.split('').reduce((a, b) => ((a << 7) + a) ^ b.charCodeAt(0), 5381) >>> 0;
+  const hash3 = id.split('').reduce((a, b) => a * 31 + b.charCodeAt(0), 7) >>> 0;
+  
+  const skinTones = ['#e8c4a0', '#f5d6b8', '#d4a574', '#c68c53', '#a0673c', '#7b4b2a', '#f0dcc8', '#e0b896'];
+  const hairColors = ['#4a3728', '#1a1a2e', '#8b4513', '#d4a017', '#c0392b', '#2c3e50', '#7f8c8d', '#e8dacc', '#5c2d91', '#2ecc71'];
+  const hairStyles: HairStyle[] = ['classic', 'spiky', 'long', 'mohawk', 'bald', 'afro', 'bob', 'ponytail'];
+  const accessories: Accessory[] = ['none', 'glasses', 'headphones', 'cap', 'earring', 'none'];
+  const pantsColors = ['#334155', '#1e293b', '#3b4252', '#4c566a', '#2d3748', '#1a202c', '#374151', '#2e1065'];
+  
+  return {
+    skinColor: skinTones[hash1 % skinTones.length],
+    hairColor: hairColors[hash2 % hairColors.length],
+    hairStyle: hairStyles[hash3 % hairStyles.length],
+    accessory: accessories[(hash1 + hash2) % accessories.length],
+    pantsColor: pantsColors[hash3 % pantsColors.length],
+  };
+}
+
+function NpcHair({ style, s, hairColor }: { style: HairStyle; s: number; hairColor: string }) {
+  switch (style) {
+    case 'spiky':
+      return (<>
+        <div style={{ position: 'absolute', top: -s * 0.5, left: s * 1.5, width: s * 5, height: s * 2.5, background: hairColor, borderRadius: `${s * 1.5}px ${s * 1.5}px ${s * 0.3}px ${s * 0.3}px` }} />
+        {/* Spikes */}
+        <div style={{ position: 'absolute', top: -s * 1.2, left: s * 2, width: s * 1.2, height: s * 1.5, background: hairColor, borderRadius: `${s}px ${s}px 0 0`, transform: 'rotate(-15deg)' }} />
+        <div style={{ position: 'absolute', top: -s * 1.5, left: s * 3.5, width: s * 1.2, height: s * 1.8, background: hairColor, borderRadius: `${s}px ${s}px 0 0` }} />
+        <div style={{ position: 'absolute', top: -s * 1.2, left: s * 5, width: s * 1.2, height: s * 1.5, background: hairColor, borderRadius: `${s}px ${s}px 0 0`, transform: 'rotate(15deg)' }} />
+      </>);
+    case 'long':
+      return (<>
+        <div style={{ position: 'absolute', top: 0, left: s * 0.5, width: s * 7, height: s * 2.5, background: hairColor, borderRadius: `${s * 1.5}px ${s * 1.5}px ${s * 0.3}px ${s * 0.3}px` }} />
+        {/* Side locks */}
+        <div style={{ position: 'absolute', top: s * 1.5, left: s * 0.2, width: s * 1.2, height: s * 4, background: hairColor, borderRadius: `0 0 ${s * 0.5}px ${s * 0.5}px` }} />
+        <div style={{ position: 'absolute', top: s * 1.5, left: s * 6.6, width: s * 1.2, height: s * 4, background: hairColor, borderRadius: `0 0 ${s * 0.5}px ${s * 0.5}px` }} />
+      </>);
+    case 'mohawk':
+      return (
+        <div style={{ position: 'absolute', top: -s * 0.8, left: s * 2.8, width: s * 2.5, height: s * 3, background: hairColor, borderRadius: `${s * 1.5}px ${s * 1.5}px ${s * 0.3}px ${s * 0.3}px` }} />
+      );
+    case 'bald':
+      return (
+        <div style={{ position: 'absolute', top: s * 0.8, left: s * 1.2, width: s * 5.6, height: s * 1, background: hairColor, opacity: 0.3, borderRadius: `${s * 1}px ${s * 1}px 0 0` }} />
+      );
+    case 'afro':
+      return (
+        <div style={{ position: 'absolute', top: -s * 1.5, left: s * 0.2, width: s * 7.6, height: s * 4.5, background: hairColor, borderRadius: '50%' }} />
+      );
+    case 'bob':
+      return (<>
+        <div style={{ position: 'absolute', top: 0, left: s * 0.5, width: s * 7, height: s * 2.5, background: hairColor, borderRadius: `${s * 1.5}px ${s * 1.5}px ${s * 0.5}px ${s * 0.5}px` }} />
+        <div style={{ position: 'absolute', top: s * 1.5, left: s * 0.3, width: s * 1.5, height: s * 2.5, background: hairColor, borderRadius: `0 0 ${s * 0.8}px ${s * 0.8}px` }} />
+        <div style={{ position: 'absolute', top: s * 1.5, left: s * 6.2, width: s * 1.5, height: s * 2.5, background: hairColor, borderRadius: `0 0 ${s * 0.8}px ${s * 0.8}px` }} />
+      </>);
+    case 'ponytail':
+      return (<>
+        <div style={{ position: 'absolute', top: 0, left: s, width: s * 6, height: s * 2.5, background: hairColor, borderRadius: `${s * 1.5}px ${s * 1.5}px ${s * 0.3}px ${s * 0.3}px` }} />
+        <div style={{ position: 'absolute', top: s * 1, left: s * 6.5, width: s * 1.5, height: s * 3.5, background: hairColor, borderRadius: `0 ${s}px ${s * 0.5}px 0` }} />
+      </>);
+    default: // classic
+      return (
+        <div style={{ position: 'absolute', top: 0, left: s, width: s * 6, height: s * 2.5, background: hairColor, borderRadius: `${s * 1.5}px ${s * 1.5}px ${s * 0.3}px ${s * 0.3}px` }} />
+      );
+  }
+}
+
+function NpcAccessory({ accessory, s, shirtColor }: { accessory: Accessory; s: number; shirtColor: string }) {
+  switch (accessory) {
+    case 'glasses':
+      return (<>
+        <div style={{ position: 'absolute', top: s * 2.3, left: s * 1.5, width: s * 2, height: s * 1.2, border: `${s * 0.25}px solid #94a3b8`, borderRadius: s * 0.3, background: 'rgba(148,163,184,0.15)' }} />
+        <div style={{ position: 'absolute', top: s * 2.3, left: s * 4.5, width: s * 2, height: s * 1.2, border: `${s * 0.25}px solid #94a3b8`, borderRadius: s * 0.3, background: 'rgba(148,163,184,0.15)' }} />
+        <div style={{ position: 'absolute', top: s * 2.7, left: s * 3.5, width: s * 1, height: s * 0.25, background: '#94a3b8' }} />
+      </>);
+    case 'headphones':
+      return (<>
+        <div style={{ position: 'absolute', top: -s * 0.3, left: s * 0.3, width: s * 7.4, height: s * 3, border: `${s * 0.35}px solid #475569`, borderRadius: `${s * 4}px ${s * 4}px 0 0`, borderBottom: 'none' }} />
+        <div style={{ position: 'absolute', top: s * 2, left: s * 0, width: s * 1.2, height: s * 1.5, background: '#475569', borderRadius: s * 0.4 }} />
+        <div style={{ position: 'absolute', top: s * 2, left: s * 6.8, width: s * 1.2, height: s * 1.5, background: '#475569', borderRadius: s * 0.4 }} />
+      </>);
+    case 'cap':
+      return (<>
+        <div style={{ position: 'absolute', top: -s * 0.3, left: s * 0.5, width: s * 7, height: s * 1.8, background: shirtColor, borderRadius: `${s * 1}px ${s * 1}px ${s * 0.2}px ${s * 0.2}px`, filter: 'brightness(0.8)' }} />
+        <div style={{ position: 'absolute', top: s * 1, left: -s * 0.3, width: s * 4, height: s * 0.6, background: shirtColor, borderRadius: `${s * 0.3}px 0 0 ${s * 0.3}px`, filter: 'brightness(0.7)' }} />
+      </>);
+    case 'earring':
+      return (
+        <div style={{ position: 'absolute', top: s * 3.5, left: s * 6.8, width: s * 0.5, height: s * 0.5, background: '#fbbf24', borderRadius: '50%', boxShadow: `0 0 ${s * 0.3}px #fbbf24` }} />
+      );
+    default:
+      return null;
+  }
+}
+
 function NPC({ agent, size = 1, onClick, forceThought, flipped, hasCelebration }: {
   agent: Agent;
   size?: number;
@@ -298,9 +398,12 @@ function NPC({ agent, size = 1, onClick, forceThought, flipped, hasCelebration }
     return () => clearTimeout(hideTimer);
   }, [displayThought]);
 
-  const skinColor = agent.skinColor || '#e8c4a0';
+  // Generate unique traits from agent ID
+  const traits = getNpcTraits(agent.id);
+  const skinColor = agent.skinColor || traits.skinColor;
   const shirtColor = agent.shirtColor || agent.color || randomColor(agent.id);
-  const hairColor = agent.hairColor || '#4a3728';
+  const hairColor = agent.hairColor || traits.hairColor;
+  const pantsColor = traits.pantsColor;
 
   return (
     <div
@@ -347,16 +450,8 @@ function NPC({ agent, size = 1, onClick, forceThought, flipped, hasCelebration }
         animation: 'npcBob 2s ease-in-out infinite',
         ...(flipped ? { transform: 'scaleX(-1)' } : {}),
       }}>
-        {/* Hair */}
-        <div style={{
-          position: 'absolute',
-          top: 0,
-          left: s,
-          width: s * 6,
-          height: s * 2.5,
-          background: hairColor,
-          borderRadius: `${s * 1.5}px ${s * 1.5}px ${s * 0.3}px ${s * 0.3}px`,
-        }} />
+        {/* Hair — unique style per agent */}
+        <NpcHair style={traits.hairStyle} s={s} hairColor={hairColor} />
         {/* Head */}
         <div style={{
           position: 'absolute',
@@ -367,6 +462,8 @@ function NPC({ agent, size = 1, onClick, forceThought, flipped, hasCelebration }
           background: skinColor,
           borderRadius: s * 0.5,
         }} />
+        {/* Accessory — unique per agent */}
+        <NpcAccessory accessory={traits.accessory} s={s} shirtColor={shirtColor} />
         {/* Eyes */}
         <div style={{
           position: 'absolute',
@@ -437,14 +534,14 @@ function NPC({ agent, size = 1, onClick, forceThought, flipped, hasCelebration }
           background: shirtColor,
           borderRadius: s * 0.5,
         }} />
-        {/* Legs */}
+        {/* Legs — unique pants color */}
         <div style={{
           position: 'absolute',
           top: s * 8.5,
           left: s * 1,
           width: s * 2.2,
           height: s * 2,
-          background: '#334155',
+          background: pantsColor,
           borderRadius: `0 0 ${s * 0.4}px ${s * 0.4}px`,
         }} />
         <div style={{
@@ -453,7 +550,7 @@ function NPC({ agent, size = 1, onClick, forceThought, flipped, hasCelebration }
           left: s * 4.8,
           width: s * 2.2,
           height: s * 2,
-          background: '#334155',
+          background: pantsColor,
           borderRadius: `0 0 ${s * 0.4}px ${s * 0.4}px`,
         }} />
       </div>
@@ -1694,7 +1791,8 @@ export default function HomePage() {
   // Track new chat messages and sync thought bubbles
   useEffect(() => {
     if (chatLog.length > lastSeenChatCount) {
-      if (lastSeenChatCount > 0) sfx.play('message', 5000); // Don't play on initial load, debounce 5s
+      // Only play message sound in real mode (not demo) to avoid constant chimes
+      if (lastSeenChatCount > 0 && !isDemoMode) sfx.play('message', 5000);
       setLastSeenChatCount(chatLog.length);
       const lastMsg = chatLog[chatLog.length - 1];
       if (lastMsg) {
