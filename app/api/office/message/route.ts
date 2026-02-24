@@ -3,6 +3,7 @@ import { spawn } from 'child_process';
 import { join } from 'path';
 import { homedir } from 'os';
 import { readFileSync, writeFileSync, existsSync } from 'fs';
+import { sanitizeMessage, validateAgentId, validateAgentIdArray } from '@/lib/input-validation';
 
 // Find openclaw binary: check PATH first, then common install locations
 function findOpenclawBin(): string {
@@ -74,41 +75,67 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { agentId, message, broadcast, agentIds } = body;
 
-    if (!message || message.trim().length === 0) {
+    // Validate and sanitize message
+    if (!message || typeof message !== 'string') {
       return NextResponse.json({ error: 'Message is required' }, { status: 400 });
     }
+    
+    let sanitizedMessage: string;
+    try {
+      sanitizedMessage = sanitizeMessage(message);
+    } catch (err: any) {
+      return NextResponse.json({ error: err.message }, { status: 400 });
+    }
+    
+    if (sanitizedMessage.length === 0) {
+      return NextResponse.json({ error: 'Message cannot be empty' }, { status: 400 });
+    }
 
-    if (broadcast && agentIds && Array.isArray(agentIds)) {
+    if (broadcast && agentIds) {
+      // Validate agent IDs array
+      if (!validateAgentIdArray(agentIds)) {
+        return NextResponse.json({ 
+          error: 'Invalid agent IDs array (max 100 agents, alphanumeric IDs only)' 
+        }, { status: 400 });
+      }
+      
       // Broadcast to multiple agents
       for (const id of agentIds) {
-        sendToAgentAsync(id, message);
+        sendToAgentAsync(id, sanitizedMessage);
       }
       
       // Add to water cooler chat log so it appears in UI
-      addToChatLog('You', message);
+      addToChatLog('You', sanitizedMessage);
       
       return NextResponse.json({ 
         success: true, 
         broadcast: true,
         agentCount: agentIds.length,
-        message 
+        message: sanitizedMessage 
       });
     }
 
+    // Validate agent ID for DM
     if (!agentId) {
       return NextResponse.json({ error: 'Agent ID is required for DM' }, { status: 400 });
     }
+    
+    if (!validateAgentId(agentId)) {
+      return NextResponse.json({ 
+        error: 'Invalid agent ID (alphanumeric with hyphens/underscores only)' 
+      }, { status: 400 });
+    }
 
     // Send message to specific agent (fire and forget)
-    sendToAgentAsync(agentId, message);
+    sendToAgentAsync(agentId, sanitizedMessage);
     
     // Also add to water cooler for visibility
-    addToChatLog('You', `→ ${agentId}: ${message}`);
+    addToChatLog('You', `→ ${agentId}: ${sanitizedMessage}`);
 
     return NextResponse.json({ 
       success: true, 
       agentId, 
-      message,
+      message: sanitizedMessage,
       sent: true 
     });
 
