@@ -31,9 +31,10 @@ echo ""
 # Original: 800x500
 # Crop: Remove right 240px (30%), keep left 560px
 # New dimensions: 560x500
+# Use palette optimization to keep file size small
 
 ffmpeg -y -i public/openclawfice-demo.gif \
-  -vf "crop=560:500:0:0" \
+  -vf "crop=560:500:0:0,split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse" \
   public/openclawfice-demo-cropped.gif
 
 echo ""
