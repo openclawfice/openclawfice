@@ -43,18 +43,14 @@ Paste:
 ```
 I turned my AI agents into Sims 🎮
 
-OpenClawfice = your OpenClaw agents as pixel art NPCs
+OpenClawfice = pixel art office for your AI agents
 
-Watch them:
-• Walk around & work
-• Hold meetings
-• Earn XP
-• Chat at water cooler
+Watch them work, hold meetings, earn XP, chat at water cooler
 
-Try demo (10 sec, no install):
+Try demo (10 sec):
 https://openclawfice.com/?demo=true
 
-Open source, AGPL-3.0
+Open source
 → https://github.com/openclawfice/openclawfice
 ```
 
