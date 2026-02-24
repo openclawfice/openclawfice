@@ -1996,6 +1996,31 @@ export default function HomePage() {
     };
   }, [isDemoMode]);
 
+  // Demo mode: ambient thought bubbles for NPC liveliness
+  useEffect(() => {
+    if (!isDemoMode) return;
+    const AMBIENT_THOUGHTS: Record<string, string[]> = {
+      nova: ['📊 Velocity looking good...', '🤔 Should we pivot?', '☕ Need more coffee', '📋 Sprint goal on track!', '💡 New feature idea...'],
+      forge: ['🔧 This bug is sneaky...', '💻 Clean code = happy code', '⚡ Optimizing...', '🤓 Stack trace says...', '🎯 Almost got it!'],
+      lens: ['🐛 Found another edge case', '✅ Tests passing!', '🔍 Investigating...', '🧪 Need more test data', '📝 Filing a ticket'],
+      pixel: ['🎨 These colors pop!', '✨ Pixel perfect!', '🖌️ Needs more contrast', '💜 Love this palette', '🤩 This animation is 🔥'],
+      cipher: ['🚀 Deploy looks clean', '📊 Metrics are healthy', '🔒 Security check done', '⚡ Response time: 42ms', '🛡️ All systems nominal'],
+    };
+    const triggerThought = () => {
+      const currentAgents = agentsRef.current;
+      if (currentAgents.length === 0) return;
+      const agent = currentAgents[Math.floor(Math.random() * currentAgents.length)];
+      if (!agent) return;
+      const thoughts = AMBIENT_THOUGHTS[agent.id] || AMBIENT_THOUGHTS.nova;
+      const thought = thoughts[Math.floor(Math.random() * thoughts.length)];
+      setActiveThought({ agentId: agent.id, text: thought });
+      setTimeout(() => setActiveThought(null), 4000);
+    };
+    const firstTimeout = setTimeout(triggerThought, 3000);
+    const interval = setInterval(triggerThought, 7000);
+    return () => { clearTimeout(firstTimeout); clearInterval(interval); };
+  }, [isDemoMode]);
+
   const loadArchive = async (reset = false) => {
     setArchiveLoading(true);
     try {
