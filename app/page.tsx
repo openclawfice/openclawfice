@@ -21,27 +21,28 @@ import { BootSequence } from '../components/BootSequence';
 
 
 function Clock() {
-  const [time, setTime] = useState(new Date());
+  const [timeLabel, setTimeLabel] = useState('--:--');
   useEffect(() => {
-    const i = setInterval(() => setTime(new Date()), 1000);
+    const format = () =>
+      new Date().toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        timeZone: 'America/New_York',
+      });
+    setTimeLabel(format());
+    const i = setInterval(() => setTimeLabel(format()), 1000);
     return () => clearInterval(i);
   }, []);
   return (
     <div style={{ fontFamily: '"Press Start 2P", monospace', fontSize: 9, color: '#64748b' }}>
-      {time.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', timeZone: 'America/New_York' })}
+      {timeLabel}
     </div>
   );
 }
 
-const renderCount = { current: 0 };
-const renderLog: { ts: number; delta: number }[] = [];
+let moduleInitialLoaded = false;
 
 export default function HomePage() {
-  renderCount.current++;
-  const now = performance.now();
-  const last = renderLog.length > 0 ? renderLog[renderLog.length - 1].ts : now;
-  renderLog.push({ ts: now, delta: now - last });
-  if (renderLog.length > 50) renderLog.shift();
 
   const { isDemoMode, getApiPath } = useDemoMode();
   const sfx = useRetroSFX();
@@ -96,17 +97,26 @@ export default function HomePage() {
   const [autoworkPolicies, setAutoworkPolicies] = useState<Record<string, { enabled: boolean; intervalMs: number; directive: string; lastSentAt: number }>>({});
   const [pendingAutowork, setPendingAutowork] = useState<Record<string, Partial<{ enabled: boolean; intervalMs: number; directive: string }>>>({});
   const [showSettings, setShowSettings] = useState(false);
-  const [sfxEnabled, setSfxEnabled] = useState(() => typeof window !== 'undefined' ? localStorage.getItem('openclawfice-sfx') === 'on' : false);
+  const [sfxEnabled, setSfxEnabled] = useState(false);
   const [screenSize, setScreenSize] = useState<'mobile' | 'tablet' | 'desktop'>('desktop');
   const [githubStars, setGithubStars] = useState<number | null>(null);
-  const [showBoot, setShowBoot] = useState(() => {
-    // Only show boot sequence on first visit (not every page load)
-    if (typeof window === 'undefined') return false;
+  const [showBoot, setShowBoot] = useState(false);
+  const [nowMs, setNowMs] = useState(0);
+
+  useEffect(() => {
     const seen = sessionStorage.getItem('openclawfice-boot-seen');
-    if (seen) return false;
-    sessionStorage.setItem('openclawfice-boot-seen', 'true');
-    return true;
-  });
+    if (!seen) {
+      sessionStorage.setItem('openclawfice-boot-seen', 'true');
+      setShowBoot(true);
+    }
+    if (localStorage.getItem('openclawfice-sfx') === 'on') setSfxEnabled(true);
+  }, []);
+
+  useEffect(() => {
+    setNowMs(Date.now());
+    const i = setInterval(() => setNowMs(Date.now()), 1000);
+    return () => clearInterval(i);
+  }, []);
 
   // Detect screen size for responsive layout
   useEffect(() => {
@@ -122,14 +132,43 @@ export default function HomePage() {
   }, []);
 
   // Initial data load — single effect, single render batch
-  const initialLoaded = useRef(false);
   useEffect(() => {
-    if (initialLoaded.current) return;
-    initialLoaded.current = true;
+    if (moduleInitialLoaded) return;
+    moduleInitialLoaded = true;
     const load = async () => {
+      const starsPromise = (() => {
+        try {
+          const cached = localStorage.getItem('openclawfice-stars-cache');
+          if (cached) {
+            const parsed = JSON.parse(cached) as { stars?: number; ts?: number };
+            if (
+              typeof parsed?.stars === 'number' &&
+              typeof parsed?.ts === 'number' &&
+              Date.now() - parsed.ts < 5 * 60 * 1000
+            ) {
+              return Promise.resolve({ stars: parsed.stars, cached: true });
+            }
+          }
+        } catch {}
+
+        return fetch('/api/github/stars')
+          .then(r => r.json())
+          .then(data => {
+            if (typeof data?.stars === 'number') {
+              try {
+                localStorage.setItem(
+                  'openclawfice-stars-cache',
+                  JSON.stringify({ stars: data.stars, ts: Date.now() })
+                );
+              } catch {}
+            }
+            return data;
+          });
+      })();
+
       const [configRes, starsRes, officeRes, meetingRes, actionsRes, archiveRes, autoworkRes] = await Promise.allSettled([
         secureFetch(getApiPath('/api/office/config')).then(r => r.json()),
-        fetch('/api/github/stars').then(r => r.json()),
+        starsPromise,
         secureFetch(getApiPath('/api/office')).then(r => r.json()),
         secureFetch(getApiPath('/api/office/meeting')).then(r => r.json()),
         secureFetch(getApiPath('/api/office/actions')).then(r => r.json()),
@@ -827,10 +866,8 @@ export default function HomePage() {
   const roomPadding = isMobile ? '16px 6px 4px' : '24px 8px 6px';
   const baseFontSize = isMobile ? 10 : isTablet ? 9 : 8;
   const headerFontSize = isMobile ? 12 : 14;
-
-  const recentRenders = renderLog.slice(-20);
-  const rendersPerSec = renderLog.filter(r => now - r.ts < 1000).length;
-  const rendersLast5s = renderLog.filter(r => now - r.ts < 5000).length;
+  const workRoomSingleRowCapacity = isMobile ? 2 : isTablet ? 3 : 4;
+  const isSingleWorkRow = working.length > 0 && working.length <= workRoomSingleRowCapacity;
 
   return (
     <div style={{
@@ -840,30 +877,6 @@ export default function HomePage() {
       color: '#e2e8f0',
       fontFamily: 'system-ui',
     }}>
-      {/* Debug Render Monitor */}
-      <div style={{
-        position: 'fixed',
-        top: 4,
-        left: 4,
-        zIndex: 99999,
-        background: rendersPerSec > 3 ? 'rgba(239,68,68,0.95)' : rendersPerSec > 1 ? 'rgba(245,158,11,0.95)' : 'rgba(16,185,129,0.95)',
-        color: '#fff',
-        borderRadius: 6,
-        padding: '4px 8px',
-        fontFamily: 'monospace',
-        fontSize: 10,
-        lineHeight: 1.4,
-        pointerEvents: 'none',
-        minWidth: 140,
-      }}>
-        <div style={{ fontWeight: 700 }}>RENDERS: {renderCount.current}</div>
-        <div>{rendersPerSec}/sec | {rendersLast5s}/5s</div>
-        <div style={{ fontSize: 8, marginTop: 2, opacity: 0.8 }}>
-          {recentRenders.slice(-5).map((r, i) => (
-            <span key={i}>{r.delta < 10 ? '<10' : Math.round(r.delta)}ms </span>
-          ))}
-        </div>
-      </div>
       <link
         href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap"
         rel="stylesheet"
@@ -1205,7 +1218,7 @@ export default function HomePage() {
             borderColor="#166534"
             roomType="work"
             dataTour="work-room"
-            style={{ flex: '1 1 auto' }}
+            style={{ flex: isSingleWorkRow ? '0 0 auto' : '1 1 auto' }}
           >
             <div style={{
               display: 'flex',
@@ -1213,7 +1226,7 @@ export default function HomePage() {
               gap: 24,
               justifyContent: 'center',
               padding: '12px 0 4px',
-              minHeight: 80,
+              minHeight: isSingleWorkRow ? 56 : 80,
             }}>
               {working.length > 0 ? (
                 working.map((a, idx) => (
@@ -1355,7 +1368,8 @@ export default function HomePage() {
                         fontFamily: '"Press Start 2P", monospace',
                       }}>
                         {(() => {
-                          const elapsed = Date.now() - (meeting.startedAt || Date.now());
+                          const startedAt = meeting.startedAt || nowMs;
+                          const elapsed = Math.max(0, nowMs - startedAt);
                           const mins = Math.floor(elapsed / 60000);
                           const secs = Math.floor((elapsed % 60000) / 1000);
                           return `${mins}:${secs.toString().padStart(2, '0')} elapsed`;
@@ -1869,7 +1883,7 @@ export default function HomePage() {
                     {/* Accomplishments for this date */}
                     {accs.map((a, i) => {
                   const timeAgo = (() => {
-                    const mins = Math.floor((Date.now() - a.timestamp) / 60000);
+                    const mins = Math.floor((nowMs - a.timestamp) / 60000);
                     if (mins < 1) return 'just now';
                     if (mins < 60) return `${mins}m ago`;
                     const hours = Math.floor(mins / 60);
@@ -1878,7 +1892,7 @@ export default function HomePage() {
                   })();
                   const hasMedia = a.screenshot && (a.screenshot.endsWith('.mp4') || a.screenshot.endsWith('.webm') || a.screenshot.endsWith('.mov'));
                   const hasScreenshot = !!a.screenshot;
-                  const isRecording = !hasScreenshot && (Date.now() - a.timestamp) < 30000;
+                  const isRecording = !hasScreenshot && (nowMs - a.timestamp) < 30000;
                   return (
                     <div
                       key={`${a.id}-${i}`}
@@ -1970,7 +1984,7 @@ export default function HomePage() {
                     History ({archiveTotal} archived)
                   </div>
                   {archivedAccomplishments.map((a, i) => {
-                    const dateStr = new Date(a.timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+                    const dateStr = new Date(a.timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
                     return (
                       <div
                         key={`arch-${a.id || i}`}
@@ -2531,7 +2545,7 @@ export default function HomePage() {
                   {selectedAccomplishment.title}
                 </div>
                 <div style={{ fontSize: 11, color: '#6366f1', fontWeight: 600 }}>
-                  {selectedAccomplishment.who} · {new Date(selectedAccomplishment.timestamp).toLocaleString()}
+                  {selectedAccomplishment.who} · {new Date(selectedAccomplishment.timestamp).toLocaleString('en-US')}
                 </div>
               </div>
             </div>
