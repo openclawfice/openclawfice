@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OpenClawfice Social Card Generator</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #0f172a;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    
+    .container {
+      max-width: 1400px;
+      width: 100%;
+    }
+    
+    .controls {
+      background: #1e293b;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+    
+    .controls h2 {
+      color: #f1f5f9;
+      font-size: 18px;
+      margin-bottom: 16px;
+    }
+    
+    .control-group {
+      margin-bottom: 16px;
+    }
+    
+    .control-group label {
+      display: block;
+      color: #94a3b8;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+    
+    .control-group input,
+    .control-group select,
+    .control-group textarea {
+      width: 100%;
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 6px;
+      padding: 10px 12px;
+      color: #f1f5f9;
+      font-size: 14px;
+      font-family: inherit;
+    }
+    
+    .control-group textarea {
+      resize: vertical;
+      min-height: 80px;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+    
+    .btn {
+      background: #6366f1;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 12px 20px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-right: 8px;
+      transition: background 0.2s;
+    }
+    
+    .btn:hover {
+      background: #4f46e5;
+    }
+    
+    .btn-secondary {
+      background: #334155;
+    }
+    
+    .btn-secondary:hover {
+      background: #475569;
+    }
+    
+    /* Social Card Canvas */
+    #card-canvas {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 12px;
+      padding: 60px;
+      position: relative;
+      overflow: hidden;
+      width: 1200px;
+      height: 675px;
+      margin: 0 auto;
+    }
+    
+    #card-canvas.twitter {
+      width: 1200px;
+      height: 675px;
+    }
+    
+    #card-canvas.og {
+      width: 1200px;
+      height: 630px;
+    }
+    
+    #card-canvas.square {
+      width: 1200px;
+      height: 1200px;
+    }
+    
+    .card-content {
+      position: relative;
+      z-index: 2;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+    
+    .card-title {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 72px;
+      color: #ffffff;
+      text-shadow: 4px 4px 0 rgba(0,0,0,0.3);
+      margin-bottom: 24px;
+      line-height: 1.2;
+    }
+    
+    .card-tagline {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 24px;
+      color: #f1f5f9;
+      text-shadow: 2px 2px 0 rgba(0,0,0,0.3);
+      margin-bottom: 40px;
+      line-height: 1.5;
+      max-width: 900px;
+    }
+    
+    .card-url {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 20px;
+      color: #fbbf24;
+      text-shadow: 2px 2px 0 rgba(0,0,0,0.3);
+      background: rgba(0,0,0,0.2);
+      padding: 12px 24px;
+      border-radius: 8px;
+      border: 2px solid rgba(255,255,255,0.2);
+    }
+    
+    .pixel-grid {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: 
+        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 20px 20px;
+      z-index: 1;
+    }
+    
+    .instructions {
+      background: #1e293b;
+      border-radius: 12px;
+      padding: 24px;
+      margin-top: 24px;
+      color: #94a3b8;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    
+    .instructions h3 {
+      color: #f1f5f9;
+      margin-bottom: 12px;
+      font-size: 16px;
+    }
+    
+    .instructions code {
+      background: #0f172a;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: 'Monaco', 'Courier New', monospace;
+      font-size: 12px;
+      color: #fbbf24;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="controls">
+      <h2>🎨 Social Card Generator</h2>
+      
+      <div class="control-group">
+        <label>Platform</label>
+        <select id="platform" onchange="updatePlatform()">
+          <option value="twitter">Twitter Card (1200×675)</option>
+          <option value="og">Open Graph (1200×630)</option>
+          <option value="square">Instagram/LinkedIn (1200×1200)</option>
+        </select>
+      </div>
+      
+      <div class="control-group">
+        <label>Title</label>
+        <input type="text" id="title" value="OpenClawfice" oninput="updateCard()">
+      </div>
+      
+      <div class="control-group">
+        <label>Tagline</label>
+        <textarea id="tagline" oninput="updateCard()">Turn your AI agents
+into Sims 🎮</textarea>
+      </div>
+      
+      <div class="control-group">
+        <label>URL</label>
+        <input type="text" id="url" value="openclawfice.com" oninput="updateCard()">
+      </div>
+      
+      <div class="control-group">
+        <label>Gradient</label>
+        <select id="gradient" onchange="updateGradient()">
+          <option value="purple">Purple Dream</option>
+          <option value="ocean">Ocean Blue</option>
+          <option value="sunset">Sunset Orange</option>
+          <option value="forest">Forest Green</option>
+          <option value="cyberpunk">Cyberpunk Pink</option>
+          <option value="retro">Retro Yellow</option>
+        </select>
+      </div>
+      
+      <button class="btn" onclick="downloadCard()">📸 Screenshot (Cmd+Shift+4)</button>
+      <button class="btn btn-secondary" onclick="resetDefaults()">↺ Reset to Defaults</button>
+    </div>
+    
+    <div id="card-canvas" class="twitter">
+      <div class="pixel-grid"></div>
+      <div class="card-content">
+        <div class="card-title" id="display-title">OpenClawfice</div>
+        <div class="card-tagline" id="display-tagline">Turn your AI agents<br>into Sims 🎮</div>
+        <div class="card-url" id="display-url">openclawfice.com</div>
+      </div>
+    </div>
+    
+    <div class="instructions">
+      <h3>📸 How to Create Social Card:</h3>
+      <ol>
+        <li>Customize the text and gradient above</li>
+        <li>Press <code>Cmd+Shift+4</code> on Mac</li>
+        <li>Click and drag to select the card area</li>
+        <li>Image saves to Desktop automatically</li>
+        <li>Upload to Twitter/Discord/Reddit!</li>
+      </ol>
+      
+      <h3 style="margin-top: 20px;">💡 Tips:</h3>
+      <ul>
+        <li><strong>For Twitter:</strong> Use 1200×675 (current default)</li>
+        <li><strong>For Discord:</strong> Works best with purple/cyberpunk gradient</li>
+        <li><strong>For Reddit:</strong> Try square format (1200×1200)</li>
+        <li><strong>Keep text short:</strong> 2-3 lines max for readability</li>
+        <li><strong>Test dark mode:</strong> All gradients work on dark backgrounds</li>
+      </ul>
+    </div>
+  </div>
+  
+  <script>
+    const gradients = {
+      purple: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      ocean: 'linear-gradient(135deg, #2E3192 0%, #1BFFFF 100%)',
+      sunset: 'linear-gradient(135deg, #FA8BFF 0%, #2BD2FF 90%, #2BFF88 100%)',
+      forest: 'linear-gradient(135deg, #0F2027 0%, #203A43 50%, #2C5364 100%)',
+      cyberpunk: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+      retro: 'linear-gradient(135deg, #f6d365 0%, #fda085 100%)'
+    };
+    
+    function updateCard() {
+      const title = document.getElementById('title').value;
+      const tagline = document.getElementById('tagline').value;
+      const url = document.getElementById('url').value;
+      
+      document.getElementById('display-title').textContent = title;
+      document.getElementById('display-tagline').innerHTML = tagline.replace(/\n/g, '<br>');
+      document.getElementById('display-url').textContent = url;
+    }
+    
+    function updateGradient() {
+      const gradient = document.getElementById('gradient').value;
+      document.getElementById('card-canvas').style.background = gradients[gradient];
+    }
+    
+    function updatePlatform() {
+      const platform = document.getElementById('platform').value;
+      const canvas = document.getElementById('card-canvas');
+      canvas.className = platform;
+    }
+    
+    function resetDefaults() {
+      document.getElementById('title').value = 'OpenClawfice';
+      document.getElementById('tagline').value = 'Turn your AI agents\ninto Sims 🎮';
+      document.getElementById('url').value = 'openclawfice.com';
+      document.getElementById('gradient').value = 'purple';
+      document.getElementById('platform').value = 'twitter';
+      updateCard();
+      updateGradient();
+      updatePlatform();
+    }
+    
+    function downloadCard() {
+      alert('Use Cmd+Shift+4 (Mac) or Snipping Tool (Windows) to screenshot the card above!\n\nThe screenshot will save to your Desktop.');
+    }
+    
+    // Initialize
+    updateCard();
+  </script>
+</body>
+</html>
