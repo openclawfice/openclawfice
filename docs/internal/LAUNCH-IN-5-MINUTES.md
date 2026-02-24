@@ -81,7 +81,7 @@ Watch them:
 Try the demo (10 sec, no install):
 https://openclawfice.com/?demo=true
 
-Open source, MIT license
+Open source, AGPL-3.0 license
 → https://github.com/openclawfice/openclawfice
 
 [Attach: GIF or screenshot from public/screenshot.png]

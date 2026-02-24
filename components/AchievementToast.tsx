@@ -100,7 +100,7 @@ function AchievementToastItem({ toast, onDismiss }: AchievementToastProps) {
         @keyframes toastSlideIn {
           0% {
             opacity: 0;
-            transform: translateY(20px) scale(0.95);
+            transform: translateY(-20px) scale(0.95);
           }
           100% {
             opacity: 1;
@@ -114,7 +114,7 @@ function AchievementToastItem({ toast, onDismiss }: AchievementToastProps) {
           }
           100% {
             opacity: 0;
-            transform: translateY(20px) scale(0.95);
+            transform: translateY(-20px) scale(0.95);
           }
         }
       `}</style>
@@ -133,7 +133,7 @@ export function AchievementToastContainer({ toasts, onDismiss }: AchievementToas
   return (
     <div className="achievement-toast-container" style={{
       position: 'fixed',
-      bottom: 20,
+      top: 64,
       right: 20,
       zIndex: 9999,
       display: 'flex',

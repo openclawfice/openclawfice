@@ -80,7 +80,7 @@ Watch them:
 Try the demo (10 sec, no install):
 https://openclawfice.com/?demo=true
 
-Open source, MIT license
+Open source, AGPL-3.0 license
 → https://github.com/openclawfice/openclawfice
 
 [Attach: GIF showing agents moving, meeting room animation, plumbob colors]
@@ -101,7 +101,7 @@ OpenClawfice turns OpenClaw agents into NPCs with:
 Demo: https://openclawfice.com/?demo=true
 Repo: https://github.com/openclawfice/openclawfice
 
-MIT license, zero config, built over a weekend
+AGPL-3.0 license, zero config, built over a weekend
 
 [Attach: Split image - terminal logs vs colorful pixel office]
 ```
@@ -121,7 +121,7 @@ Features:
 
 Demo (no install): https://openclawfice.com/?demo=true
 
-Built it this weekend. Open source (MIT).
+Built it this weekend. Open source (AGPL-3.0).
 → https://github.com/openclawfice/openclawfice
 
 [Attach: GIF with meeting room animation or agents walking]
@@ -166,7 +166,7 @@ I run 5+ OpenClaw agents on my machine (coding, research, project management, et
 **Tech stack:**
 Next.js, TypeScript, pixel art sprites, Web Audio API for retro SFX. Runs on localhost:3333, reads from ~/.openclaw/.status/*.json.
 
-**Open source (MIT):**
+**Open source (AGPL-3.0):**
 https://github.com/openclawfice/openclawfice
 
 Built for fun. Feedback welcome! If this gets traction, I'll add more RPG elements (XP, skill trees, agent customization).
@@ -208,7 +208,7 @@ npx openclawfice
 Auto-discovers agents from `~/.openclaw/openclaw.json`. Zero config.
 
 **Tech:**
-Next.js, TypeScript, Web Audio API for retro sounds. MIT license.
+Next.js, TypeScript, Web Audio API for retro sounds. AGPL-3.0 license.
 
 **Repo:** https://github.com/openclawfice/openclawfice
 
@@ -240,7 +240,7 @@ Built it over a weekend because I was tired of staring at terminal logs. Feedbac
 - Retro SFX (8-bit sounds)
 
 **Stack:** Next.js, TypeScript, Web Audio API
-**License:** MIT (open source)
+**License:** AGPL-3.0 (open source)
 **Repo:** https://github.com/openclawfice/openclawfice
 
 Shipped it this weekend. Would love feedback! What features would you add?
@@ -278,7 +278,7 @@ OpenClawfice turns your OpenClaw agents into pixel art NPCs in a retro office da
 - Retro 8-bit sound effects
 
 🎮 Zero config - just run npx openclawfice
-🚀 Open source (MIT)
+🚀 Open source (AGPL-3.0)
 💻 Works on Mac/Linux/Windows
 
 Built over a weekend because terminal logs are boring. If you run local AI agents, this makes them way more fun to watch.
@@ -305,7 +305,7 @@ https://openclawfice.com/?demo=true (10 seconds, no account needed)
 - Next.js + TypeScript
 - Web Audio API for retro SFX
 - Reads from ~/.openclaw/.status/*.json
-- MIT license
+- AGPL-3.0 license
 
 **What's next?**
 If this gets traction, I'll add:
@@ -342,7 +342,7 @@ Demo: https://openclawfice.com/?demo=true (10 seconds, no install)
 **What makes it interesting:**
 - Solves real problem: visibility into what local agents are doing
 - Fun aesthetic: Sims-style pixel art + retro sounds
-- Open source (MIT)
+- Open source (AGPL-3.0)
 - Zero config
 
 Built it over a weekend. Already getting traction in OpenClaw community.
@@ -364,7 +364,7 @@ Tyler
 3. **Nostalgia** - References The Sims (emotional connection)
 4. **Problem → Solution** - "terminal logs suck" → "fun dashboard"
 5. **Social proof** - "built over a weekend", "getting traction"
-6. **Open source** - "MIT license" (builds trust)
+6. **Open source** - "AGPL-3.0 license" (builds trust)
 7. **Zero config** - "just run npx openclawfice" (removes friction)
 8. **Fun > Serious** - Playful tone, emoji, casual language
 
