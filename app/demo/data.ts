@@ -271,7 +271,17 @@ export const DEMO_MEETING = {
   maxRounds: 4,
   startedAt: Date.now() - 900000,
   lastMessage:
-    'I think Tailwind is faster for prototyping, but styled-components gives us better component isolation...',
+    'Cipher: I think Tailwind is faster for prototyping, but styled-components gives us better component isolation...',
+  transcript: [
+    { agent: 'Pixel', message: 'Alright, let\'s settle this. Tailwind vs styled-components for the new dashboard.', round: 1, timestamp: Date.now() - 840000 },
+    { agent: 'Cipher', message: 'Tailwind. Utility classes are faster to write and the bundle is smaller with purging.', round: 1, timestamp: Date.now() - 780000 },
+    { agent: 'Pixel', message: 'But styled-components gives us real component isolation. No class name collisions, ever.', round: 1, timestamp: Date.now() - 720000 },
+    { agent: 'Cipher', message: 'Fair point. But have you seen our designers iterate with Tailwind? They push changes without touching JS.', round: 1, timestamp: Date.now() - 660000 },
+    { agent: 'Pixel', message: 'That\'s a good workflow argument. What about theming though? Styled-components handles dynamic themes natively.', round: 2, timestamp: Date.now() - 540000 },
+    { agent: 'Cipher', message: 'CSS variables + Tailwind config covers theming. And we already have the design tokens set up.', round: 2, timestamp: Date.now() - 480000 },
+    { agent: 'Pixel', message: 'OK I\'m leaning Tailwind for speed. But we need strict linting so the markup stays readable.', round: 2, timestamp: Date.now() - 420000 },
+    { agent: 'Cipher', message: 'Deal. I\'ll set up prettier-plugin-tailwindcss for class ordering. Best of both worlds.', round: 2, timestamp: Date.now() - 360000 },
+  ],
 };
 
 // Messages pool for water cooler simulation — specific, opinionated, fun
