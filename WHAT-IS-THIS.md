@@ -252,7 +252,7 @@ Retro RPG aesthetics + 8-bit sound effects + XP celebrations make work feel less
 **Learn:**
 - [FIRST-5-MINUTES.md](./docs/FIRST-5-MINUTES.md) — Get productive in 5 minutes
 - [USE-CASES.md](./docs/USE-CASES.md) — Real-world workflows
-- [USER-SUCCESS-GUIDE.md](./USER-SUCCESS-GUIDE.md) — Measure ROI, track productivity gains
+- [USER-SUCCESS-GUIDE.md](./docs/USER-SUCCESS-GUIDE.md) — Measure ROI, track productivity gains
 
 **Customize:**
 - [CONFIGURING-YOUR-OFFICE.md](./docs/CONFIGURING-YOUR-OFFICE.md) — Agent colors, cooldowns, templates

@@ -14,9 +14,9 @@ Watch them work, chat, complete quests, and earn XP — like The Sims meets your
 
 ![OpenClawfice Demo](./public/openclawfice-demo.gif)
 
-> **New here?** Read [What is this?](./WHAT-IS-THIS.md) for a visual walkthrough, or [Why OpenClawfice?](./WHY-OPENCLAWFICE.md) if deciding whether to try it.
+> **New here?** Read [What is this?](./WHAT-IS-THIS.md) for a visual walkthrough, or [Why OpenClawfice?](./docs/WHY-OPENCLAWFICE.md) if deciding whether to try it.
 >
-> **Ready to launch?** See [Launch Day Checklist](./docs/LAUNCH-DAY-CHECKLIST.md) for final verification, then [Week One Guide](./WEEK-ONE-GUIDE.md) for Days 2-7.
+> **Ready to launch?** See [Launch Day Checklist](./docs/LAUNCH-DAY-CHECKLIST.md) for final verification, then [Week One Guide](./docs/WEEK-ONE-GUIDE.md) for Days 2-7.
 >
 > **[Try the live demo →](https://openclawfice.com/?demo=true)** No install needed. 10 seconds to get it.
 
@@ -39,13 +39,13 @@ cd ~/openclawfice && npm install && npm run dev
 
 Open **http://localhost:3333** — that's it. Zero config. Agents are auto-discovered.
 
-**Just installed?** Read [FIRST-5-MINUTES.md](./FIRST-5-MINUTES.md) for a quick walkthrough.
+**Just installed?** Read [FIRST-5-MINUTES.md](./docs/FIRST-5-MINUTES.md) for a quick walkthrough.
 
 **Having issues?** See [INSTALL.md](./INSTALL.md) for prerequisites and troubleshooting.
 
-**Want the cool stuff?** Check [Cool Features & Hidden Gems](./COOL-FEATURES.md) for fun, quirky, shareable moments.
+**Want the cool stuff?** Check [Cool Features & Hidden Gems](./docs/COOL-FEATURES.md) for fun, quirky, shareable moments.
 
-**Ready to get work done?** See [Get Productive in 10 Minutes](./GET-PRODUCTIVE.md) for real-world workflows and time-saving hacks.
+**Ready to get work done?** See [Get Productive in 10 Minutes](./docs/GET-PRODUCTIVE.md) for real-world workflows and time-saving hacks.
 
 ## What You Get
 
@@ -59,7 +59,7 @@ Open **http://localhost:3333** — that's it. Zero config. Agents are auto-disco
 | ⏱️ **Cooldown Timers** | See when idle agents will self-assign next |
 | ⭐ **XP & Leaderboard** | Agents earn XP for completed work. Top performers get medals |
 | 🗳️ **Quest Templates** | One-click workflow starters (ship MVP, debug prod, write docs…) |
-| ⌨️ **Keyboard Shortcuts** | `Esc`, `?`, `T`, `M`, `1-9` for power users ([full list](./KEYBOARD-SHORTCUTS.md)) |
+| ⌨️ **Keyboard Shortcuts** | `Esc`, `?`, `T`, `M`, `1-9` for power users ([full list](./docs/KEYBOARD-SHORTCUTS.md)) |
 | 📱 **Mobile Ready** | Works on any screen size |
 
 ## How It Works
@@ -107,13 +107,13 @@ PRs welcome! See [CONTRIBUTING.md](./CONTRIBUTING.md) and [docs/GOOD-FIRST-ISSUE
 
 ## Getting Value
 
-**New to OpenClawfice?** Read [USER-SUCCESS-GUIDE.md](./USER-SUCCESS-GUIDE.md) to learn:
+**New to OpenClawfice?** Read [USER-SUCCESS-GUIDE.md](./docs/USER-SUCCESS-GUIDE.md) to learn:
 - What productivity gains to expect (4.4 hours saved/week)
 - Daily workflow best practices
 - How to measure ROI
 - 30-day success plan
 
-**Looking for specific docs?** See [DOCUMENTATION-INDEX.md](./DOCUMENTATION-INDEX.md) - master index of all 30+ guides organized by use case, problem, and interest.
+**Looking for specific docs?** See [DOCUMENTATION-INDEX.md](./docs/DOCUMENTATION-INDEX.md) - master index of all 30+ guides organized by use case, problem, and interest.
 
 ## Troubleshooting
 

@@ -294,7 +294,7 @@ docker run -p 3333:3333 openclawfice/openclawfice:latest
 
 - **[FIRST-5-MINUTES.md](./docs/FIRST-5-MINUTES.md)** — Learn how to use your new office
 - **[USE-CASES.md](./docs/USE-CASES.md)** — Real-world workflows (debugging, shipping features, daily standups)
-- **[USER-SUCCESS-GUIDE.md](./USER-SUCCESS-GUIDE.md)** — Measure productivity gains, ROI tracking
+- **[USER-SUCCESS-GUIDE.md](./docs/USER-SUCCESS-GUIDE.md)** — Measure productivity gains, ROI tracking
 - **[CONFIGURING-YOUR-OFFICE.md](./docs/CONFIGURING-YOUR-OFFICE.md)** — Customize everything
 
 ---
