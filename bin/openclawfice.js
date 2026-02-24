@@ -300,6 +300,162 @@ if (command === 'sync-cooldowns') {
   return;
 }
 
+if (command === 'doctor' || command === '--doctor') {
+  console.log('\n🏥 OpenClawfice Doctor');
+  console.log('━━━━━━━━━━━━━━━━━━━━━━');
+  
+  const issues = [];
+  const warnings = [];
+  
+  // 1. Node.js version check
+  const nodeVersion = process.version;
+  const nodeMajor = parseInt(nodeVersion.slice(1).split('.')[0]);
+  if (nodeMajor >= 18) {
+    console.log(`✅ Node.js ${nodeVersion} (min v18)`);
+  } else {
+    console.log(`❌ Node.js ${nodeVersion} (requires v18+)`);
+    issues.push('Upgrade Node.js: https://nodejs.org');
+  }
+  
+  // 2. npm version check
+  try {
+    const { execSync } = require('child_process');
+    const npmVersion = execSync('npm --version', { encoding: 'utf-8' }).trim();
+    console.log(`✅ npm v${npmVersion}`);
+  } catch (err) {
+    console.log('❌ npm not found');
+    issues.push('Install npm');
+  }
+  
+  // 3. OpenClaw config check
+  const openclawConfigPath = join(homeDir, '.openclaw', 'openclaw.json');
+  let agentCount = 0;
+  if (fs.existsSync(openclawConfigPath)) {
+    try {
+      const config = JSON.parse(fs.readFileSync(openclawConfigPath, 'utf-8'));
+      agentCount = (config.agents?.list || []).length;
+      if (agentCount > 0) {
+        console.log(`✅ OpenClaw config found (${agentCount} agents)`);
+      } else {
+        console.log('⚠️  OpenClaw config found (0 agents)');
+        warnings.push('No agents configured in openclaw.json');
+      }
+    } catch (err) {
+      console.log('❌ OpenClaw config invalid JSON');
+      issues.push(`Fix JSON syntax in ${openclawConfigPath}`);
+    }
+  } else {
+    console.log('❌ OpenClaw config not found');
+    issues.push('Install OpenClaw: https://openclaw.ai');
+  }
+  
+  // 4. Auth token check
+  const tokenPath = join(homeDir, '.openclaw', '.openclawfice-token');
+  if (fs.existsSync(tokenPath)) {
+    try {
+      const stats = fs.statSync(tokenPath);
+      const mode = (stats.mode & parseInt('777', 8)).toString(8);
+      if (mode === '600') {
+        console.log('✅ Auth token exists (permissions: 0600)');
+      } else {
+        console.log(`⚠️  Auth token exists (permissions: 0${mode})`);
+        warnings.push(`Fix permissions: chmod 600 ${tokenPath}`);
+      }
+    } catch (err) {
+      console.log('❌ Cannot read auth token file');
+      issues.push(`Check file permissions: ${tokenPath}`);
+    }
+  } else {
+    console.log('⚠️  Auth token missing');
+    warnings.push('Token will be generated on first run');
+  }
+  
+  // 5. .status directory check
+  const statusDirPath = join(homeDir, '.openclaw', '.status');
+  if (fs.existsSync(statusDirPath)) {
+    try {
+      const testFile = join(statusDirPath, '.write-test');
+      fs.writeFileSync(testFile, 'test');
+      fs.unlinkSync(testFile);
+      console.log('✅ .status directory writable');
+    } catch (err) {
+      console.log('❌ .status directory not writable');
+      issues.push(`Fix permissions: chmod u+w ${statusDirPath}`);
+    }
+  } else {
+    console.log('⚠️  .status directory missing');
+    warnings.push('Will be created on first run');
+  }
+  
+  // 6. .next build directory check
+  const nextDir = join(packageRoot, '.next');
+  if (fs.existsSync(nextDir)) {
+    console.log('✅ .next directory exists (built)');
+  } else {
+    console.log('❌ .next directory missing');
+    issues.push('Build the project: npm run build');
+  }
+  
+  // 7. Server connectivity check (async)
+  const pArg = process.argv.find(a => a.startsWith('--port='));
+  const checkPort = pArg ? pArg.split('=')[1] : (process.env.PORT || '3333');
+  const http = require('http');
+  
+  const req = http.get(`http://localhost:${checkPort}/api/office`, { timeout: 2000 }, (res) => {
+    console.log(`✅ Server running on port ${checkPort}`);
+    printDoctorSummary(issues, warnings);
+  });
+  
+  req.on('error', (err) => {
+    if (err.code === 'ECONNREFUSED') {
+      console.log(`⚠️  Server not running on port ${checkPort}`);
+      warnings.push('Start the server: openclawfice');
+    } else if (err.code === 'EADDRINUSE') {
+      console.log(`❌ Port ${checkPort} is in use by another process`);
+      issues.push(`Kill the process or use: openclawfice --port=<other-port>`);
+    } else {
+      console.log(`❌ Cannot reach localhost:${checkPort}`);
+      issues.push(err.message);
+    }
+    printDoctorSummary(issues, warnings);
+  });
+  
+  req.on('timeout', () => {
+    req.destroy();
+    console.log(`⚠️  Server timeout on port ${checkPort}`);
+    warnings.push('Server may be unresponsive');
+    printDoctorSummary(issues, warnings);
+  });
+  
+  function printDoctorSummary(issues, warnings) {
+    console.log('');
+    
+    if (issues.length === 0 && warnings.length === 0) {
+      console.log('✨ Diagnosis: All systems operational!');
+      console.log('   Your office is in perfect health. +10 XP\n');
+      process.exit(0);
+    }
+    
+    if (warnings.length > 0) {
+      console.log(`⚠️  ${warnings.length} warning${warnings.length > 1 ? 's' : ''}:`);
+      warnings.forEach(w => console.log(`   • ${w}`));
+      console.log('');
+    }
+    
+    if (issues.length > 0) {
+      console.log(`❌ ${issues.length} issue${issues.length > 1 ? 's' : ''} found:`);
+      issues.forEach(i => console.log(`   • ${i}`));
+      console.log('');
+      process.exit(1);
+    } else {
+      console.log('💡 Suggestion: Address warnings to optimize your office.\n');
+      process.exit(0);
+    }
+  }
+  
+  return;
+}
+
 if (command === 'status' || command === '--status') {
   const https = require('https');
   const http = require('http');
@@ -533,6 +689,7 @@ Usage:
 Commands:
   (default)         Start the office dashboard server
   status            Check office health (party status, quests, uptime)
+  doctor            Diagnose common issues (Node, auth, ports, build)
   deploy            Deploy OFFICE.md to all agent workspaces
   sync-cooldowns    Sync cooldown config to OpenClaw cron jobs
   update            Upgrade to the latest version (+50 XP)
@@ -545,6 +702,7 @@ Options:
 Examples:
   openclawfice                    # Start server on port 3333
   openclawfice status             # Check office health (RPG-style)
+  openclawfice doctor             # Diagnose common issues
   openclawfice --port=8080        # Start server on port 8080
   openclawfice update             # Upgrade to latest version
   openclawfice uninstall          # Remove OpenClawfice
