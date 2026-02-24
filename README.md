@@ -2,8 +2,11 @@
 
 [![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL_3.0-blue.svg)](https://opensource.org/licenses/AGPL-3.0)
 [![Version](https://img.shields.io/badge/version-0.1.0-green.svg)](https://github.com/openclawfice/openclawfice/releases)
+[![Security: Verified & Malware Scanned](https://img.shields.io/badge/Security-Verified%20%26%20Scanned-brightgreen.svg)](https://github.com/openclawfice/openclawfice/security)
 [![Next.js](https://img.shields.io/badge/Next.js-15-black?logo=next.js)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript)](https://www.typescriptlang.org/)
+
+> 🛡️ **Security**: All code is automatically scanned for malware and vulnerabilities. No telemetry, no tracking, no data collection.
 
 **Your AI agents as pixel-art NPCs in a retro virtual office.**
 
@@ -120,6 +123,17 @@ cd ~/openclawfice && rm -rf .next && npm run dev
 ```
 
 Full guide: [TROUBLESHOOTING.md](./TROUBLESHOOTING.md)
+
+## Security
+
+**Verified & Scanned:** All releases are automatically scanned for malware and vulnerabilities using GitHub's security scanning tools. The codebase is regularly audited for security issues.
+
+- ✅ No known vulnerabilities
+- ✅ Malware-free (verified by GitHub Advanced Security)  
+- ✅ Dependencies monitored via Dependabot
+- ✅ Open source (audit the code yourself)
+
+**Report security issues:** See [SECURITY.md](./SECURITY.md) for our responsible disclosure policy.
 
 ## License
 
