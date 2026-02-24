@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OpenClawfice Security Dashboard</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: #e2e8f0;
+      padding: 40px 20px;
+      min-height: 100vh;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    h1 {
+      font-size: 32px;
+      margin-bottom: 12px;
+      background: linear-gradient(135deg, #10b981, #3b82f6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .subtitle {
+      color: #94a3b8;
+      margin-bottom: 40px;
+      font-size: 16px;
+    }
+    
+    .security-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+    
+    .security-card {
+      background: rgba(30, 41, 59, 0.6);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      border-radius: 12px;
+      padding: 24px;
+      transition: all 0.3s;
+    }
+    
+    .security-card:hover {
+      border-color: rgba(16, 185, 129, 0.6);
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(16, 185, 129, 0.2);
+    }
+    
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    
+    .card-icon {
+      font-size: 32px;
+      width: 56px;
+      height: 56px;
+      background: rgba(16, 185, 129, 0.1);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid rgba(16, 185, 129, 0.3);
+    }
+    
+    .card-title {
+      flex: 1;
+    }
+    
+    .card-title h3 {
+      font-size: 18px;
+      margin-bottom: 4px;
+    }
+    
+    .card-title p {
+      font-size: 12px;
+      color: #64748b;
+    }
+    
+    .card-status {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    
+    .status-active {
+      background: rgba(16, 185, 129, 0.2);
+      color: #10b981;
+    }
+    
+    .status-scheduled {
+      background: rgba(59, 130, 246, 0.2);
+      color: #3b82f6;
+    }
+    
+    .card-content {
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(100, 116, 139, 0.2);
+    }
+    
+    .feature-list {
+      list-style: none;
+      margin-top: 12px;
+    }
+    
+    .feature-list li {
+      padding: 8px 0;
+      color: #cbd5e1;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .feature-list li::before {
+      content: '✓';
+      color: #10b981;
+      font-weight: bold;
+      font-size: 16px;
+    }
+    
+    .badge-showcase {
+      background: rgba(30, 41, 59, 0.8);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      border-radius: 16px;
+      padding: 32px;
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    
+    .badge-showcase h2 {
+      font-size: 24px;
+      margin-bottom: 24px;
+      color: #10b981;
+    }
+    
+    .badge-row {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-top: 24px;
+    }
+    
+    .badge-row img {
+      height: 28px;
+      transition: transform 0.2s;
+    }
+    
+    .badge-row img:hover {
+      transform: scale(1.1);
+    }
+    
+    .privacy-section {
+      background: rgba(30, 41, 59, 0.6);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      border-radius: 12px;
+      padding: 32px;
+      margin-top: 40px;
+    }
+    
+    .privacy-section h2 {
+      font-size: 24px;
+      margin-bottom: 24px;
+      color: #3b82f6;
+    }
+    
+    .privacy-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+    }
+    
+    .privacy-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 8px;
+    }
+    
+    .privacy-icon {
+      font-size: 24px;
+    }
+    
+    .privacy-text {
+      flex: 1;
+      font-size: 14px;
+      color: #cbd5e1;
+    }
+    
+    .cta-button {
+      background: linear-gradient(135deg, #10b981, #3b82f6);
+      color: white;
+      border: none;
+      padding: 16px 32px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s;
+      text-decoration: none;
+      display: inline-block;
+      margin-top: 24px;
+    }
+    
+    .cta-button:hover {
+      transform: scale(1.05);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>
+      🛡️ Security Dashboard
+    </h1>
+    <p class="subtitle">Automated security scanning protecting OpenClawfice 24/7</p>
+    
+    <div class="badge-showcase">
+      <h2>Live Security Status</h2>
+      <p style="color: #94a3b8; margin-bottom: 16px;">
+        All badges show real-time status from GitHub Actions
+      </p>
+      <div class="badge-row">
+        <img src="https://github.com/openclaw/openclawfice/actions/workflows/security-scan.yml/badge.svg" alt="Security Scanning">
+        <img src="https://github.com/openclaw/openclawfice/actions/workflows/codeql.yml/badge.svg" alt="CodeQL Analysis">
+        <img src="https://img.shields.io/badge/Dependabot-Enabled-success?logo=dependabot" alt="Dependabot">
+        <img src="https://img.shields.io/badge/License-AGPL_3.0-blue.svg" alt="License">
+      </div>
+      <a href="https://github.com/openclaw/openclawfice/security" target="_blank" class="cta-button">
+        View Full Security Report →
+      </a>
+    </div>
+    
+    <div class="security-grid">
+      <div class="security-card">
+        <div class="card-header">
+          <div class="card-icon">🔍</div>
+          <div class="card-title">
+            <h3>CodeQL Analysis</h3>
+            <p>Static code security scanning</p>
+          </div>
+        </div>
+        <span class="card-status status-active">✓ Active</span>
+        <div class="card-content">
+          <ul class="feature-list">
+            <li>Scans JavaScript & TypeScript</li>
+            <li>Detects 200+ vulnerability patterns</li>
+            <li>Runs on every commit + daily</li>
+            <li>Security-extended query pack</li>
+          </ul>
+          <p style="color: #64748b; font-size: 12px; margin-top: 16px;">
+            Schedule: Every push, PR, and daily at 6am UTC
+          </p>
+        </div>
+      </div>
+      
+      <div class="security-card">
+        <div class="card-header">
+          <div class="card-icon">📦</div>
+          <div class="card-title">
+            <h3>npm Audit</h3>
+            <p>Dependency vulnerability detection</p>
+          </div>
+        </div>
+        <span class="card-status status-active">✓ Active</span>
+        <div class="card-content">
+          <ul class="feature-list">
+            <li>Checks all npm dependencies</li>
+            <li>Alerts on high-severity issues</li>
+            <li>Automated fix suggestions</li>
+            <li>Daily vulnerability scans</li>
+          </ul>
+          <p style="color: #64748b; font-size: 12px; margin-top: 16px;">
+            Schedule: Every push and daily at 3am UTC
+          </p>
+        </div>
+      </div>
+      
+      <div class="security-card">
+        <div class="card-header">
+          <div class="card-icon">🤖</div>
+          <div class="card-title">
+            <h3>Dependabot</h3>
+            <p>Automated security updates</p>
+          </div>
+        </div>
+        <span class="card-status status-active">✓ Active</span>
+        <div class="card-content">
+          <ul class="feature-list">
+            <li>Auto-updates vulnerable packages</li>
+            <li>Creates pull requests for fixes</li>
+            <li>Monitors supply chain integrity</li>
+            <li>GitHub Actions updates</li>
+          </ul>
+          <p style="color: #64748b; font-size: 12px; margin-top: 16px;">
+            Schedule: Daily for npm, weekly for actions
+          </p>
+        </div>
+      </div>
+      
+      <div class="security-card">
+        <div class="card-header">
+          <div class="card-icon">⚡</div>
+          <div class="card-title">
+            <h3>ESLint Security</h3>
+            <p>Code quality & security rules</p>
+          </div>
+        </div>
+        <span class="card-status status-active">✓ Active</span>
+        <div class="card-content">
+          <ul class="feature-list">
+            <li>Detects unsafe patterns</li>
+            <li>Prevents common vulnerabilities</li>
+            <li>Enforces secure coding practices</li>
+            <li>Type safety with TypeScript</li>
+          </ul>
+          <p style="color: #64748b; font-size: 12px; margin-top: 16px;">
+            Schedule: Every push and pull request
+          </p>
+        </div>
+      </div>
+      
+      <div class="security-card">
+        <div class="card-header">
+          <div class="card-icon">🔐</div>
+          <div class="card-title">
+            <h3>Dependency Review</h3>
+            <p>Supply chain protection</p>
+          </div>
+        </div>
+        <span class="card-status status-active">✓ Active</span>
+        <div class="card-content">
+          <ul class="feature-list">
+            <li>Reviews new dependencies in PRs</li>
+            <li>Blocks vulnerable packages</li>
+            <li>License compatibility checks</li>
+            <li>Malicious package detection</li>
+          </ul>
+          <p style="color: #64748b; font-size: 12px; margin-top: 16px;">
+            Schedule: Every pull request
+          </p>
+        </div>
+      </div>
+      
+      <div class="security-card">
+        <div class="card-header">
+          <div class="card-icon">📝</div>
+          <div class="card-title">
+            <h3>TypeScript Checks</h3>
+            <p>Type safety enforcement</p>
+          </div>
+        </div>
+        <span class="card-status status-active">✓ Active</span>
+        <div class="card-content">
+          <ul class="feature-list">
+            <li>Catches type errors pre-deploy</li>
+            <li>Prevents runtime type issues</li>
+            <li>Strict mode enabled</li>
+            <li>100% type coverage goal</li>
+          </ul>
+          <p style="color: #64748b; font-size: 12px; margin-top: 16px;">
+            Schedule: Every push and pull request
+          </p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="privacy-section">
+      <h2>Privacy Guarantees</h2>
+      <div class="privacy-grid">
+        <div class="privacy-item">
+          <div class="privacy-icon">❌</div>
+          <div class="privacy-text">No telemetry or tracking</div>
+        </div>
+        <div class="privacy-item">
+          <div class="privacy-icon">❌</div>
+          <div class="privacy-text">No data collection</div>
+        </div>
+        <div class="privacy-item">
+          <div class="privacy-icon">❌</div>
+          <div class="privacy-text">No external API calls</div>
+        </div>
+        <div class="privacy-item">
+          <div class="privacy-icon">✅</div>
+          <div class="privacy-text">100% local operation</div>
+        </div>
+        <div class="privacy-item">
+          <div class="privacy-icon">✅</div>
+          <div class="privacy-text">Open source & auditable</div>
+        </div>
+        <div class="privacy-item">
+          <div class="privacy-icon">✅</div>
+          <div class="privacy-text">Works offline</div>
+        </div>
+      </div>
+      
+      <div style="margin-top: 32px; text-align: center;">
+        <a href="https://github.com/openclaw/openclawfice/blob/main/SECURITY.md" target="_blank" class="cta-button">
+          Read Full Security Policy →
+        </a>
+      </div>
+    </div>
+    
+    <div style="text-align: center; margin-top: 40px; color: #64748b; font-size: 14px;">
+      <p>All security scans are public and auditable on GitHub</p>
+      <p style="margin-top: 8px;">Last updated: <span id="timestamp"></span></p>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('timestamp').textContent = new Date().toLocaleString();
+  </script>
+</body>
+</html>
