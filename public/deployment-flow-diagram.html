@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OpenClawfice Deployment Flow</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: #e2e8f0;
+      padding: 40px 20px;
+      min-height: 100vh;
+    }
+    
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    
+    h1 {
+      font-size: 32px;
+      margin-bottom: 12px;
+      background: linear-gradient(135deg, #8b5cf6, #ec4899);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .subtitle {
+      color: #94a3b8;
+      margin-bottom: 40px;
+      font-size: 16px;
+    }
+    
+    .flow-diagram {
+      background: rgba(30, 41, 59, 0.6);
+      border: 1px solid rgba(139, 92, 246, 0.2);
+      border-radius: 16px;
+      padding: 32px;
+      margin-bottom: 32px;
+    }
+    
+    .step {
+      display: flex;
+      align-items: center;
+      margin-bottom: 24px;
+      position: relative;
+    }
+    
+    .step:not(:last-child)::after {
+      content: '↓';
+      position: absolute;
+      left: 40px;
+      bottom: -20px;
+      font-size: 24px;
+      color: #8b5cf6;
+    }
+    
+    .step-num {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, #8b5cf6, #ec4899);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      font-weight: bold;
+      flex-shrink: 0;
+      margin-right: 24px;
+    }
+    
+    .step-content {
+      flex: 1;
+    }
+    
+    .step-title {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    
+    .step-desc {
+      color: #94a3b8;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    
+    .status-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-left: 8px;
+    }
+    
+    .status-working {
+      background: rgba(34, 197, 94, 0.2);
+      color: #4ade80;
+    }
+    
+    .status-broken {
+      background: rgba(239, 68, 68, 0.2);
+      color: #f87171;
+    }
+    
+    .status-pending {
+      background: rgba(251, 191, 36, 0.2);
+      color: #fbbf24;
+    }
+    
+    .breakpoint {
+      background: rgba(239, 68, 68, 0.1);
+      border: 2px solid rgba(239, 68, 68, 0.4);
+      border-radius: 12px;
+      padding: 24px;
+      margin: 32px 0;
+    }
+    
+    .breakpoint h3 {
+      color: #f87171;
+      font-size: 20px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .breakpoint-desc {
+      color: #cbd5e1;
+      font-size: 14px;
+      line-height: 1.6;
+      margin-bottom: 16px;
+    }
+    
+    .fix-button {
+      background: linear-gradient(135deg, #8b5cf6, #ec4899);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s;
+      text-decoration: none;
+      display: inline-block;
+    }
+    
+    .fix-button:hover {
+      transform: scale(1.05);
+    }
+    
+    .code-block {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(139, 92, 246, 0.2);
+      border-radius: 8px;
+      padding: 16px;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      color: #a5f3fc;
+      margin-top: 12px;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔄 OpenClawfice Deployment Flow</h1>
+    <p class="subtitle">Visual diagnostic: Git → Vercel → Production</p>
+    
+    <div class="flow-diagram">
+      <div class="step">
+        <div class="step-num">1️⃣</div>
+        <div class="step-content">
+          <div class="step-title">
+            Local Development
+            <span class="status-badge status-working">✅ WORKING</span>
+          </div>
+          <div class="step-desc">
+            Agents write code → Commit locally → Changes in <code>~/clawd-openclawfice/openclawfice/</code>
+          </div>
+        </div>
+      </div>
+      
+      <div class="step">
+        <div class="step-num">2️⃣</div>
+        <div class="step-content">
+          <div class="step-title">
+            Git Push to GitHub
+            <span class="status-badge status-working">✅ WORKING</span>
+          </div>
+          <div class="step-desc">
+            <code>git push origin main</code> → Changes appear on GitHub <code>openclaw/openclawfice</code> repo<br>
+            <strong>Last 20+ commits:</strong> All successfully pushed to <code>origin/main</code>
+          </div>
+        </div>
+      </div>
+      
+      <div class="step">
+        <div class="step-num">3️⃣</div>
+        <div class="step-content">
+          <div class="step-title">
+            GitHub Webhook → Vercel
+            <span class="status-badge status-broken">❌ BROKEN</span>
+          </div>
+          <div class="step-desc">
+            GitHub should send webhook to Vercel on every push → Triggers auto-deploy<br>
+            <strong>Issue:</strong> Webhook not firing or Vercel not receiving it
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="breakpoint">
+      <h3>⚠️ BREAKPOINT: Auto-Deploy Not Triggering</h3>
+      <p class="breakpoint-desc">
+        Last Vercel deployment: <strong>16+ hours ago</strong><br>
+        Last GitHub commit: <strong>2 minutes ago</strong><br>
+        <strong>Gap:</strong> 20+ commits stuck (not deployed to production)
+      </p>
+      <p class="breakpoint-desc">
+        <strong>Why this happens:</strong>
+      </p>
+      <ul style="color: #cbd5e1; margin-left: 20px; margin-bottom: 16px; line-height: 1.8;">
+        <li>GitHub webhook disabled or broken</li>
+        <li>Vercel project disconnected from GitHub repo</li>
+        <li>Production branch setting wrong (not pointing to <code>main</code>)</li>
+        <li>Auto-deploy disabled in Vercel settings</li>
+        <li>Branch protection rules blocking webhooks</li>
+      </ul>
+      <a href="https://vercel.com/dashboard" target="_blank" class="fix-button">
+        🔧 Open Vercel Dashboard
+      </a>
+      <div class="code-block">
+// Quick fix: Manual redeploy
+1. Vercel dashboard → openclawfice → Deployments
+2. Click ⋯ on latest deployment
+3. Click "Redeploy"
+4. Wait 60 seconds → All commits deployed ✅
+      </div>
+    </div>
+    
+    <div class="flow-diagram">
+      <div class="step">
+        <div class="step-num">4️⃣</div>
+        <div class="step-content">
+          <div class="step-title">
+            Vercel Build
+            <span class="status-badge status-pending">⏳ PENDING</span>
+          </div>
+          <div class="step-desc">
+            Vercel receives webhook → Clones repo → Runs <code>npm run build</code> → Generates production assets<br>
+            <strong>Current status:</strong> Not running (stuck at step 3)
+          </div>
+        </div>
+      </div>
+      
+      <div class="step">
+        <div class="step-num">5️⃣</div>
+        <div class="step-content">
+          <div class="step-title">
+            Deploy to Production
+            <span class="status-badge status-pending">⏳ PENDING</span>
+          </div>
+          <div class="step-desc">
+            Build succeeds → Vercel deploys to <code>openclawfice.com</code> → Users see latest code<br>
+            <strong>Current status:</strong> Still serving 16-hour-old build
+          </div>
+        </div>
+      </div>
+      
+      <div class="step">
+        <div class="step-num">6️⃣</div>
+        <div class="step-content">
+          <div class="step-title">
+            Production Live
+            <span class="status-badge status-broken">❌ STALE</span>
+          </div>
+          <div class="step-desc">
+            Users visit <code>openclawfice.com</code> → See latest features<br>
+            <strong>Currently showing:</strong> Build from 16+ hours ago (missing 20+ commits)
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 12px; padding: 24px; margin-top: 32px;">
+      <h3 style="color: #60a5fa; margin-bottom: 16px;">🔍 Diagnostic Tools</h3>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+        <a href="https://github.com/openclaw/openclawfice/commits/main" target="_blank" 
+           style="display: block; padding: 16px; background: rgba(0,0,0,0.2); border-radius: 8px; color: #60a5fa; text-decoration: none; transition: transform 0.2s;"
+           onmouseover="this.style.transform='scale(1.05)'"
+           onmouseout="this.style.transform='scale(1)'">
+          <div style="font-size: 24px; margin-bottom: 8px;">📝</div>
+          <div style="font-weight: 600;">GitHub Commits</div>
+          <div style="font-size: 12px; color: #94a3b8; margin-top: 4px;">View latest pushes</div>
+        </a>
+        
+        <a href="https://vercel.com/dashboard" target="_blank"
+           style="display: block; padding: 16px; background: rgba(0,0,0,0.2); border-radius: 8px; color: #60a5fa; text-decoration: none; transition: transform 0.2s;"
+           onmouseover="this.style.transform='scale(1.05)'"
+           onmouseout="this.style.transform='scale(1)'">
+          <div style="font-size: 24px; margin-bottom: 8px;">▲</div>
+          <div style="font-weight: 600;">Vercel Dashboard</div>
+          <div style="font-size: 12px; color: #94a3b8; margin-top: 4px;">Check deployments</div>
+        </a>
+        
+        <a href="https://github.com/openclaw/openclawfice/settings/hooks" target="_blank"
+           style="display: block; padding: 16px; background: rgba(0,0,0,0.2); border-radius: 8px; color: #60a5fa; text-decoration: none; transition: transform 0.2s;"
+           onmouseover="this.style.transform='scale(1.05)'"
+           onmouseout="this.style.transform='scale(1)'">
+          <div style="font-size: 24px; margin-bottom: 8px;">🔗</div>
+          <div style="font-weight: 600;">GitHub Webhooks</div>
+          <div style="font-size: 12px; color: #94a3b8; margin-top: 4px;">Check Vercel hook</div>
+        </a>
+        
+        <a href="/verify-deploy.html" target="_blank"
+           style="display: block; padding: 16px; background: rgba(0,0,0,0.2); border-radius: 8px; color: #60a5fa; text-decoration: none; transition: transform 0.2s;"
+           onmouseover="this.style.transform='scale(1.05)'"
+           onmouseout="this.style.transform='scale(1)'">
+          <div style="font-size: 24px; margin-bottom: 8px;">✅</div>
+          <div style="font-weight: 600;">Verify Deploy</div>
+          <div style="font-size: 12px; color: #94a3b8; margin-top: 4px;">Test production</div>
+        </a>
+      </div>
+    </div>
+    
+    <div style="text-align: center; margin-top: 40px; color: #64748b; font-size: 14px;">
+      <p>Last updated: <span id="timestamp"></span></p>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('timestamp').textContent = new Date().toLocaleString();
+  </script>
+</body>
+</html>
