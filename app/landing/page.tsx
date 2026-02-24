@@ -307,7 +307,7 @@ export default function LandingPage() {
           }}>
             {[
               { icon: '🛡️', label: 'Anti-Malware', desc: 'Every release scanned for viruses & trojans', highlight: true },
-              { icon: '🔍', label: 'npm audit', desc: 'Automated dependency security scanning', highlight: true },
+              { icon: '🔍', label: 'CodeQL Analysis', desc: 'Automated security pattern detection', highlight: true },
               { icon: '📦', label: 'Dependabot', desc: 'Real-time dependency vulnerability monitoring' },
               { icon: '✅', label: 'Zero CVEs', desc: 'No known security vulnerabilities' },
             ].map((item, i) => (
@@ -372,7 +372,7 @@ export default function LandingPage() {
             marginBottom: 12,
             lineHeight: 1.6,
           }}>
-            Every code change is automatically scanned by GitHub Actions, npm audit, and Dependabot.
+            Every code change is automatically scanned by GitHub Advanced Security, CodeQL, and Dependabot.
             <br />
             All source code is auditable, readable TypeScript. No obfuscation, no hidden payloads.
           </p>
