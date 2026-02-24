@@ -12,7 +12,7 @@ import { SettingsPanel } from '../components/SettingsPanel';
 import { CooldownTimer, linkifyFiles, Stat } from '../components/CooldownTimer';
 import { TemplateGallery } from '../components/TemplateGallery';
 import { DemoBanner } from '../components/DemoBanner';
-import { ShareModal } from '../components/ShareModal';
+import { ShareCard } from '../components/ShareCard';
 import { Celebration } from '../components/Celebration';
 import { AchievementToastContainer, AchievementToastData } from '../components/AchievementToast';
 import { DemoTour } from '../components/DemoTour';
@@ -2620,10 +2620,12 @@ export default function HomePage() {
 
       {/* Share Modal */}
       {showShareModal && (
-        <ShareModal
+        <ShareCard
           onClose={() => setShowShareModal(false)}
-          agentCount={agents.length}
-          workingCount={working.length}
+          agents={agents}
+          pendingActions={pendingActions}
+          accomplishments={accomplishments}
+          isDemoMode={isDemoMode}
         />
       )}
       <AchievementToastContainer

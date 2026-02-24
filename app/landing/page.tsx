@@ -1,10 +1,21 @@
 'use client';
 
+import { useState, useEffect } from 'react';
+
 /**
  * Landing Page - Viral-friendly marketing page
  * Optimized for social sharing and conversion
  */
 export default function LandingPage() {
+  const [stars, setStars] = useState<number | null>(null);
+
+  useEffect(() => {
+    fetch('https://api.github.com/repos/openclawfice/openclawfice')
+      .then(r => r.json())
+      .then(d => { if (d.stargazers_count != null) setStars(d.stargazers_count); })
+      .catch(() => {});
+  }, []);
+
   return (
     <div style={{
       minHeight: '100vh',
@@ -105,6 +116,24 @@ export default function LandingPage() {
             📦 Install Now
           </a>
         </div>
+
+        {/* Social proof */}
+        {stars !== null && stars > 0 && (
+          <div style={{
+            marginTop: 16,
+            fontSize: 13,
+            color: '#64748b',
+          }}>
+            <a
+              href="https://github.com/openclawfice/openclawfice"
+              style={{ color: '#94a3b8', textDecoration: 'none' }}
+            >
+              ⭐ {stars} stars on GitHub
+            </a>
+            {' · '}
+            Open source · MIT license
+          </div>
+        )}
 
         {/* Screenshot */}
         <div style={{
@@ -278,7 +307,7 @@ export default function LandingPage() {
           }}>
             {[
               { icon: '🛡️', label: 'Anti-Malware', desc: 'Every release scanned for viruses & trojans', highlight: true },
-              { icon: '🔍', label: 'CodeQL Analysis', desc: 'Automated security pattern detection', highlight: true },
+              { icon: '🔍', label: 'npm audit', desc: 'Automated dependency security scanning', highlight: true },
               { icon: '📦', label: 'Dependabot', desc: 'Real-time dependency vulnerability monitoring' },
               { icon: '✅', label: 'Zero CVEs', desc: 'No known security vulnerabilities' },
             ].map((item, i) => (
@@ -343,7 +372,7 @@ export default function LandingPage() {
             marginBottom: 12,
             lineHeight: 1.6,
           }}>
-            Every code change is automatically scanned by GitHub Advanced Security, CodeQL, and Dependabot.
+            Every code change is automatically scanned by GitHub Actions, npm audit, and Dependabot.
             <br />
             All source code is auditable, readable TypeScript. No obfuscation, no hidden payloads.
           </p>
@@ -538,7 +567,7 @@ export default function LandingPage() {
               fontSize: 18,
             }}
           >
-            ⭐ Star on GitHub
+            ⭐ Star on GitHub{stars !== null ? ` (${stars})` : ''}
           </a>
         </div>
       </div>
