@@ -36,7 +36,9 @@ cd ~/openclawfice && npm install && npm run dev
 
 Open **http://localhost:3333** — that's it. Zero config. Agents are auto-discovered.
 
-**First time?** See [INSTALL.md](./INSTALL.md) for prerequisites and troubleshooting.
+**Just installed?** Read [FIRST-5-MINUTES.md](./FIRST-5-MINUTES.md) for a quick walkthrough.
+
+**Having issues?** See [INSTALL.md](./INSTALL.md) for prerequisites and troubleshooting.
 
 **Want the cool stuff?** Check [Cool Features & Hidden Gems](./COOL-FEATURES.md) for fun, quirky, shareable moments.
 
