@@ -1,10 +1,10 @@
 #!/bin/bash
-# Record ONLY the OpenClawfice window (not entire screen)
-# Usage: record-loom.sh <output_filename> [duration_seconds] [tts_text]
+# Smart feature recording - focuses on OpenClawfice and captures just that window
+# Usage: record-feature.sh <output_filename> [duration_seconds] [tts_text]
 
 set -e
 
-OUTPUT_NAME="${1:?Usage: record-loom.sh <output_name> [duration] [tts_text]}"
+OUTPUT_NAME="${1:?Usage: record-feature.sh <output_name> [duration] [tts_text]}"
 DURATION="${2:-6}"
 TTS_TEXT="${3:-}"
 
@@ -15,7 +15,7 @@ mkdir -p "$SCREENSHOTS_DIR" "$TEMP_DIR"
 VIDEO_FILE="$TEMP_DIR/${OUTPUT_NAME}-window.mov"
 FINAL_FILE="$SCREENSHOTS_DIR/${OUTPUT_NAME}.mp4"
 
-# Get OpenClawfice window ID for targeted capture
+# Function to get OpenClawfice window ID
 get_window_id() {
   osascript 2>/dev/null <<'APPLESCRIPT' || echo ""
     tell application "System Events"
@@ -28,6 +28,7 @@ get_window_id() {
               try
                 set windowTitle to name of w
                 if windowTitle contains "OpenClawfice" or windowTitle contains "localhost:3333" then
+                  -- Get window ID for screencapture
                   set windowID to id of w
                   return windowID
                 end if
@@ -41,20 +42,26 @@ get_window_id() {
 APPLESCRIPT
 }
 
-# Find the OpenClawfice window
+# Try to find OpenClawfice window
 WINDOW_ID=$(get_window_id)
 
-if [ -z "$WINDOW_ID" ] || [ "$WINDOW_ID" = "" ]; then
-  # No OpenClawfice window found - skip recording instead of capturing junk
-  echo "SKIP: OpenClawfice window not found" >&2
-  exit 0
+if [ -n "$WINDOW_ID" ] && [ "$WINDOW_ID" != "" ]; then
+  # Record just the OpenClawfice window (not entire screen)
+  /usr/sbin/screencapture -l"$WINDOW_ID" -V "$DURATION" -x "$VIDEO_FILE" 2>/dev/null
+  
+  if [ ! -f "$VIDEO_FILE" ]; then
+    echo "ERROR: Window capture failed, falling back to full screen" >&2
+    # Fallback: capture entire screen
+    /usr/sbin/screencapture -V "$DURATION" -x "$VIDEO_FILE" 2>/dev/null
+  fi
+else
+  echo "WARNING: Could not find OpenClawfice window, capturing full screen" >&2
+  # Fallback: capture entire screen
+  /usr/sbin/screencapture -V "$DURATION" -x "$VIDEO_FILE" 2>/dev/null
 fi
 
-# Record ONLY the OpenClawfice window (uses -l flag with window ID)
-/usr/sbin/screencapture -l"$WINDOW_ID" -V "$DURATION" -x "$VIDEO_FILE" 2>/dev/null
-
 if [ ! -f "$VIDEO_FILE" ]; then
-  echo "ERROR: screencapture failed" >&2
+  echo "ERROR: screencapture failed completely" >&2
   exit 1
 fi
 
