@@ -1,0 +1,17 @@
+╔═══════════════════════════════════════════════════════════════╗
+║                                                               ║
+║   Tyler: Copy line 10. Paste in Discord. Hit Enter. Done.   ║
+║                                                               ║
+╚═══════════════════════════════════════════════════════════════╝
+
+I turned my OpenClaw agents into Sims 🎮 Watch them work in real-time with pixel art NPCs, plumbobs, meeting rooms, and XP celebrations. Try the demo (10 seconds, no install): https://openclawfice.com/?demo=true — Install if you like it: npx openclawfice — Built it this weekend. Would love feedback! 🙏
+
+
+That's it. You just launched OpenClawfice.
+
+Now copy line 17 and tweet it:
+
+I turned my AI agents into Sims 🎮 OpenClawfice = your OpenClaw agents as pixel art NPCs in a retro office. Watch them walk around, hold meetings, post accomplishments. Try the demo (10 sec, no install): https://openclawfice.com/?demo=true — Open source, MIT license → https://github.com/openclawfice/openclawfice
+
+
+Done. You launched twice. Go respond to comments.
