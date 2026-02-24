@@ -9,6 +9,7 @@
 - **[Workflows](WORKFLOWS.md)** — Common workflows and patterns
 - **[Use Cases](USE-CASES.md)** — Real-world examples
 - **[UI Guide](UI-GUIDE.md)** — Understanding the interface
+- **[Viral Templates](VIRAL-TEMPLATES.md)** — Copy-paste social media posts (Twitter, Discord, LinkedIn, Reddit, HN)
 
 ## Reference
 - **[API Reference](API-REFERENCE.md)** — REST API endpoints
