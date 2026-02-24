@@ -2046,7 +2046,7 @@ export default function HomePage() {
         const nonOwnerAgents = agents.filter(a => a.id !== '_owner');
         if (idx < nonOwnerAgents.length) {
           setSelectedAgent(prev => prev?.id === nonOwnerAgents[idx].id ? null : nonOwnerAgents[idx]);
-          sfx.playClick();
+          sfx.play('click');
         }
       }
     };
