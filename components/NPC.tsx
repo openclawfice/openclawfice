@@ -243,6 +243,7 @@ export function NPC({ agent, size = 1, onClick, forceThought, flipped, hasCelebr
           height: s * 0.8,
           background: '#1a1a2e',
           borderRadius: '50%',
+          animation: 'npcBlink 4s ease-in-out infinite',
         }} />
         <div style={{
           position: 'absolute',
@@ -252,6 +253,7 @@ export function NPC({ agent, size = 1, onClick, forceThought, flipped, hasCelebr
           height: s * 0.8,
           background: '#1a1a2e',
           borderRadius: '50%',
+          animation: 'npcBlink 4s ease-in-out infinite',
         }} />
         {/* Smile/Frown */}
         {agent.mood === 'stressed' ? (
@@ -294,6 +296,8 @@ export function NPC({ agent, size = 1, onClick, forceThought, flipped, hasCelebr
           height: s * 2.5,
           background: shirtColor,
           borderRadius: s * 0.5,
+          transformOrigin: 'top center',
+          ...(agent.status === 'working' ? { animation: 'npcTypeLeft 0.8s ease-in-out infinite' } : {}),
         }} />
         <div style={{
           position: 'absolute',
@@ -303,6 +307,8 @@ export function NPC({ agent, size = 1, onClick, forceThought, flipped, hasCelebr
           height: s * 2.5,
           background: shirtColor,
           borderRadius: s * 0.5,
+          transformOrigin: 'top center',
+          ...(agent.status === 'working' ? { animation: 'npcTypeRight 0.8s ease-in-out infinite' } : {}),
         }} />
         {/* Legs */}
         <div style={{

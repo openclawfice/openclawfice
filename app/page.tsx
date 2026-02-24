@@ -2450,6 +2450,20 @@ export default function HomePage() {
           0% { opacity: 0; transform: translateY(12px) scale(0.9); }
           100% { opacity: 1; transform: translateY(0) scale(1); }
         }
+        @keyframes npcTypeLeft {
+          0%, 100% { transform: rotate(0deg); }
+          25% { transform: rotate(-8deg) translateY(-1px); }
+          75% { transform: rotate(4deg); }
+        }
+        @keyframes npcTypeRight {
+          0%, 100% { transform: rotate(0deg); }
+          25% { transform: rotate(4deg); }
+          75% { transform: rotate(-8deg) translateY(-1px); }
+        }
+        @keyframes npcBlink {
+          0%, 90%, 100% { transform: scaleY(1); }
+          95% { transform: scaleY(0.1); }
+        }
       `}</style>
 
       {/* Template Gallery Modal */}
