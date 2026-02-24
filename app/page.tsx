@@ -7,6 +7,7 @@ import { TemplateGallery } from '../components/TemplateGallery';
 import { DemoBanner } from '../components/DemoBanner';
 import { ShareModal } from '../components/ShareModal';
 import { Celebration } from '../components/Celebration';
+import { AchievementToastContainer, AchievementToastData } from '../components/AchievementToast';
 
 type AgentStatus = 'working' | 'idle';
 type Mood = 'great' | 'good' | 'okay' | 'stressed';
@@ -1594,6 +1595,7 @@ export default function HomePage() {
   const [showTemplateGallery, setShowTemplateGallery] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [celebrations, setCelebrations] = useState<{ agentId: string; timestamp: number }[]>([]);
+  const [achievementToasts, setAchievementToasts] = useState<AchievementToastData[]>([]);
   const lastAccomplishmentCheck = useRef(0);
   const [showCallMeeting, setShowCallMeeting] = useState(false);
   const [meetingTopic, setMeetingTopic] = useState('');
@@ -1791,6 +1793,17 @@ export default function HomePage() {
               prev.filter(c => c.agentId !== agent.id || Date.now() - c.timestamp > 1500)
             );
           }, 1500);
+
+          // Show achievement toast notification
+          const XP_AMOUNTS = [5, 10, 10, 15, 20, 25, 10, 10, 10, 50];
+          setAchievementToasts(prev => [...prev.slice(-4), {
+            id: `${agent.id}-${acc.timestamp}`,
+            agentName: agent.name,
+            agentColor: agent.color || '#6366f1',
+            icon: acc.icon || '⭐',
+            title: acc.title || 'Task completed',
+            xp: XP_AMOUNTS[Math.floor(Math.random() * XP_AMOUNTS.length)],
+          }]);
         }
       }
     });
@@ -1804,14 +1817,31 @@ export default function HomePage() {
     }
   }, [accomplishments, agents]);
 
+  // Keep a ref to agents for demo celebrations (avoids effect reset on every poll)
+  const agentsRef = useRef(agents);
+  agentsRef.current = agents;
+
   // Demo mode: trigger random celebrations periodically for visual delight
   useEffect(() => {
-    if (!isDemoMode || agents.length === 0) return;
+    if (!isDemoMode) return;
+    const DEMO_TASKS = [
+      'Shipped dashboard refactor',
+      'Fixed auth module bug',
+      'Deployed to staging',
+      'Optimized database queries',
+      'Wrote integration tests',
+      'Updated API documentation',
+      'Reviewed pull request',
+      'Refactored login flow',
+    ];
+    const DEMO_ICONS = ['🚀', '🐛', '✅', '⚡', '📝', '🔧', '💡', '🎯'];
+    const XP_AMOUNTS = [5, 10, 10, 15, 20, 25, 10, 10, 10, 50];
     const triggerRandomCelebration = () => {
-      const randomAgent = agents[Math.floor(Math.random() * agents.length)];
+      const currentAgents = agentsRef.current;
+      if (currentAgents.length === 0) return;
+      const randomAgent = currentAgents[Math.floor(Math.random() * currentAgents.length)];
       if (!randomAgent) return;
       setCelebrations(prev => {
-        // Max 2 concurrent celebrations
         if (prev.length >= 2) return prev;
         return [...prev, { agentId: randomAgent.id, timestamp: Date.now() }];
       });
@@ -1820,17 +1850,25 @@ export default function HomePage() {
           prev.filter(c => c.agentId !== randomAgent.id || Date.now() - c.timestamp > 1500)
         );
       }, 1500);
+      // Also show achievement toast in demo mode
+      const idx = Math.floor(Math.random() * DEMO_TASKS.length);
+      setAchievementToasts(prev => [...prev.slice(-4), {
+        id: `demo-${randomAgent.id}-${Date.now()}`,
+        agentName: randomAgent.name,
+        agentColor: randomAgent.color || '#6366f1',
+        icon: DEMO_ICONS[idx],
+        title: DEMO_TASKS[idx],
+        xp: XP_AMOUNTS[Math.floor(Math.random() * XP_AMOUNTS.length)],
+      }]);
     };
     // First one after 8 seconds, then every 12-20 seconds
     const firstTimeout = setTimeout(triggerRandomCelebration, 8000);
-    const interval = setInterval(() => {
-      triggerRandomCelebration();
-    }, 12000 + Math.random() * 8000);
+    const interval = setInterval(triggerRandomCelebration, 15000);
     return () => {
       clearTimeout(firstTimeout);
       clearInterval(interval);
     };
-  }, [isDemoMode, agents]);
+  }, [isDemoMode]);
 
   const loadArchive = async (reset = false) => {
     setArchiveLoading(true);
@@ -3849,6 +3887,10 @@ export default function HomePage() {
           workingCount={working.length}
         />
       )}
+      <AchievementToastContainer
+        toasts={achievementToasts}
+        onDismiss={(id) => setAchievementToasts(prev => prev.filter(t => t.id !== id))}
+      />
     </div>
   );
 }
