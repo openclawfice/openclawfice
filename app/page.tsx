@@ -268,11 +268,15 @@ export default function HomePage() {
   }, [autoworkPolicies]);
 
   // Poll status + chat every 3s (initial load handled above)
+  const lastStatusJson = useRef('');
   useEffect(() => {
     const fetchStatus = async () => {
       try {
         const res = await secureFetch(getApiPath('/api/office'));
         const data = await res.json();
+        const json = JSON.stringify(data);
+        if (json === lastStatusJson.current) return;
+        lastStatusJson.current = json;
         if (data.agents) {
           setAgents(prev => {
             const updated = data.agents.map((a: any) => {
@@ -300,8 +304,9 @@ export default function HomePage() {
               setTimeout(() => {
                 if (chatRef.current) chatRef.current.scrollTop = chatRef.current.scrollHeight;
               }, 100);
+              return data.chatLog;
             }
-            return data.chatLog;
+            return prev;
           });
         }
       } catch (err) {
@@ -952,6 +957,24 @@ export default function HomePage() {
           >
             📸
           </button>
+          <a
+            href="/viral-templates.html"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              background: 'none',
+              border: 'none',
+              color: '#475569',
+              cursor: 'pointer',
+              fontSize: 14,
+              padding: '2px 4px',
+              textDecoration: 'none',
+              display: 'inline-block',
+            }}
+            title="Viral Post Templates"
+          >
+            📝
+          </a>
           <a
             href="https://github.com/openclawfice/openclawfice"
             target="_blank"
