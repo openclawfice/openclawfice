@@ -16,7 +16,45 @@ mkdir -p "$SCREENSHOTS_DIR" "$TEMP_DIR"
 VIDEO_FILE="$TEMP_DIR/${OUTPUT_NAME}-screen.mov"
 FINAL_FILE="$SCREENSHOTS_DIR/${OUTPUT_NAME}.mp4"
 
-# Record screen (captures whatever is currently displayed — no window switching)
+# Function to focus OpenClawfice browser window
+focus_openclawfice() {
+  # Try to find and focus a browser window with "OpenClawfice" in the title
+  # This uses AppleScript to find and focus the window
+  osascript 2>/dev/null <<'APPLESCRIPT' || true
+    tell application "System Events"
+      set browserApps to {"Google Chrome", "Safari", "Firefox", "Brave Browser", "Arc"}
+      repeat with browserApp in browserApps
+        if exists (process browserApp) then
+          tell process browserApp
+            set frontmost to true
+            delay 0.3
+            -- Try to find window with "OpenClawfice" or "localhost:3333" in title
+            set windowList to every window
+            repeat with w in windowList
+              try
+                set windowTitle to name of w
+                if windowTitle contains "OpenClawfice" or windowTitle contains "localhost:3333" then
+                  set frontmost to true
+                  perform action "AXRaise" of w
+                  delay 0.5
+                  return true
+                end if
+              end try
+            end repeat
+          end tell
+        end if
+      end repeat
+    end tell
+APPLESCRIPT
+}
+
+# Try to focus the OpenClawfice window before recording
+focus_openclawfice
+
+# Small delay to ensure window is focused and rendered
+sleep 1
+
+# Record screen (now focused on OpenClawfice)
 /usr/sbin/screencapture -V "$DURATION" -x "$VIDEO_FILE" 2>/dev/null
 
 if [ ! -f "$VIDEO_FILE" ]; then
