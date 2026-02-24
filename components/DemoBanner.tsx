@@ -59,7 +59,7 @@ export function DemoBanner() {
               textDecoration: 'none',
             }}
           >
-            Install
+            Create yours →
           </a>
           <button
             onClick={() => setDismissed(true)}
@@ -154,7 +154,7 @@ export function DemoBanner() {
             e.currentTarget.style.background = 'rgba(255, 255, 255, 0.25)';
           }}
         >
-          Install OpenClawfice
+          Create Your AI Team →
         </a>
 
         <a

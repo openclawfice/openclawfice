@@ -1,31 +1,15 @@
 # Security Policy
 
-## 🛡️ Verified & Malware Scanned
+## Verified & Scanned
 
-**OpenClawfice is continuously scanned for security vulnerabilities and malware.**
+OpenClawfice is automatically scanned for security vulnerabilities and malware:
 
-Every code change is automatically verified by:
+- **GitHub Advanced Security:** Automated scanning on every commit
+- **Dependabot:** Monitors npm dependencies for known vulnerabilities  
+- **Malware Detection:** All releases verified malware-free
+- **Open Source:** Full transparency - audit the code yourself
 
-- ✅ **GitHub Advanced Security** - Automated code scanning on every commit
-- ✅ **Dependabot** - Real-time monitoring of npm dependencies for known vulnerabilities  
-- ✅ **Malware Detection** - All releases verified malware-free
-- ✅ **CodeQL Analysis** - Static analysis for security patterns
-- ✅ **npm audit** - Package vulnerability scanning
-
-**Current Status:** ✅ **0 known vulnerabilities** | ✅ **Malware-free** | ✅ **All dependencies up-to-date**
-
-### Privacy First
-
-- ❌ **No telemetry** - We don't track your usage
-- ❌ **No analytics** - No Google Analytics, no tracking pixels
-- ❌ **No data collection** - Your data stays on your machine
-- ❌ **No external requests** - Runs 100% locally (except npm install)
-
-### Open Source & Auditable
-
-- 📖 **Full source code:** https://github.com/openclawfice/openclawfice
-- 🔍 **Audit anytime:** All code is readable TypeScript/JavaScript
-- 🚫 **No obfuscation:** What you see is what runs
+**Current Status:** ✅ No known vulnerabilities
 
 ---
 

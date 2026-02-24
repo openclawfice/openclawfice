@@ -1257,6 +1257,21 @@ export default function HomePage() {
                         }}>🆕 NEW</div>
                       )}
                       {a.nextTaskAt && !a.isNew && <CooldownTimer targetMs={a.nextTaskAt} />}
+                      {!a.isNew && !a.nextTaskAt && (
+                        <div style={{
+                          background: 'rgba(146,64,14,0.15)',
+                          border: '1px solid rgba(146,64,14,0.3)',
+                          borderRadius: 4,
+                          padding: '2px 6px',
+                          fontSize: 7,
+                          color: '#d97706',
+                          textAlign: 'center',
+                        }}>
+                          {['☕ On break', '📖 Reading docs', '🎮 Taking 5', '💭 Thinking...', '🧹 Tidying up'][
+                            a.id.split('').reduce((s: number, c: string) => s + c.charCodeAt(0), 0) % 5
+                          ]}
+                        </div>
+                      )}
                       <NPC
                         agent={a}
                         size={npcSize}
