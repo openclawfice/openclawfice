@@ -3,6 +3,7 @@ import { readFileSync, existsSync, writeFileSync, appendFileSync } from 'fs';
 import { join } from 'path';
 import { homedir } from 'os';
 import { exec } from 'child_process';
+import { findRelatedFile } from '../../../../lib/file-finder';
 
 const OPENCLAW_DIR = join(homedir(), '.openclaw');
 const STATUS_DIR = join(OPENCLAW_DIR, '.status');
@@ -59,13 +60,31 @@ function writeJson(path: string, data: any[]) {
   writeFileSync(path, JSON.stringify(data, null, 2));
 }
 
-const RECORD_SCRIPT = join(process.cwd(), 'scripts', 'record-loom.sh');
+// Isolated recording via headless Chrome (no user disruption)
+const RECORD_ISOLATED = join(process.cwd(), 'scripts', 'record-isolated.mjs');
+const RECORD_LEGACY = join(process.cwd(), 'scripts', 'record-loom.sh');
 const RECORD_DURATION = 6;
 const MIN_RECORDING_GAP_MS = 15000; // At most one recording every 15 seconds
 let lastRecordingStarted = 0;
 
-function triggerRecording(accomplishmentId: string, title: string, who: string) {
-  if (!existsSync(RECORD_SCRIPT)) return;
+function detectFeatureType(title: string, detail: string = ''): string {
+  const text = `${title} ${detail}`.toLowerCase();
+  
+  // Detect feature type from accomplishment title/detail
+  if (text.match(/\bxp\b|experience|level|celebration|animation|points/i)) return 'xp';
+  if (text.match(/meeting|collaborate|discussion|sync|call/i)) return 'meeting';
+  if (text.match(/quest|modal|decision|approval/i)) return 'quest';
+  if (text.match(/water[- ]?cooler|chat|conversation/i)) return 'watercooler';
+  if (text.match(/accomplishment|achievement|feed|completed/i)) return 'accomplishment';
+  
+  return 'default';
+}
+
+function triggerRecording(accomplishmentId: string, title: string, who: string, detail: string = '') {
+  // Prefer isolated recorder; fall back to legacy screencapture
+  const useIsolated = existsSync(RECORD_ISOLATED);
+  const hasLegacy = existsSync(RECORD_LEGACY);
+  if (!useIsolated && !hasLegacy) return;
 
   // Rate limit: skip if a recording started recently
   const now = Date.now();
@@ -85,10 +104,22 @@ function triggerRecording(accomplishmentId: string, title: string, who: string) 
     }
   } catch {}
 
-  const ttsText = `${who} just completed: ${title}`;
-  const cmd = `bash "${RECORD_SCRIPT}" "${accomplishmentId}" ${RECORD_DURATION} "${ttsText.replace(/"/g, '\\"')}"`;
+  // Detect what feature this accomplishment is about
+  const featureType = detectFeatureType(title, detail);
 
-  exec(cmd, { timeout: (RECORD_DURATION + 15) * 1000 }, (err, stdout) => {
+  // Build command — isolated headless recorder or legacy screencapture
+  let cmd: string;
+  if (useIsolated) {
+    cmd = `node "${RECORD_ISOLATED}" "${accomplishmentId}" ${RECORD_DURATION} "${featureType}"`;
+  } else {
+    const ttsText = `${who} just completed: ${title}`;
+    cmd = `bash "${RECORD_LEGACY}" "${accomplishmentId}" ${RECORD_DURATION} "${ttsText.replace(/"/g, '\\"')}"`;
+  }
+
+  // Generous timeout: headless Chrome startup + recording + encoding
+  const timeoutMs = useIsolated ? (RECORD_DURATION + 30) * 1000 : (RECORD_DURATION + 15) * 1000;
+
+  exec(cmd, { timeout: timeoutMs }, (err, stdout) => {
     const updateScreenshot = (value: string | undefined) => {
       for (let attempt = 0; attempt < 3; attempt++) {
         try {
@@ -117,7 +148,7 @@ function triggerRecording(accomplishmentId: string, title: string, who: string) 
       return;
     }
     const filename = stdout.trim();
-    if (!filename || filename.startsWith('ERROR')) {
+    if (!filename || filename.startsWith('ERROR') || filename.startsWith('SKIP')) {
       updateScreenshot(undefined);
       return;
     }
@@ -234,16 +265,17 @@ export async function POST(request: Request) {
       const accomplishments = readJson(ACCOMPLISHMENTS_FILE);
       const responseAccId = `response-${body.id}`;
       const responseTitle = `Resolved: ${action?.title || body.id}`;
+      const responseDetail = `Response: ${body.response}`;
       accomplishments.push({
         id: responseAccId,
         icon: '✅',
         title: responseTitle,
-        detail: `Response: ${body.response}`,
+        detail: responseDetail,
         who: getOwnerName(),
         timestamp: Date.now(),
       });
       writeJson(ACCOMPLISHMENTS_FILE, trimAccomplishments(accomplishments));
-      triggerRecording(responseAccId, responseTitle, getOwnerName());
+      triggerRecording(responseAccId, responseTitle, getOwnerName(), responseDetail);
 
       return NextResponse.json({ success: true });
     }
@@ -253,6 +285,7 @@ export async function POST(request: Request) {
       const accomplishments = readJson(ACCOMPLISHMENTS_FILE);
       const a = body.accomplishment || body;
       const accId = a.id || Date.now().toString();
+      const relatedFile = a.file || findRelatedFile(a.title || '', a.detail || '') || undefined;
       accomplishments.push({
         id: accId,
         icon: a.icon || '✅',
@@ -260,13 +293,14 @@ export async function POST(request: Request) {
         detail: a.detail,
         who: a.who,
         screenshot: a.screenshot,
+        file: relatedFile,
         timestamp: a.timestamp || Date.now(),
       });
       writeJson(ACCOMPLISHMENTS_FILE, trimAccomplishments(accomplishments));
 
       // Auto-record a loom-style video if no screenshot was provided
       if (!a.screenshot) {
-        triggerRecording(accId, a.title || 'Accomplishment', a.who || 'Agent');
+        triggerRecording(accId, a.title || 'Accomplishment', a.who || 'Agent', a.detail || '');
       }
 
       return NextResponse.json({ success: true });
@@ -293,6 +327,7 @@ export async function POST(request: Request) {
     if (body.type === 'accomplishment') {
       const accomplishments = readJson(ACCOMPLISHMENTS_FILE);
       const legacyAccId = body.id || Date.now().toString();
+      const legacyRelatedFile = body.file || findRelatedFile(body.title || '', body.detail || '') || undefined;
       accomplishments.push({
         id: legacyAccId,
         icon: body.icon || '✅',
@@ -300,12 +335,13 @@ export async function POST(request: Request) {
         detail: body.detail,
         who: body.who,
         screenshot: body.screenshot,
+        file: legacyRelatedFile,
         timestamp: Date.now(),
       });
       writeJson(ACCOMPLISHMENTS_FILE, trimAccomplishments(accomplishments));
 
       if (!body.screenshot) {
-        triggerRecording(legacyAccId, body.title || 'Accomplishment', body.who || 'Agent');
+        triggerRecording(legacyAccId, body.title || 'Accomplishment', body.who || 'Agent', body.detail || '');
       }
 
       return NextResponse.json({ success: true });

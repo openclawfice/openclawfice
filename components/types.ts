@@ -23,6 +23,7 @@ export interface Accomplishment {
   who: string;
   timestamp: number;
   screenshot?: string;
+  file?: string;
 }
 
 export interface Skill {
