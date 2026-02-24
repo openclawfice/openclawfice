@@ -777,40 +777,6 @@ export default function HomePage() {
           }}>
             {agents.length} {isMobile ? 'ag' : 'agents'}
           </span>
-          {!isMobile && (
-            <a
-              href="https://github.com/openclawfice/openclawfice/blob/main/SECURITY.md"
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 4,
-                fontSize: 8,
-                color: '#10b981',
-                textDecoration: 'none',
-                padding: '3px 8px',
-                background: '#10b98120',
-                border: '1px solid #10b981',
-                borderRadius: 4,
-                marginLeft: 8,
-                fontWeight: 600,
-                transition: 'all 0.2s',
-              }}
-              title="✓ Malware Scanned | No Telemetry | Privacy First"
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = '#10b98130';
-                e.currentTarget.style.transform = 'translateY(-1px)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = '#10b98120';
-                e.currentTarget.style.transform = 'translateY(0)';
-              }}
-            >
-              <span>🛡️</span>
-              <span>MALWARE FREE</span>
-            </a>
-          )}
         </div>
         <div style={{
           display: 'flex',
