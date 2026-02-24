@@ -1493,6 +1493,26 @@ function SettingsPanel({ config, onConfigChange, onClose }: {
       >
         {saved ? '✓ Saved' : saving ? 'Saving...' : 'Save Settings'}
       </button>
+
+      {/* Keyboard Shortcuts */}
+      <div style={{ marginTop: 16, padding: '12px 0', borderTop: '1px solid #334155' }}>
+        <div style={{ fontSize: 9, fontFamily: '"Press Start 2P", monospace', color: '#94a3b8', marginBottom: 8 }}>⌨️ Shortcuts</div>
+        {[
+          ['1-9', 'Select agent'],
+          ['T', 'Quest templates'],
+          ['M', 'Call meeting'],
+          ['?', 'Settings'],
+          ['Esc', 'Close panel'],
+        ].map(([key, desc]) => (
+          <div key={key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+            <kbd style={{
+              background: '#1e293b', border: '1px solid #475569', borderRadius: 3,
+              padding: '1px 6px', fontSize: 9, color: '#e2e8f0', fontFamily: 'monospace',
+            }}>{key}</kbd>
+            <span style={{ fontSize: 9, color: '#64748b' }}>{desc}</span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -1995,6 +2015,44 @@ export default function HomePage() {
     groups[label].push(acc);
     return groups;
   }, {} as Record<string, typeof accomplishments>);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      // Ignore when typing in inputs
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      
+      const key = e.key.toLowerCase();
+      if (key === 'escape') {
+        setSelectedAgent(null);
+        setShowTemplateGallery(false);
+        setShowShareModal(false);
+        setShowSettings(false);
+        setShowCallMeeting(false);
+        setSelectedAccomplishment(null);
+      }
+      if (key === '?' && !e.ctrlKey && !e.metaKey) {
+        setShowSettings(prev => !prev);
+      }
+      if (key === 't' && !e.ctrlKey && !e.metaKey) {
+        setShowTemplateGallery(prev => !prev);
+      }
+      if (key === 'm' && !e.ctrlKey && !e.metaKey) {
+        setShowCallMeeting(prev => !prev);
+      }
+      // Number keys 1-9 to select agents
+      if (key >= '1' && key <= '9' && !e.ctrlKey && !e.metaKey) {
+        const idx = parseInt(key) - 1;
+        const nonOwnerAgents = agents.filter(a => a.id !== '_owner');
+        if (idx < nonOwnerAgents.length) {
+          setSelectedAgent(prev => prev?.id === nonOwnerAgents[idx].id ? null : nonOwnerAgents[idx]);
+          sfx.playClick();
+        }
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [agents, sfx]);
 
   const hour = time.getHours();
   const bgGrad =
