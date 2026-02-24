@@ -2212,11 +2212,11 @@ export default function HomePage() {
           textAlign: 'center',
           padding: '20px',
         }}>
-          <div style={{ fontSize: 48, marginBottom: 16 }}>🏢</div>
+          <div style={{ fontSize: 64, marginBottom: 16, animation: 'npcBob 2s ease-in-out infinite' }}>🏢</div>
           <h2 style={{
             fontSize: isMobile ? 16 : 20,
             fontFamily: '"Press Start 2P", monospace',
-            marginBottom: 20,
+            marginBottom: 12,
             color: '#e2e8f0',
           }}>
             Welcome to OpenClawfice!
@@ -2226,24 +2226,53 @@ export default function HomePage() {
             color: '#94a3b8',
             maxWidth: 500,
             lineHeight: 1.8,
-            marginBottom: 20,
+            marginBottom: 24,
           }}>
-            No agents detected yet.
+            Your virtual office is empty. Let&apos;s fix that.
           </div>
           <div style={{
-            fontSize: isMobile ? 11 : 13,
-            color: '#64748b',
-            maxWidth: 500,
-            lineHeight: 1.6,
-            textAlign: 'left',
+            display: 'flex',
+            gap: 12,
+            marginBottom: 28,
+            flexWrap: 'wrap',
+            justifyContent: 'center',
           }}>
-            <div style={{ marginBottom: 8 }}>To get started:</div>
-            <div style={{ marginBottom: 6 }}>1. Make sure OpenClaw is running</div>
-            <div style={{ marginBottom: 6 }}>2. Agents will appear here automatically from ~/.openclaw/openclaw.json</div>
-            <div style={{ marginBottom: 20 }}>3. Send a message in OpenClaw to wake them up!</div>
-            <div style={{ fontSize: isMobile ? 10 : 12, color: '#475569' }}>
-              Need help? Check the <a href="/install" style={{ color: '#6366f1', textDecoration: 'none' }}>install guide</a>
-            </div>
+            <a href="/?demo=true" style={{
+              background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+              color: '#fff',
+              padding: '12px 24px',
+              borderRadius: 8,
+              fontSize: 11,
+              fontFamily: '"Press Start 2P", monospace',
+              textDecoration: 'none',
+              boxShadow: '0 4px 16px rgba(99,102,241,0.4)',
+              transition: 'transform 0.2s',
+            }}>
+              ▶ Try Demo
+            </a>
+            <a href="/install" style={{
+              background: 'rgba(99,102,241,0.15)',
+              color: '#a5b4fc',
+              padding: '12px 24px',
+              borderRadius: 8,
+              fontSize: 11,
+              fontFamily: '"Press Start 2P", monospace',
+              textDecoration: 'none',
+              border: '1px solid rgba(99,102,241,0.3)',
+              transition: 'transform 0.2s',
+            }}>
+              📖 Setup Guide
+            </a>
+          </div>
+          <div style={{
+            fontSize: isMobile ? 11 : 12,
+            color: '#475569',
+            maxWidth: 400,
+            lineHeight: 1.8,
+          }}>
+            <div style={{ marginBottom: 4 }}>✅ Make sure OpenClaw is running</div>
+            <div style={{ marginBottom: 4 }}>✅ Agents appear automatically from <code style={{ background: '#1e293b', padding: '1px 4px', borderRadius: 3, fontSize: 10 }}>~/.openclaw/openclaw.json</code></div>
+            <div>✅ Send a message in OpenClaw to wake them up</div>
           </div>
         </div>
       )}
