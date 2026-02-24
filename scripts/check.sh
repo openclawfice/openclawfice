@@ -74,9 +74,9 @@ if [ "$MODE" = "prod" ] || [ "$MODE" = "all" ]; then
   check_url "Homepage" "$BASE_PROD"
   check_url "Demo mode" "$BASE_PROD/demo"
   check_url "Install page" "$BASE_PROD/install"
-  check_url_contains "Security badge" "$BASE_PROD" "malware"
-  check_url_contains "Demo GIF" "$BASE_PROD" "openclawfice-demo.gif"
-  check_url_contains "Create Your AI Team" "$BASE_PROD" "Create Your"
+  check_url_contains "Security section" "$BASE_PROD" "VERIFIED"
+  check_url_contains "Hero text" "$BASE_PROD" "YOUR AI AGENTS"
+  check_url_contains "Zero config" "$BASE_PROD" "Zero Config"
 fi
 
 echo ""
