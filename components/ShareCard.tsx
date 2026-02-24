@@ -203,59 +203,63 @@ export function ShareCard({ agents, pendingActions, accomplishments, isDemoMode,
       ctx.fillText(agent.name || agent.id, x + 32, y + 27);
     });
 
-    // Quest preview (right side)
+    // Quest preview (below agents, not overlapping)
     if (pendingActions.length > 0) {
-      const qx = 680;
-      const qy = agentStartY;
+      const qx = 50;
+      const qy = loungeY + 80;
       ctx.font = 'bold 14px system-ui';
       ctx.fillStyle = '#f59e0b';
-      ctx.fillText('⚔️ QUEST LOG', qx, qy);
+      ctx.fillText('⚔️ ACTIVE QUESTS', qx, qy);
 
-      pendingActions.slice(0, 3).forEach((quest, i) => {
-        const y = qy + 15 + i * 55;
+      pendingActions.slice(0, 2).forEach((quest, i) => {
+        const y = qy + 15 + i * 50;
 
-        ctx.fillStyle = 'rgba(245, 158, 11, 0.08)';
-        roundRect(ctx, qx, y, 470, 45, 8);
+        ctx.fillStyle = 'rgba(245, 158, 11, 0.12)';
+        roundRect(ctx, qx, y, 540, 40, 8);
         ctx.fill();
-        ctx.strokeStyle = 'rgba(245, 158, 11, 0.15)';
-        ctx.lineWidth = 1;
-        roundRect(ctx, qx, y, 470, 45, 8);
+        ctx.strokeStyle = '#f59e0b';
+        ctx.lineWidth = 2;
+        roundRect(ctx, qx, y, 540, 40, 8);
         ctx.stroke();
 
-        ctx.font = 'bold 12px system-ui';
+        ctx.font = 'bold 13px system-ui';
         ctx.fillStyle = '#fbbf24';
-        ctx.fillText(truncate(quest.title || 'Quest', 40), qx + 12, y + 20);
+        ctx.fillText(truncate(quest.title || 'Quest', 50), qx + 12, y + 18);
 
         ctx.font = '10px system-ui';
         ctx.fillStyle = '#94a3b8';
         const from = quest.from ? `from ${quest.from}` : '';
-        const priority = quest.priority === 'high' ? '🔴 URGENT' : '';
-        ctx.fillText(`${from} ${priority}`.trim(), qx + 12, y + 36);
+        ctx.fillText(from, qx + 12, y + 32);
       });
     }
 
-    // Recent accomplishments
+    // Recent accomplishments (right side of quests)
     if (accomplishments.length > 0) {
-      const ax = 680;
-      const ay = loungeY;
+      const ax = 610;
+      const qy = loungeY + 80;
+      const ay = qy;
       ctx.font = 'bold 14px system-ui';
       ctx.fillStyle = '#ec4899';
-      ctx.fillText(`🏆 RECENT (${accomplishments.length} total)`, ax, ay);
+      ctx.fillText(`🏆 SHIPPED (${accomplishments.length})`, ax, ay);
 
       accomplishments.slice(0, 2).forEach((acc, i) => {
-        const y = ay + 15 + i * 45;
+        const y = ay + 15 + i * 50;
 
-        ctx.fillStyle = 'rgba(236, 72, 153, 0.08)';
-        roundRect(ctx, ax, y, 470, 38, 8);
+        ctx.fillStyle = 'rgba(236, 72, 153, 0.12)';
+        roundRect(ctx, ax, y, 540, 40, 8);
         ctx.fill();
+        ctx.strokeStyle = '#ec4899';
+        ctx.lineWidth = 2;
+        roundRect(ctx, ax, y, 540, 40, 8);
+        ctx.stroke();
 
-        ctx.font = '12px system-ui';
+        ctx.font = 'bold 12px system-ui';
         ctx.fillStyle = '#f9a8d4';
-        ctx.fillText(`${acc.icon || '✅'} ${truncate(acc.title, 45)}`, ax + 12, y + 16);
+        ctx.fillText(`${acc.icon || '✅'} ${truncate(acc.title, 50)}`, ax + 12, y + 18);
 
         ctx.font = '10px system-ui';
         ctx.fillStyle = '#94a3b8';
-        ctx.fillText(acc.who || '', ax + 12, y + 30);
+        ctx.fillText(acc.who || 'Team', ax + 12, y + 32);
       });
     }
 
