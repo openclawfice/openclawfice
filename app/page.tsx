@@ -789,16 +789,26 @@ export default function HomePage() {
                 fontSize: 8,
                 color: '#10b981',
                 textDecoration: 'none',
-                padding: '2px 6px',
-                background: '#10b98110',
-                border: '1px solid #10b98130',
+                padding: '3px 8px',
+                background: '#10b98120',
+                border: '1px solid #10b981',
                 borderRadius: 4,
                 marginLeft: 8,
+                fontWeight: 600,
+                transition: 'all 0.2s',
               }}
-              title="Security verified & malware scanned"
+              title="✓ Malware Scanned | No Telemetry | Privacy First"
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = '#10b98130';
+                e.currentTarget.style.transform = 'translateY(-1px)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = '#10b98120';
+                e.currentTarget.style.transform = 'translateY(0)';
+              }}
             >
               <span>🛡️</span>
-              <span>VERIFIED</span>
+              <span>MALWARE FREE</span>
             </a>
           )}
         </div>

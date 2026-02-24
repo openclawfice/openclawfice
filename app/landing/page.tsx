@@ -218,59 +218,161 @@ export default function LandingPage() {
 
       {/* Trust & Security */}
       <div style={{
-        background: 'rgba(16,185,129,0.06)',
-        borderTop: '2px solid rgba(16,185,129,0.2)',
-        borderBottom: '2px solid rgba(16,185,129,0.2)',
-        padding: '50px 20px',
+        background: 'rgba(16,185,129,0.08)',
+        borderTop: '3px solid rgba(16,185,129,0.3)',
+        borderBottom: '3px solid rgba(16,185,129,0.3)',
+        padding: '60px 20px',
+        boxShadow: '0 4px 24px rgba(16,185,129,0.1)',
       }}>
         <div style={{
           maxWidth: 900,
           margin: '0 auto',
           textAlign: 'center',
         }}>
+          {/* Main Security Badge */}
+          <div style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 12,
+            padding: '12px 24px',
+            background: 'rgba(16,185,129,0.15)',
+            border: '2px solid #10b981',
+            borderRadius: 12,
+            marginBottom: 20,
+            boxShadow: '0 4px 16px rgba(16,185,129,0.2)',
+          }}>
+            <span style={{ fontSize: 32 }}>🛡️</span>
+            <div style={{ textAlign: 'left' }}>
+              <div style={{
+                fontFamily: '"Press Start 2P", monospace',
+                fontSize: 14,
+                color: '#10b981',
+                marginBottom: 4,
+              }}>
+                VERIFIED & MALWARE SCANNED
+              </div>
+              <div style={{
+                fontSize: 11,
+                color: '#6ee7b7',
+              }}>
+                Automatically scanned by GitHub Security on every commit
+              </div>
+            </div>
+          </div>
+
           <h2 style={{
             fontFamily: '"Press Start 2P", monospace',
             fontSize: 16,
-            color: '#10b981',
-            marginBottom: 32,
+            color: '#fff',
+            marginBottom: 36,
           }}>
-            🔒 VERIFIED & SECURE
+            🔒 SAFE TO INSTALL • NO TELEMETRY • PRIVACY FIRST
           </h2>
+          
           <div style={{
             display: 'flex',
             justifyContent: 'center',
             flexWrap: 'wrap',
             gap: 24,
+            marginBottom: 32,
           }}>
             {[
-              { icon: '🛡️', label: 'Malware-Free', desc: 'Scanned by GitHub Advanced Security' },
-              { icon: '🔍', label: 'Open Source', desc: 'Audit every line of code yourself' },
-              { icon: '📦', label: 'Dependency Monitored', desc: 'Dependabot watches for vulnerabilities' },
-              { icon: '✅', label: 'Zero Known CVEs', desc: 'No known security vulnerabilities' },
+              { icon: '🛡️', label: 'Anti-Malware', desc: 'Every release scanned for viruses & trojans', highlight: true },
+              { icon: '🔍', label: 'CodeQL Analysis', desc: 'Automated security pattern detection', highlight: true },
+              { icon: '📦', label: 'Dependabot', desc: 'Real-time dependency vulnerability monitoring' },
+              { icon: '✅', label: 'Zero CVEs', desc: 'No known security vulnerabilities' },
             ].map((item, i) => (
               <div key={i} style={{
-                background: 'rgba(16,185,129,0.08)',
-                border: '1px solid rgba(16,185,129,0.2)',
+                background: item.highlight ? 'rgba(16,185,129,0.12)' : 'rgba(16,185,129,0.08)',
+                border: item.highlight ? '2px solid rgba(16,185,129,0.4)' : '1px solid rgba(16,185,129,0.2)',
                 borderRadius: 10,
-                padding: '16px 20px',
-                minWidth: 180,
-                flex: '1 1 180px',
-                maxWidth: 220,
-              }}>
-                <div style={{ fontSize: 24, marginBottom: 8 }}>{item.icon}</div>
-                <div style={{ fontSize: 13, fontWeight: 700, color: '#e2e8f0', marginBottom: 4 }}>{item.label}</div>
-                <div style={{ fontSize: 11, color: '#6ee7b7', lineHeight: 1.4 }}>{item.desc}</div>
+                padding: '20px 24px',
+                minWidth: 200,
+                flex: '1 1 200px',
+                maxWidth: 240,
+                transition: 'transform 0.2s, border-color 0.2s',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-4px)';
+                e.currentTarget.style.borderColor = '#10b981';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.borderColor = item.highlight ? 'rgba(16,185,129,0.4)' : 'rgba(16,185,129,0.2)';
+              }}
+              >
+                <div style={{ fontSize: 28, marginBottom: 12 }}>{item.icon}</div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: '#e2e8f0', marginBottom: 6 }}>{item.label}</div>
+                <div style={{ fontSize: 11, color: '#6ee7b7', lineHeight: 1.5 }}>{item.desc}</div>
               </div>
             ))}
           </div>
-          <p style={{
-            fontSize: 12,
-            color: '#64748b',
-            marginTop: 20,
+
+          {/* Privacy Guarantees */}
+          <div style={{
+            display: 'flex',
+            justifyContent: 'center',
+            flexWrap: 'wrap',
+            gap: 20,
+            marginBottom: 24,
           }}>
-            All releases are automatically scanned for malware and vulnerabilities.
-            {' '}<a href="https://github.com/openclawfice/openclawfice/security" style={{ color: '#10b981', textDecoration: 'none' }}>View security report →</a>
+            {[
+              '❌ No Telemetry',
+              '❌ No Tracking',
+              '❌ No Data Collection',
+              '✅ 100% Local',
+              '✅ Open Source',
+            ].map((item, i) => (
+              <div key={i} style={{
+                fontSize: 13,
+                color: '#6ee7b7',
+                fontWeight: 600,
+                padding: '8px 16px',
+                background: 'rgba(16,185,129,0.08)',
+                border: '1px solid rgba(16,185,129,0.2)',
+                borderRadius: 6,
+              }}>
+                {item}
+              </div>
+            ))}
+          </div>
+
+          <p style={{
+            fontSize: 13,
+            color: '#94a3b8',
+            marginBottom: 12,
+            lineHeight: 1.6,
+          }}>
+            Every code change is automatically scanned by GitHub Advanced Security, CodeQL, and Dependabot.
+            <br />
+            All source code is auditable, readable TypeScript. No obfuscation, no hidden payloads.
           </p>
+          
+          <a 
+            href="https://github.com/openclawfice/openclawfice/blob/main/SECURITY.md" 
+            style={{ 
+              color: '#10b981', 
+              textDecoration: 'none',
+              fontSize: 13,
+              fontWeight: 600,
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 6,
+              padding: '8px 16px',
+              background: 'rgba(16,185,129,0.1)',
+              borderRadius: 6,
+              border: '1px solid rgba(16,185,129,0.3)',
+              transition: 'all 0.2s',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'rgba(16,185,129,0.15)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'rgba(16,185,129,0.1)';
+            }}
+          >
+            📋 Read Full Security Policy →
+          </a>
         </div>
       </div>
 
