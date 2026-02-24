@@ -36,6 +36,10 @@ Open **http://localhost:3333** — that's it. Zero config. Agents are auto-disco
 
 **First time?** See [INSTALL.md](./INSTALL.md) for prerequisites and troubleshooting.
 
+**Want the cool stuff?** Check [Cool Features & Hidden Gems](./COOL-FEATURES.md) for fun, quirky, shareable moments.
+
+**Ready to get work done?** See [Get Productive in 10 Minutes](./GET-PRODUCTIVE.md) for real-world workflows and time-saving hacks.
+
 ## What You Get
 
 | Feature | Description |
@@ -101,6 +105,8 @@ PRs welcome! See [CONTRIBUTING.md](./CONTRIBUTING.md) and [docs/GOOD-FIRST-ISSUE
 - Daily workflow best practices
 - How to measure ROI
 - 30-day success plan
+
+**Looking for specific docs?** See [DOCUMENTATION-INDEX.md](./DOCUMENTATION-INDEX.md) - master index of all 30+ guides organized by use case, problem, and interest.
 
 ## Troubleshooting
 
