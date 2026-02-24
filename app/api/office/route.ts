@@ -11,6 +11,7 @@ const STATUS_DIR = join(OPENCLAW_DIR, '.status');
 const ACTIVITY_FILE = join(STATUS_DIR, 'activity.json');
 const CHAT_FILE = join(STATUS_DIR, 'chat.json');
 const WATERCOOLER_MARKER = join(STATUS_DIR, 'watercooler-active.json');
+const ACCOMPLISHMENTS_FILE = join(STATUS_DIR, 'accomplishments.json');
 
 interface SessionInfo {
   sessionId: string;
@@ -487,6 +488,72 @@ function formatTime(ts: number): string {
 }
 
 /**
+ * Calculate XP, level, and skills from real accomplishment data.
+ * Each accomplishment = 10-25 XP based on keyword complexity.
+ * Skills derived from accomplishment titles/details.
+ */
+function calculateAgentProgression(agentName: string): { xp: number; level: number; skills: { name: string; level: number; icon: string }[] } {
+  try {
+    if (!existsSync(ACCOMPLISHMENTS_FILE)) return { xp: 0, level: 1, skills: [] };
+    const all: { who?: string; title?: string; detail?: string }[] = JSON.parse(readFileSync(ACCOMPLISHMENTS_FILE, 'utf-8'));
+    const mine = all.filter(a => a.who?.toLowerCase() === agentName.toLowerCase());
+    if (mine.length === 0) return { xp: 0, level: 1, skills: [] };
+
+    // Skill categories with keyword detection
+    const skillDefs: { name: string; icon: string; keywords: string[] }[] = [
+      { name: 'Code', icon: '💻', keywords: ['code', 'fix', 'bug', 'refactor', 'build', 'implement', 'typescript', 'component', 'api', 'script', 'function', 'module', 'commit', 'push', 'merge', 'pr'] },
+      { name: 'Design', icon: '🎨', keywords: ['design', 'ui', 'ux', 'css', 'style', 'layout', 'animation', 'responsive', 'npc', 'pixel', 'theme'] },
+      { name: 'Ops', icon: '⚙️', keywords: ['deploy', 'server', 'database', 'security', 'config', 'automate', 'pipeline', 'monitor', 'backup', 'infrastructure', 'vercel', 'production'] },
+      { name: 'Research', icon: '🔍', keywords: ['research', 'find', 'search', 'analyze', 'audit', 'validate', 'evaluate', 'report', 'data', 'roi', 'metrics'] },
+      { name: 'Outreach', icon: '📧', keywords: ['email', 'outreach', 'creator', 'contact', 'dm', 'prospect', 'campaign', 'follow-up', 'qualified', 'sourced', 'pipeline'] },
+      { name: 'Docs', icon: '📝', keywords: ['doc', 'readme', 'guide', 'documentation', 'changelog', 'tutorial', 'checklist', 'wrote', 'status report'] },
+      { name: 'Ship', icon: '🚀', keywords: ['ship', 'launch', 'release', 'publish', 'demo', 'screenshot', 'gif', 'record', 'video', 'proof'] },
+    ];
+
+    // Count skill hits and calculate XP
+    const skillCounts: Record<string, number> = {};
+    let totalXp = 0;
+
+    for (const acc of mine) {
+      const text = `${acc.title || ''} ${acc.detail || ''}`.toLowerCase();
+      // Base XP per accomplishment, bonus for longer/more complex titles
+      const complexity = text.length > 100 ? 25 : text.length > 50 ? 20 : 15;
+      totalXp += complexity;
+
+      for (const sd of skillDefs) {
+        const hits = sd.keywords.filter(k => text.includes(k)).length;
+        if (hits > 0) skillCounts[sd.name] = (skillCounts[sd.name] || 0) + hits;
+      }
+    }
+
+    // Convert to levels: every 100 XP = 1 level, starting at 1
+    const level = Math.max(1, Math.floor(totalXp / 100) + 1);
+
+    // Convert skill counts to levels, pick top 3
+    const skills = skillDefs
+      .map(sd => ({
+        name: sd.name,
+        icon: sd.icon,
+        level: Math.min(20, Math.max(1, Math.floor(Math.sqrt((skillCounts[sd.name] || 0) * 3)) + 1)),
+        score: skillCounts[sd.name] || 0,
+      }))
+      .filter(s => s.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 3)
+      .map(({ score, ...rest }) => rest);
+
+    // If no skills matched, give a default
+    if (skills.length === 0) {
+      skills.push({ name: 'General', icon: '⭐', level: Math.min(20, mine.length) });
+    }
+
+    return { xp: totalXp, level, skills };
+  } catch {
+    return { xp: 0, level: 1, skills: [] };
+  }
+}
+
+/**
  * Main API handler
  */
 export async function GET() {
@@ -646,6 +713,7 @@ export async function GET() {
         lastToolUseTs: evidence.lastToolUseTs,
         lastActivityTs: evidence.lastActivityTs,
       } : undefined,
+      ...calculateAgentProgression(cfg.name),
     };
   });
 
