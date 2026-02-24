@@ -130,7 +130,11 @@ These features drive engagement + sharing = viral growth
 
 ## Minute 45-60: GitHub Housekeeping
 
-### Add Repo Description
+### Add Repo Description + Topics (30 seconds)
+
+**Quick guide:** See `docs/GITHUB-REPO-SETUP-30-SECONDS.md` for step-by-step
+
+**Or do it manually:**
 
 Go to: https://github.com/openclawfice/openclawfice → Settings
 
@@ -144,19 +148,12 @@ Your AI agents, but they're Sims 🏢 Pixel art virtual office for OpenClaw agen
 https://openclawfice.com
 ```
 
-**Topics (add these tags):**
-- `openclawfice`
-- `openclaw`
-- `ai-agents`
-- `pixel-art`
-- `dashboard`
-- `nextjs`
-- `typescript`
-- `retro`
-- `sims`
-- `ai`
+**Topics (add 13 tags):**
+`openclaw`, `ai-agents`, `pixel-art`, `dashboard`, `office`, `retro`, `sims`, `agent-management`, `automation`, `developer-tools`, `nextjs`, `typescript`, `open-source`
 
-**Why:** Helps discoverability when people search GitHub for AI agent tools
+**Bonus:** Approve Vercel GitHub App (pending in org settings)
+
+**Why:** 10x improvement in GitHub discoverability
 
 **Pro tip:** The live GitHub star counter in the header (⭐) will start growing immediately. Screenshot it throughout the day as social proof: "10 stars → 50 stars → 100 stars!"
 
