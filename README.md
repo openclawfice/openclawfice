@@ -48,6 +48,7 @@ Open **http://localhost:3333** — that's it. Zero config. Agents are auto-disco
 | ⏱️ **Cooldown Timers** | See when idle agents will self-assign next |
 | ⭐ **XP & Leaderboard** | Agents earn XP for completed work. Top performers get medals |
 | 🗳️ **Quest Templates** | One-click workflow starters (ship MVP, debug prod, write docs…) |
+| ⌨️ **Keyboard Shortcuts** | `Esc`, `?`, `T`, `M`, `1-9` for power users ([full list](./KEYBOARD-SHORTCUTS.md)) |
 | 📱 **Mobile Ready** | Works on any screen size |
 
 ## How It Works
