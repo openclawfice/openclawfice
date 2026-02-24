@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { basename } from 'path';
-import { exec } from 'child_process';
+import { execFile } from 'child_process';
 import { findFile, findRelatedFile, getAgentWorkspaces } from '../../../../lib/file-finder';
 
 export async function GET(request: Request) {
@@ -47,7 +47,8 @@ export async function POST(request: Request) {
     for (const editor of editors) {
       try {
         await new Promise<void>((resolve, reject) => {
-          exec(`${editor} "${resolved}"`, { timeout: 5000 }, (err) => {
+          // Use execFile instead of exec to prevent command injection
+          execFile(editor, [resolved], { timeout: 5000 }, (err) => {
             if (err) reject(err); else resolve();
           });
         });
@@ -57,7 +58,8 @@ export async function POST(request: Request) {
     }
 
     if (!opened) {
-      exec(`open "${resolved}"`, { timeout: 5000 });
+      // Use execFile with 'open' command (macOS)
+      execFile('open', [resolved], { timeout: 5000 });
     }
 
     return NextResponse.json({ path: resolved, opened: true });
