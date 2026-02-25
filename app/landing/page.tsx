@@ -28,12 +28,22 @@ export default function LandingPage() {
     bg: 'linear-gradient(180deg, #0f172a 0%, #1e293b 50%, #0f172a 100%)',
     text: '#e2e8f0',
     textMuted: '#94a3b8',
+    textDim: '#64748b',
     cardBg: 'rgba(30, 41, 59, 0.6)',
+    cardBorder: '#334155',
+    sectionBg: 'rgba(15, 23, 42, 0.5)',
+    buttonBg: '#1e293b',
+    buttonHover: '#334155',
   } : {
     bg: 'linear-gradient(180deg, #f8fafc 0%, #e2e8f0 50%, #f8fafc 100%)',
     text: '#1e293b',
     textMuted: '#64748b',
-    cardBg: 'rgba(255, 255, 255, 0.8)',
+    textDim: '#94a3b8',
+    cardBg: 'rgba(255, 255, 255, 0.9)',
+    cardBorder: '#e2e8f0',
+    sectionBg: 'rgba(248, 250, 252, 0.8)',
+    buttonBg: '#e2e8f0',
+    buttonHover: '#cbd5e1',
   };
 
   return (
@@ -168,11 +178,11 @@ export default function LandingPage() {
           <div style={{
             marginTop: 16,
             fontSize: 13,
-            color: '#64748b',
+            color: theme.textDim,
           }}>
             <a
               href="https://github.com/openclawfice/openclawfice"
-              style={{ color: '#94a3b8', textDecoration: 'none' }}
+              style={{ color: theme.textMuted, textDecoration: 'none' }}
             >
               ⭐ {stars} stars on GitHub
             </a>
@@ -209,7 +219,7 @@ export default function LandingPage() {
           fontSize: 24,
           textAlign: 'center',
           marginBottom: 60,
-          color: '#fff',
+          color: theme.text,
         }}>
           WHY PEOPLE LOVE IT
         </h2>
@@ -254,8 +264,8 @@ export default function LandingPage() {
             <div
               key={i}
               style={{
-                background: '#0f172a',
-                border: '2px solid #1e293b',
+                background: theme.cardBg,
+                border: `2px solid ${theme.cardBorder}`,
                 borderRadius: 12,
                 padding: 24,
                 transition: 'transform 0.2s, border-color 0.2s',
@@ -266,7 +276,7 @@ export default function LandingPage() {
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.borderColor = '#1e293b';
+                e.currentTarget.style.borderColor = theme.cardBorder;
               }}
             >
               <div style={{ fontSize: 40, marginBottom: 16 }}>{feature.icon}</div>
@@ -274,12 +284,12 @@ export default function LandingPage() {
                 fontFamily: '"Press Start 2P", monospace',
                 fontSize: 12,
                 marginBottom: 12,
-                color: '#fff',
+                color: theme.text,
               }}>
                 {feature.title}
               </h3>
               <p style={{
-                color: '#94a3b8',
+                color: theme.textMuted,
                 fontSize: 14,
                 lineHeight: 1.6,
                 margin: 0,
@@ -338,7 +348,7 @@ export default function LandingPage() {
           <h2 style={{
             fontFamily: '"Press Start 2P", monospace',
             fontSize: 16,
-            color: '#fff',
+            color: theme.text,
             marginBottom: 36,
           }}>
             🔒 SAFE TO INSTALL • NO TELEMETRY • PRIVACY FIRST
@@ -377,7 +387,7 @@ export default function LandingPage() {
               }}
               >
                 <div style={{ fontSize: 28, marginBottom: 12 }}>{item.icon}</div>
-                <div style={{ fontSize: 14, fontWeight: 700, color: '#e2e8f0', marginBottom: 6 }}>{item.label}</div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: theme.text, marginBottom: 6 }}>{item.label}</div>
                 <div style={{ fontSize: 11, color: '#6ee7b7', lineHeight: 1.5 }}>{item.desc}</div>
               </div>
             ))}
@@ -414,7 +424,7 @@ export default function LandingPage() {
 
           <p style={{
             fontSize: 13,
-            color: '#94a3b8',
+            color: theme.textMuted,
             marginBottom: 12,
             lineHeight: 1.6,
           }}>
@@ -462,7 +472,7 @@ export default function LandingPage() {
           fontSize: 24,
           textAlign: 'center',
           marginBottom: 60,
-          color: '#fff',
+          color: theme.text,
         }}>
           HOW IT WORKS
         </h2>
@@ -520,12 +530,12 @@ export default function LandingPage() {
                   fontFamily: '"Press Start 2P", monospace',
                   fontSize: 14,
                   marginBottom: 12,
-                  color: '#fff',
+                  color: theme.text,
                 }}>
                   {item.title}
                 </h3>
                 <p style={{
-                  color: '#94a3b8',
+                  color: theme.textMuted,
                   fontSize: 14,
                   lineHeight: 1.6,
                   marginBottom: item.code ? 16 : 0,
@@ -534,8 +544,8 @@ export default function LandingPage() {
                 </p>
                 {item.code && (
                   <div style={{
-                    background: '#0f172a',
-                    border: '1px solid #334155',
+                    background: theme.cardBg,
+                    border: `1px solid ${theme.cardBorder}`,
                     borderRadius: 8,
                     padding: 16,
                     fontFamily: 'monospace',
@@ -562,7 +572,7 @@ export default function LandingPage() {
           fontFamily: '"Press Start 2P", monospace',
           fontSize: 32,
           marginBottom: 24,
-          color: '#fff',
+          color: theme.text,
           lineHeight: 1.4,
         }}>
           READY TO TURN YOUR
@@ -571,7 +581,7 @@ export default function LandingPage() {
         </h2>
         <p style={{
           fontSize: 18,
-          color: '#94a3b8',
+          color: theme.textMuted,
           marginBottom: 40,
           lineHeight: 1.6,
         }}>
@@ -626,7 +636,7 @@ export default function LandingPage() {
       }}>
         <p style={{
           fontSize: 12,
-          color: '#64748b',
+          color: theme.textDim,
           marginBottom: 12,
         }}>
           Open Source • AGPL-3.0 • Made with 💜 by the OpenClaw community
