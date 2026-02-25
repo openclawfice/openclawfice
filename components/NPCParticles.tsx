@@ -80,7 +80,7 @@ export function NPCParticles({ agentStatus, agentMood, agentRole, width, height 
     let particleId = 0;
     const createParticle = (): Particle => {
       const angle = Math.random() * Math.PI * 2;
-      const speed = (0.55 + Math.random() * 0.8) * (focusedBoost ? 1.15 : 1) * 2;
+      const speed = (0.55 + Math.random() * 0.8) * (focusedBoost ? 1.15 : 1) * 0.3;
       
       return {
         id: particleId++,
@@ -89,7 +89,7 @@ export function NPCParticles({ agentStatus, agentMood, agentRole, width, height 
         vx: Math.cos(angle) * speed,
         vy: Math.sin(angle) * speed - 0.3, // Slight upward bias
         life: 0,
-        maxLife: 18 + Math.random() * 12, // ~0.3-0.5 seconds at 60fps
+        maxLife: 14 + Math.random() * 10, // ~0.23-0.4 seconds at 60fps
         char: particleChars[Math.floor(Math.random() * particleChars.length)],
         color: colors[Math.floor(Math.random() * colors.length)],
         size: 10.5 + Math.random() * 5.25,

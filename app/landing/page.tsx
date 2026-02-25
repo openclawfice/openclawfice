@@ -34,6 +34,11 @@ export default function LandingPage() {
     sectionBg: 'rgba(15, 23, 42, 0.5)',
     buttonBg: '#1e293b',
     buttonHover: '#334155',
+    accent: '#6366f1',
+    accentMuted: '#a5b4fc',
+    success: '#10b981',
+    successMuted: '#6ee7b7',
+    footerText: '#475569',
   } : {
     bg: 'linear-gradient(180deg, #f8fafc 0%, #e2e8f0 50%, #f8fafc 100%)',
     text: '#1e293b',
@@ -44,6 +49,11 @@ export default function LandingPage() {
     sectionBg: 'rgba(248, 250, 252, 0.8)',
     buttonBg: '#e2e8f0',
     buttonHover: '#cbd5e1',
+    accent: '#4f46e5',
+    accentMuted: '#6366f1',
+    success: '#059669',
+    successMuted: '#10b981',
+    footerText: '#64748b',
   };
 
   return (
@@ -162,7 +172,7 @@ export default function LandingPage() {
               padding: '16px 32px',
               background: 'rgba(99,102,241,0.15)',
               border: '2px solid rgba(99,102,241,0.4)',
-              color: '#a5b4fc',
+              color: theme.accentMuted,
               textDecoration: 'none',
               borderRadius: 12,
               fontWeight: 700,
@@ -195,7 +205,7 @@ export default function LandingPage() {
         <div style={{
           maxWidth: 900,
           margin: '0 auto',
-          border: '3px solid #334155',
+          border: `3px solid ${theme.cardBorder}`,
           borderRadius: 16,
           overflow: 'hidden',
           boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
@@ -321,7 +331,7 @@ export default function LandingPage() {
             gap: 12,
             padding: '12px 24px',
             background: 'rgba(16,185,129,0.15)',
-            border: '2px solid #10b981',
+            border: `2px solid ${theme.success}`,
             borderRadius: 12,
             marginBottom: 20,
             boxShadow: '0 4px 16px rgba(16,185,129,0.2)',
@@ -331,14 +341,14 @@ export default function LandingPage() {
               <div style={{
                 fontFamily: '"Press Start 2P", monospace',
                 fontSize: 14,
-                color: '#10b981',
+                color: theme.success,
                 marginBottom: 4,
               }}>
                 VERIFIED & MALWARE SCANNED
               </div>
               <div style={{
                 fontSize: 11,
-                color: '#6ee7b7',
+                color: theme.successMuted,
               }}>
                 Automatically scanned by GitHub Security on every commit
               </div>
@@ -379,7 +389,7 @@ export default function LandingPage() {
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.transform = 'translateY(-4px)';
-                e.currentTarget.style.borderColor = '#10b981';
+                e.currentTarget.style.borderColor = theme.success;
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.transform = 'translateY(0)';
@@ -388,7 +398,7 @@ export default function LandingPage() {
               >
                 <div style={{ fontSize: 28, marginBottom: 12 }}>{item.icon}</div>
                 <div style={{ fontSize: 14, fontWeight: 700, color: theme.text, marginBottom: 6 }}>{item.label}</div>
-                <div style={{ fontSize: 11, color: '#6ee7b7', lineHeight: 1.5 }}>{item.desc}</div>
+                <div style={{ fontSize: 11, color: theme.successMuted, lineHeight: 1.5 }}>{item.desc}</div>
               </div>
             ))}
           </div>
@@ -410,7 +420,7 @@ export default function LandingPage() {
             ].map((item, i) => (
               <div key={i} style={{
                 fontSize: 13,
-                color: '#6ee7b7',
+                color: theme.successMuted,
                 fontWeight: 600,
                 padding: '8px 16px',
                 background: 'rgba(16,185,129,0.08)',
@@ -436,7 +446,7 @@ export default function LandingPage() {
           <a 
             href="https://github.com/openclawfice/openclawfice/blob/main/SECURITY.md" 
             style={{ 
-              color: '#10b981', 
+              color: theme.success, 
               textDecoration: 'none',
               fontSize: 13,
               fontWeight: 600,
@@ -550,7 +560,7 @@ export default function LandingPage() {
                     padding: 16,
                     fontFamily: 'monospace',
                     fontSize: 13,
-                    color: '#6ee7b7',
+                    color: theme.successMuted,
                   }}>
                     {item.code}
                   </div>
@@ -616,7 +626,7 @@ export default function LandingPage() {
               padding: '20px 40px',
               background: 'rgba(99,102,241,0.15)',
               border: '2px solid rgba(99,102,241,0.4)',
-              color: '#a5b4fc',
+              color: theme.accentMuted,
               textDecoration: 'none',
               borderRadius: 12,
               fontWeight: 700,
@@ -630,7 +640,7 @@ export default function LandingPage() {
 
       {/* Footer */}
       <div style={{
-        borderTop: '2px solid #1e293b',
+        borderTop: `2px solid ${theme.cardBorder}`,
         padding: '40px 20px',
         textAlign: 'center',
       }}>
@@ -643,7 +653,7 @@ export default function LandingPage() {
         </p>
         <p style={{
           fontSize: 10,
-          color: '#475569',
+          color: theme.footerText,
           maxWidth: 600,
           margin: '0 auto 12px',
           lineHeight: 1.6,
@@ -656,13 +666,13 @@ export default function LandingPage() {
           justifyContent: 'center',
           fontSize: 13,
         }}>
-          <a href="https://github.com/openclawfice/openclawfice" style={{ color: '#6366f1', textDecoration: 'none' }}>
+          <a href="https://github.com/openclawfice/openclawfice" style={{ color: theme.accent, textDecoration: 'none' }}>
             GitHub
           </a>
-          <a href="https://docs.openclaw.ai" style={{ color: '#6366f1', textDecoration: 'none' }}>
+          <a href="https://docs.openclaw.ai" style={{ color: theme.accent, textDecoration: 'none' }}>
             Docs
           </a>
-          <a href="https://openclaw.ai/discord" style={{ color: '#6366f1', textDecoration: 'none' }}>
+          <a href="https://openclaw.ai/discord" style={{ color: theme.accent, textDecoration: 'none' }}>
             Discord
           </a>
         </div>
