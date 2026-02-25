@@ -8,25 +8,71 @@ import { useState, useEffect } from 'react';
  */
 export default function LandingPage() {
   const [stars, setStars] = useState<number | null>(null);
+  const [darkMode, setDarkMode] = useState(true);
 
   useEffect(() => {
     fetch('https://api.github.com/repos/openclawfice/openclawfice')
       .then(r => r.json())
       .then(d => { if (d.stargazers_count != null) setStars(d.stargazers_count); })
       .catch(() => {});
+    
+    // Load dark mode preference (default to dark)
+    const savedDarkMode = localStorage.getItem('openclawfice-dark-mode');
+    if (savedDarkMode === 'false') {
+      setDarkMode(false);
+    }
   }, []);
+
+  // Theme colors
+  const theme = darkMode ? {
+    bg: 'linear-gradient(180deg, #0f172a 0%, #1e293b 50%, #0f172a 100%)',
+    text: '#e2e8f0',
+    textMuted: '#94a3b8',
+    cardBg: 'rgba(30, 41, 59, 0.6)',
+  } : {
+    bg: 'linear-gradient(180deg, #f8fafc 0%, #e2e8f0 50%, #f8fafc 100%)',
+    text: '#1e293b',
+    textMuted: '#64748b',
+    cardBg: 'rgba(255, 255, 255, 0.8)',
+  };
 
   return (
     <div style={{
       minHeight: '100vh',
-      background: 'linear-gradient(180deg, #0f172a 0%, #1e293b 50%, #0f172a 100%)',
-      color: '#e2e8f0',
+      background: theme.bg,
+      color: theme.text,
       fontFamily: 'system-ui',
     }}>
       <link
         href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap"
         rel="stylesheet"
       />
+
+      {/* Dark Mode Toggle */}
+      <button
+        onClick={() => {
+          const next = !darkMode;
+          setDarkMode(next);
+          localStorage.setItem('openclawfice-dark-mode', String(next));
+        }}
+        style={{
+          position: 'fixed',
+          top: 20,
+          right: 20,
+          border: 'none',
+          color: theme.textMuted,
+          cursor: 'pointer',
+          fontSize: 24,
+          padding: '8px 12px',
+          borderRadius: 8,
+          background: theme.cardBg,
+          backdropFilter: 'blur(10px)',
+          zIndex: 1000,
+        }}
+        title={darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+      >
+        {darkMode ? '🌙' : '☀️'}
+      </button>
 
       {/* Hero Section */}
       <div style={{
@@ -62,7 +108,7 @@ export default function LandingPage() {
         {/* Subheadline */}
         <p style={{
           fontSize: 20,
-          color: '#94a3b8',
+          color: theme.textMuted,
           marginBottom: 40,
           lineHeight: 1.6,
           maxWidth: 600,

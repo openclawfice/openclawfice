@@ -24,7 +24,7 @@ import { CallMeetingModal } from '../components/CallMeetingModal';
 import { AccomplishmentDetailModal } from '../components/AccomplishmentDetailModal';
 
 
-function Clock() {
+function Clock({ color }: { color: string }) {
   const [timeLabel, setTimeLabel] = useState('--:--');
   useEffect(() => {
     const format = () =>
@@ -38,7 +38,7 @@ function Clock() {
     return () => clearInterval(i);
   }, []);
   return (
-    <div style={{ fontFamily: '"Press Start 2P", monospace', fontSize: 9, color: '#64748b' }}>
+    <div style={{ fontFamily: '"Press Start 2P", monospace', fontSize: 9, color }}>
       {timeLabel}
     </div>
   );
@@ -102,6 +102,7 @@ export default function HomePage() {
   const [pendingAutowork, setPendingAutowork] = useState<Record<string, Partial<{ enabled: boolean; intervalMs: number; directive: string }>>>({});
   const [showSettings, setShowSettings] = useState(false);
   const [sfxEnabled, setSfxEnabled] = useState(false);
+  const [darkMode, setDarkMode] = useState(true); // Default to dark mode
   const [screenSize, setScreenSize] = useState<'mobile' | 'tablet' | 'desktop'>('desktop');
   const [githubStars, setGithubStars] = useState<number | null>(null);
   const [showBoot, setShowBoot] = useState(false);
@@ -118,6 +119,12 @@ export default function HomePage() {
       setShowBoot(true);
     }
     if (localStorage.getItem('openclawfice-sfx') === 'on') setSfxEnabled(true);
+    
+    // Load dark mode preference (default to dark)
+    const savedDarkMode = localStorage.getItem('openclawfice-dark-mode');
+    if (savedDarkMode === 'false') {
+      setDarkMode(false);
+    }
   }, []);
 
   // Konami code listener
@@ -897,12 +904,43 @@ export default function HomePage() {
   const isSingleWorkRow = estimatedWorkRows === 1;
   const isDoubleWorkRow = estimatedWorkRows === 2;
 
+  // Theme colors
+  const theme = darkMode ? {
+    // Dark mode (default)
+    bg: '#0f172a',
+    bgSecondary: '#1e293b',
+    bgTertiary: '#334155',
+    text: '#e2e8f0',
+    textMuted: '#94a3b8',
+    textDim: '#64748b',
+    border: '#334155',
+    borderLight: '#475569',
+    cardBg: 'rgba(30, 41, 59, 0.6)',
+    cardHover: 'rgba(51, 65, 85, 0.8)',
+    inputBg: '#1e293b',
+    inputBorder: '#475569',
+  } : {
+    // Light mode
+    bg: '#f8fafc',
+    bgSecondary: '#e2e8f0',
+    bgTertiary: '#cbd5e1',
+    text: '#1e293b',
+    textMuted: '#475569',
+    textDim: '#64748b',
+    border: '#cbd5e1',
+    borderLight: '#e2e8f0',
+    cardBg: 'rgba(255, 255, 255, 0.9)',
+    cardHover: 'rgba(241, 245, 249, 1)',
+    inputBg: '#ffffff',
+    inputBorder: '#cbd5e1',
+  };
+
   return (
     <div style={{
       height: '100vh',
       overflow: 'hidden',
-      background: '#000',
-      color: '#e2e8f0',
+      background: theme.bg,
+      color: theme.text,
       fontFamily: 'system-ui',
     }}>
       <link
@@ -926,8 +964,8 @@ export default function HomePage() {
 
       {/* Header */}
       <div style={{
-        background: '#0f172a',
-        borderBottom: '2px solid #1e293b',
+        background: theme.bgSecondary,
+        borderBottom: `2px solid ${theme.border}`,
         padding: '6px 16px',
         display: 'flex',
         justifyContent: 'space-between',
@@ -950,7 +988,7 @@ export default function HomePage() {
           </h1>
           <span style={{
             fontSize: isMobile ? 8 : 10,
-            color: '#475569',
+            color: theme.textMuted,
             marginLeft: isMobile ? 4 : 8,
           }}>
             {agents.length} {isMobile ? 'ag' : 'agents'}
@@ -964,13 +1002,13 @@ export default function HomePage() {
           <Stat icon="🟢" n={working.length} />
           <Stat icon="☕" n={idle.length} />
           {pendingActions.length > 0 && <Stat icon="⚔️" n={pendingActions.length} />}
-          <Clock />
+          <Clock color={theme.textDim} />
           <button
             onClick={() => { sfx.play('open'); setShowCallMeeting(true); }}
             style={{
               background: 'none',
               border: 'none',
-              color: '#475569',
+              color: theme.textMuted,
               cursor: 'pointer',
               fontSize: 14,
               padding: '2px 4px',
@@ -984,7 +1022,7 @@ export default function HomePage() {
             style={{
               background: 'none',
               border: 'none',
-              color: '#475569',
+              color: theme.textMuted,
               cursor: 'pointer',
               fontSize: 14,
               padding: '2px 4px',
@@ -1000,7 +1038,7 @@ export default function HomePage() {
             style={{
               background: 'none',
               border: 'none',
-              color: '#475569',
+              color: theme.textMuted,
               cursor: 'pointer',
               fontSize: 14,
               padding: '2px 4px',
@@ -1016,7 +1054,7 @@ export default function HomePage() {
             style={{
               background: 'none',
               border: 'none',
-              color: '#475569',
+              color: theme.textMuted,
               cursor: 'pointer',
               fontSize: 14,
               padding: '2px 4px',
@@ -1105,7 +1143,7 @@ export default function HomePage() {
             style={{
               background: 'none',
               border: 'none',
-              color: '#475569',
+              color: theme.textMuted,
               cursor: 'pointer',
               fontSize: 14,
               padding: '2px 4px',
@@ -1124,7 +1162,7 @@ export default function HomePage() {
             style={{
               background: 'none',
               border: 'none',
-              color: sfxEnabled ? '#475569' : '#1e293b',
+              color: sfxEnabled ? theme.textMuted : theme.textDim,
               cursor: 'pointer',
               fontSize: 14,
               padding: '2px 4px',
@@ -1133,6 +1171,25 @@ export default function HomePage() {
             title={sfxEnabled ? 'Mute SFX' : 'Unmute SFX'}
           >
             {sfxEnabled ? '🔊' : '🔇'}
+          </button>
+          <button
+            onClick={() => {
+              const next = !darkMode;
+              setDarkMode(next);
+              localStorage.setItem('openclawfice-dark-mode', String(next));
+              sfx.play('click');
+            }}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: theme.textMuted,
+              cursor: 'pointer',
+              fontSize: 14,
+              padding: '2px 4px',
+            }}
+            title={darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+          >
+            {darkMode ? '🌙' : '☀️'}
           </button>
         </div>
       </div>
@@ -1153,7 +1210,7 @@ export default function HomePage() {
             fontSize: isMobile ? 16 : 20,
             fontFamily: '"Press Start 2P", monospace',
             marginBottom: 12,
-            color: '#e2e8f0',
+            color: theme.text,
           }}>
             Welcome to OpenClawfice!
           </h2>
@@ -1202,12 +1259,12 @@ export default function HomePage() {
           </div>
           <div style={{
             fontSize: isMobile ? 11 : 12,
-            color: '#475569',
+            color: theme.textMuted,
             maxWidth: 400,
             lineHeight: 1.8,
           }}>
             <div style={{ marginBottom: 4 }}>✅ Make sure OpenClaw is running</div>
-            <div style={{ marginBottom: 4 }}>✅ Agents appear automatically from <code style={{ background: '#1e293b', padding: '1px 4px', borderRadius: 3, fontSize: 10 }}>~/.openclaw/openclaw.json</code></div>
+            <div style={{ marginBottom: 4 }}>✅ Agents appear automatically from <code style={{ background: theme.bgTertiary, padding: '1px 4px', borderRadius: 3, fontSize: 10 }}>~/.openclaw/openclaw.json</code></div>
             <div>✅ Send a message in OpenClaw to wake them up</div>
           </div>
         </div>
@@ -1228,11 +1285,11 @@ export default function HomePage() {
         }}>
           <span style={{ fontSize: 20 }}>👋</span>
           <div>
-            <div style={{ fontSize: 11, color: '#e2e8f0', fontWeight: 600 }}>Welcome to your office!</div>
+            <div style={{ fontSize: 11, color: theme.text, fontWeight: 600 }}>Welcome to your office!</div>
             <div style={{ fontSize: 10, color: '#94a3b8', marginTop: 2 }}>
               Your agents will appear here once they start working. Send a message in OpenClaw to wake them up!
               {agents.some(a => !a.hasIdentity) && (
-                <> 💡 Tip: Add <code style={{ background: '#1e293b', padding: '1px 4px', borderRadius: 3 }}>IDENTITY.md</code> to agent workspaces to customize their names.</>
+                <> 💡 Tip: Add <code style={{ background: theme.bgTertiary, padding: '1px 4px', borderRadius: 3 }}>IDENTITY.md</code> to agent workspaces to customize their names.</>
               )}
             </div>
           </div>
@@ -1254,7 +1311,7 @@ export default function HomePage() {
           gap: 6,
         }}>
           <span>💡</span>
-          <span>Some agents are using default names. Add <code style={{ background: '#1e293b', padding: '1px 4px', borderRadius: 3 }}>IDENTITY.md</code> to their workspaces to customize!</span>
+          <span>Some agents are using default names. Add <code style={{ background: theme.bgTertiary, padding: '1px 4px', borderRadius: 3 }}>IDENTITY.md</code> to their workspaces to customize!</span>
         </div>
       )}
 
@@ -1332,13 +1389,13 @@ export default function HomePage() {
                           <div onClick={(e) => e.stopPropagation()} style={{
                             position: 'absolute', top: '100%', left: '50%', transform: 'translateX(-50%)',
                             marginTop: 4, zIndex: 100,
-                            background: '#1e293b', border: '1px solid #334155',
-                            borderRadius: 8, padding: '8px 12px', fontSize: 11, color: '#e2e8f0',
+                            background: theme.bgTertiary, border: '1px solid #334155',
+                            borderRadius: 8, padding: '8px 12px', fontSize: 11, color: theme.text,
                             maxWidth: 320, minWidth: 180, whiteSpace: 'normal', wordBreak: 'break-word',
                             lineHeight: 1.4, boxShadow: '0 8px 32px rgba(0,0,0,0.6)',
                             animation: 'fadeSlideIn 0.15s ease-out',
                           }}>
-                            <div style={{ fontSize: 8, color: '#64748b', marginBottom: 4, fontFamily: '"Press Start 2P", monospace' }}>{a.name}</div>
+                            <div style={{ fontSize: 8, color: theme.textDim, marginBottom: 4, fontFamily: '"Press Start 2P", monospace' }}>{a.name}</div>
                             {a.task}
                           </div>
                         )}
@@ -1356,7 +1413,7 @@ export default function HomePage() {
                 ))
               ) : (
                 <div style={{
-                  color: '#475569',
+                  color: theme.textMuted,
                   fontFamily: '"Press Start 2P", monospace',
                   fontSize: 7,
                   padding: 12,
@@ -1456,7 +1513,7 @@ export default function HomePage() {
                   ))
                 ) : (
                   <div style={{
-                    color: '#475569',
+                    color: theme.textMuted,
                     fontFamily: '"Press Start 2P", monospace',
                     fontSize: 7,
                     padding: '12px 8px',
@@ -1524,7 +1581,7 @@ export default function HomePage() {
                             <div style={{
                               fontSize: 10,
                               fontWeight: 700,
-                              color: '#e2e8f0',
+                              color: theme.text,
                               whiteSpace: 'nowrap',
                               overflow: 'hidden',
                               textOverflow: 'ellipsis',
@@ -1533,7 +1590,7 @@ export default function HomePage() {
                             </div>
                             <div style={{
                               fontSize: 8,
-                              color: '#64748b',
+                              color: theme.textDim,
                               display: 'flex',
                               gap: 8,
                               marginTop: 1,
@@ -1554,7 +1611,7 @@ export default function HomePage() {
                               </span>
                             </div>
                           </div>
-                          <span style={{ fontSize: 10, color: '#475569' }}>▶</span>
+                          <span style={{ fontSize: 10, color: theme.textMuted }}>▶</span>
                         </div>
                       </div>
                     );
@@ -1571,7 +1628,7 @@ export default function HomePage() {
                       ✨
                     </div>
                     <div style={{
-                      color: '#e2e8f0',
+                      color: theme.text,
                       fontSize: 10,
                       marginBottom: 6,
                       fontWeight: 600,
@@ -1579,7 +1636,7 @@ export default function HomePage() {
                       No pending decisions
                     </div>
                     <div style={{
-                      color: '#64748b',
+                      color: theme.textDim,
                       fontSize: 9,
                       lineHeight: 1.5,
                       marginBottom: 12,
@@ -1626,7 +1683,7 @@ export default function HomePage() {
 
           {/* ACCOMPLISHMENTS */}
           <div data-tour="accomplishments" style={{
-            background: '#0f172a',
+            background: theme.bgSecondary,
             border: '2px solid #1e293b',
             borderRadius: 8,
             overflow: 'hidden',
@@ -1636,7 +1693,7 @@ export default function HomePage() {
             flexDirection: 'column',
           }}>
             <div style={{
-              background: '#1e293b',
+              background: theme.bgTertiary,
               padding: '8px 14px',
               display: 'flex',
               alignItems: 'center',
@@ -1653,7 +1710,7 @@ export default function HomePage() {
               </span>
               <span style={{
                 fontSize: 8,
-                color: '#475569',
+                color: theme.textMuted,
                 marginLeft: 'auto',
                 display: 'flex',
                 alignItems: 'center',
@@ -1694,7 +1751,7 @@ export default function HomePage() {
                     <div style={{
                       fontSize: 8,
                       fontFamily: '"Press Start 2P", monospace',
-                      color: '#64748b',
+                      color: theme.textDim,
                       padding: '8px 4px 4px',
                       textTransform: 'uppercase',
                       letterSpacing: '0.5px',
@@ -1734,7 +1791,7 @@ export default function HomePage() {
                         {a.icon}
                       </span>
                       <div style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        <span style={{ fontSize: 10, fontWeight: 700, color: '#e2e8f0' }}>
+                        <span style={{ fontSize: 10, fontWeight: 700, color: theme.text }}>
                           {a.title}
                         </span>
                       </div>
@@ -1757,7 +1814,7 @@ export default function HomePage() {
                         <span style={{ fontSize: 8, fontWeight: 600, color: '#6366f1' }}>
                           {a.who}
                         </span>
-                        <span style={{ fontSize: 7, color: '#475569' }}>{timeAgo}</span>
+                        <span style={{ fontSize: 7, color: theme.textMuted }}>{timeAgo}</span>
                       </div>
                     </div>
                   );
@@ -1776,7 +1833,7 @@ export default function HomePage() {
                     🎯
                   </div>
                   <div style={{
-                    color: '#e2e8f0',
+                    color: theme.text,
                     fontSize: 10,
                     marginBottom: 6,
                     fontWeight: 600,
@@ -1784,7 +1841,7 @@ export default function HomePage() {
                     No accomplishments yet
                   </div>
                   <div style={{
-                    color: '#64748b',
+                    color: theme.textDim,
                     fontSize: 9,
                     lineHeight: 1.6,
                   }}>
@@ -1829,7 +1886,7 @@ export default function HomePage() {
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 1, flexShrink: 0 }}>
                           <span style={{ fontSize: 7, fontWeight: 600, color: '#6366f1' }}>{a.who}</span>
-                          <span style={{ fontSize: 7, color: '#475569' }}>{dateStr}</span>
+                          <span style={{ fontSize: 7, color: theme.textMuted }}>{dateStr}</span>
                         </div>
                       </div>
                     );
@@ -1870,7 +1927,7 @@ export default function HomePage() {
           maxHeight: isMobile ? '400px' : undefined,
         }}>
           <div data-tour="water-cooler" style={{
-            background: '#0f172a',
+            background: theme.bgSecondary,
             border: '2px solid #44320a',
             borderRadius: 12,
             flex: isMobile ? 'none' : 1,
@@ -1880,7 +1937,7 @@ export default function HomePage() {
             maxHeight: isMobile ? '400px' : undefined,
           }}>
             <div style={{
-              background: '#1e293b',
+              background: theme.bgTertiary,
               padding: '8px 14px',
               display: 'flex',
               alignItems: 'center',
@@ -1929,7 +1986,7 @@ export default function HomePage() {
                     💬
                   </div>
                   <div style={{
-                    color: '#e2e8f0',
+                    color: theme.text,
                     fontSize: 10,
                     marginBottom: 6,
                     fontWeight: 600,
@@ -1938,7 +1995,7 @@ export default function HomePage() {
                   </div>
                   <div style={{
                     fontSize: 9,
-                    color: '#64748b',
+                    color: theme.textDim,
                     lineHeight: 1.6,
                   }}>
                     No chat yet. Idle agents will start
@@ -2011,7 +2068,7 @@ export default function HomePage() {
             }}>
               <div style={{
                 fontSize: 8,
-                color: '#64748b',
+                color: theme.textDim,
                 marginBottom: 6,
                 fontFamily: '"Press Start 2P", monospace',
               }}>
@@ -2041,11 +2098,11 @@ export default function HomePage() {
                   disabled={sendingGroup || isDemoMode}
                   style={{
                     flex: 1,
-                    background: '#1e293b',
+                    background: theme.bgTertiary,
                     border: '1px solid #334155',
                     borderRadius: 6,
                     padding: '6px 8px',
-                    color: '#e2e8f0',
+                    color: theme.text,
                     fontSize: 11,
                     outline: 'none',
                   }}
@@ -2097,7 +2154,7 @@ export default function HomePage() {
             display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20,
           }}>
             <div onClick={(e) => e.stopPropagation()} style={{
-              background: '#0f172a', border: `2px solid ${priorityColors[action.priority]}`,
+              background: theme.bgSecondary, border: `2px solid ${priorityColors[action.priority]}`,
               borderRadius: 12, padding: 20, maxWidth: 520, width: '100%',
               maxHeight: '80vh', overflowY: 'auto',
               boxShadow: `0 0 40px ${priorityColors[action.priority]}33, 0 20px 60px rgba(0,0,0,0.8)`,
@@ -2106,8 +2163,8 @@ export default function HomePage() {
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
                 <span style={{ fontSize: 24 }}>{action.icon}</span>
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: '#e2e8f0' }}>{action.title}</div>
-                  <div style={{ fontSize: 10, color: '#64748b', marginTop: 2 }}>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: theme.text }}>{action.title}</div>
+                  <div style={{ fontSize: 10, color: theme.textDim, marginTop: 2 }}>
                     from <span style={{ color: action.from === 'Scout' ? '#f59e0b' : action.from === 'Cipher' ? '#6366f1' : '#10b981' }}>{action.from}</span>
                     <span style={{ marginLeft: 8, color: priorityColors[action.priority], fontWeight: 600, textTransform: 'uppercase' as const, fontFamily: '"Press Start 2P", monospace', fontSize: 8 }}>
                       {action.priority === 'high' ? '❗ URGENT' : action.priority === 'medium' ? '⚡ SOON' : '📋 WHEN FREE'}
@@ -2115,7 +2172,7 @@ export default function HomePage() {
                   </div>
                 </div>
                 <button onClick={() => setExpandedAction(null)} style={{
-                  background: 'none', border: 'none', color: '#475569', fontSize: 18, cursor: 'pointer',
+                  background: 'none', border: 'none', color: theme.textMuted, fontSize: 18, cursor: 'pointer',
                 }}>✕</button>
               </div>
 
@@ -2153,19 +2210,19 @@ export default function HomePage() {
                   title={`Open ${action.data.file} in editor`}
                 >
                   📄 {action.data.file}
-                  <span style={{ fontSize: 9, color: '#475569' }}>↗ open in editor</span>
+                  <span style={{ fontSize: 9, color: theme.textMuted }}>↗ open in editor</span>
                 </a>
               )}
 
               {/* Email body */}
               {action.data?.body && (
                 <div style={{
-                  background: '#1e293b', borderRadius: 8, padding: 12, marginBottom: 12,
+                  background: theme.bgTertiary, borderRadius: 8, padding: 12, marginBottom: 12,
                   fontSize: 11, color: '#cbd5e1', whiteSpace: 'pre-wrap' as const, lineHeight: 1.6,
                   border: '1px solid #334155',
                 }}>
-                  {action.data.subject && <div style={{ fontWeight: 700, marginBottom: 4, color: '#e2e8f0', fontSize: 12 }}>Subject: {action.data.subject}</div>}
-                  {action.data.to && <div style={{ color: '#64748b', marginBottom: 8 }}>To: {action.data.to}</div>}
+                  {action.data.subject && <div style={{ fontWeight: 700, marginBottom: 4, color: theme.text, fontSize: 12 }}>Subject: {action.data.subject}</div>}
+                  {action.data.to && <div style={{ color: theme.textDim, marginBottom: 8 }}>To: {action.data.to}</div>}
                   {action.data.body}
                 </div>
               )}
@@ -2202,7 +2259,7 @@ export default function HomePage() {
                     const edit = prompt('Edit instructions:');
                     if (edit) respondAction(`edit: ${edit}`);
                   }} style={{
-                    background: '#1e293b', border: '1px solid #334155', borderRadius: 6,
+                    background: theme.bgTertiary, border: '1px solid #334155', borderRadius: 6,
                     padding: '8px 20px', color: '#94a3b8', cursor: 'pointer',
                     fontFamily: '"Press Start 2P", monospace', fontSize: 9,
                   }}>✏️ EDIT</button>
@@ -2218,8 +2275,8 @@ export default function HomePage() {
                     placeholder={action.type === 'decision' ? 'Your decision...' : 'Type your response...'}
                     id={`quest-input-${action.id}`}
                     style={{
-                      flex: 1, background: '#1e293b', border: '1px solid #334155',
-                      borderRadius: 6, padding: '8px 12px', color: '#e2e8f0',
+                      flex: 1, background: theme.bgTertiary, border: '1px solid #334155',
+                      borderRadius: 6, padding: '8px 12px', color: theme.text,
                       fontSize: 12, outline: 'none',
                     }}
                     onKeyDown={async (e) => {
@@ -2245,7 +2302,7 @@ export default function HomePage() {
               {(action.type === 'review_data' || action.type === 'review') && !action.data?.options && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                   <button onClick={() => respondAction('acknowledged')} style={{
-                    background: '#1e293b', border: '1px solid #334155', borderRadius: 6,
+                    background: theme.bgTertiary, border: '1px solid #334155', borderRadius: 6,
                     padding: '8px 20px', color: '#94a3b8', cursor: 'pointer',
                     fontFamily: '"Press Start 2P", monospace', fontSize: 9, alignSelf: 'flex-start',
                   }}>👀 ACKNOWLEDGED</button>
@@ -2255,8 +2312,8 @@ export default function HomePage() {
                       placeholder="Or add notes..."
                       id={`quest-input-${action.id}`}
                       style={{
-                        flex: 1, background: '#1e293b', border: '1px solid #334155',
-                        borderRadius: 6, padding: '8px 12px', color: '#e2e8f0',
+                        flex: 1, background: theme.bgTertiary, border: '1px solid #334155',
+                        borderRadius: 6, padding: '8px 12px', color: theme.text,
                         fontSize: 12, outline: 'none',
                       }}
                       onKeyDown={async (e) => {
@@ -2293,7 +2350,7 @@ export default function HomePage() {
                       fontWeight: 700, fontFamily: '"Press Start 2P", monospace', fontSize: 9,
                     }}>✅ APPROVE</button>
                     <button onClick={() => respondAction('dismissed')} style={{
-                      background: '#1e293b', border: '1px solid #334155', borderRadius: 6,
+                      background: theme.bgTertiary, border: '1px solid #334155', borderRadius: 6,
                       padding: '8px 20px', color: '#94a3b8', cursor: 'pointer',
                       fontFamily: '"Press Start 2P", monospace', fontSize: 9,
                     }}>🗑️ DISMISS</button>
@@ -2305,8 +2362,8 @@ export default function HomePage() {
                       placeholder="Or respond with notes..."
                       id={`quest-input-${action.id}`}
                       style={{
-                        flex: 1, background: '#1e293b', border: '1px solid #334155',
-                        borderRadius: 6, padding: '8px 12px', color: '#e2e8f0',
+                        flex: 1, background: theme.bgTertiary, border: '1px solid #334155',
+                        borderRadius: 6, padding: '8px 12px', color: theme.text,
                         fontSize: 12, outline: 'none',
                       }}
                       onKeyDown={async (e) => {
