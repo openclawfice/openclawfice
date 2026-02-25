@@ -574,25 +574,6 @@ export function NPC({ agent, size = 1, onClick, forceThought, flipped, hasCelebr
         }}>
           {agent.role}
         </span>
-        {/* Status activity indicator */}
-        {agent.status === 'working' ? (
-          <span style={{
-            fontSize: 7 * size,
-            animation: 'statusPulse 1.5s ease-in-out infinite',
-            display: 'inline-block',
-          }}>
-            ⚡
-          </span>
-        ) : (
-          <span style={{
-            fontSize: 7 * size,
-            opacity: 0.5,
-            animation: 'statusFloat 3s ease-in-out infinite',
-            display: 'inline-block',
-          }}>
-            💤
-          </span>
-        )}
       </div>
     </div>
   );

@@ -22,7 +22,6 @@ import { MeetingRoom } from '../components/MeetingRoom';
 import { AutoworkBanner } from '../components/AutoworkBanner';
 import { CallMeetingModal } from '../components/CallMeetingModal';
 import { AccomplishmentDetailModal } from '../components/AccomplishmentDetailModal';
-import { ActivityHeatmap } from '../components/ActivityHeatmap';
 
 
 function Clock({ color }: { color: string }) {
@@ -1048,6 +1047,38 @@ export default function HomePage() {
           >
             📸
           </button>
+          <button
+            onClick={() => {
+              sfx.play('click');
+              const tweetText = encodeURIComponent('My AI agents are pixel art NPCs now 🏢 Check out OpenClawfice — open source virtual office for @OpenClaw agents');
+              const tweetUrl = encodeURIComponent('https://openclawfice.com');
+              window.open(`https://twitter.com/intent/tweet?text=${tweetText}&url=${tweetUrl}`, '_blank', 'width=550,height=420');
+            }}
+            style={{
+              background: 'rgba(29,161,242,0.1)',
+              border: '1px solid rgba(29,161,242,0.2)',
+              borderRadius: 6,
+              color: '#1da1f2',
+              cursor: 'pointer',
+              fontSize: 14,
+              padding: '4px 8px',
+              transition: 'all 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+            title="Share on Twitter/X"
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'rgba(29,161,242,0.2)';
+              e.currentTarget.style.borderColor = 'rgba(29,161,242,0.4)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'rgba(29,161,242,0.1)';
+              e.currentTarget.style.borderColor = 'rgba(29,161,242,0.2)';
+            }}
+          >
+            𝕏
+          </button>
           <a
             href="/viral-templates.html"
             target="_blank"
@@ -1917,10 +1948,6 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Activity Heatmap */}
-          {!isMobile && (
-            <ActivityHeatmap accomplishments={[...accomplishments, ...archivedAccomplishments]} theme={theme} />
-          )}
         </div>
 
         {/* RIGHT COLUMN: Water Cooler Chat */}
