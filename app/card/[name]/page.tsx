@@ -94,13 +94,15 @@ export default function CardPage() {
     ctx.shadowBlur = 30;
     ctx.strokeStyle = rarity.color;
     ctx.lineWidth = 3;
-    ctx.roundRect(20, 20, W - 40, H - 40, 16);
+    ctx.beginPath();
+    ctx.beginPath(); ctx.roundRect(20, 20, W - 40, H - 40, 16);
     ctx.stroke();
     ctx.shadowBlur = 0;
 
     // Inner card bg
     ctx.fillStyle = 'rgba(15,23,42,0.8)';
-    ctx.roundRect(30, 30, W - 60, H - 60, 12);
+    ctx.beginPath();
+    ctx.beginPath(); ctx.roundRect(30, 30, W - 60, H - 60, 12);
     ctx.fill();
 
     // Rarity badge
@@ -132,7 +134,7 @@ export default function CardPage() {
     // XP bar
     const barW = 300, barH = 12, barX = (W - barW) / 2, barY = 298;
     ctx.fillStyle = '#1e293b';
-    ctx.roundRect(barX, barY, barW, barH, 6);
+    ctx.beginPath(); ctx.roundRect(barX, barY, barW, barH, 6);
     ctx.fill();
     const xpPct = Math.min(1, (agent.xp % 500) / 500);
     if (xpPct > 0) {
@@ -140,7 +142,7 @@ export default function CardPage() {
       grad.addColorStop(0, rarity.color);
       grad.addColorStop(1, rarity.glow);
       ctx.fillStyle = grad;
-      ctx.roundRect(barX, barY, barW * xpPct, barH, 6);
+      ctx.beginPath(); ctx.roundRect(barX, barY, barW * xpPct, barH, 6);
       ctx.fill();
     }
 
@@ -171,7 +173,7 @@ export default function CardPage() {
       const col = i % 2 === 0 ? 60 : W / 2 + 10;
       const row = 420 + Math.floor(i / 2) * 28;
       ctx.fillStyle = 'rgba(99,102,241,0.15)';
-      ctx.roundRect(col, row - 14, 220, 22, 4);
+      ctx.beginPath(); ctx.roundRect(col, row - 14, 220, 22, 4);
       ctx.fill();
       ctx.fillStyle = '#a5b4fc';
       ctx.font = '9px "Press Start 2P", monospace';
@@ -197,7 +199,7 @@ export default function CardPage() {
     const statusY = 620;
     const isWorking = agent.status === 'working';
     ctx.fillStyle = isWorking ? 'rgba(34,197,94,0.15)' : 'rgba(251,191,36,0.15)';
-    ctx.roundRect(W / 2 - 80, statusY, 160, 30, 8);
+    ctx.beginPath(); ctx.roundRect(W / 2 - 80, statusY, 160, 30, 8);
     ctx.fill();
     ctx.font = '10px "Press Start 2P", monospace';
     ctx.fillStyle = isWorking ? '#22c55e' : '#fbbf24';
