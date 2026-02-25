@@ -1,7 +1,8 @@
 # 📚 OpenClawfice Documentation
 
 ## Getting Started
-- **[First 5 Minutes](FIRST-5-MINUTES.md)** — Quick setup and first steps
+- **[Your First 5 Minutes](YOUR-FIRST-5-MINUTES.md)** — Complete beginner's guide (absolute zero to productive)
+- **[First 5 Minutes](FIRST-5-MINUTES.md)** — Quick setup and first steps (original short version)
 - **[Cool Features](COOL-FEATURES.md)** — Hidden gems and delightful details
 - **[Get Productive](GET-PRODUCTIVE.md)** — 10-minute guide to daily productivity
 - **[Configuration](CONFIGURING-YOUR-OFFICE.md)** — Customize your office
@@ -27,6 +28,7 @@
 - **[Security FAQ](SECURITY-FAQ.md)** — Common security questions
 
 ## Contributing
+- **[GitHub Setup](GITHUB-SETUP.md)** — How to launch the public GitHub repo (2 minutes)
 - **[Good First Issues](GOOD-FIRST-ISSUES.md)** — Where to start contributing
 - **[Testing Guide](TESTING-GUIDE.md)** — How to test changes
 - **[Roadmap](ROADMAP.md)** — What's planned next

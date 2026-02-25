@@ -27,6 +27,8 @@ interface CommandPaletteProps {
   onSelectAgent: (agent: Agent) => void;
   onToggleDarkMode?: () => void;
   onToggleSFX?: () => void;
+  onToggleMusic?: () => void;
+  musicPlaying?: boolean;
   onOpenSettings?: () => void;
   onOpenShare?: () => void;
   onCallMeeting?: () => void;
@@ -69,6 +71,8 @@ export function CommandPalette({
   onSelectAgent,
   onToggleDarkMode,
   onToggleSFX,
+  onToggleMusic,
+  musicPlaying,
   onOpenSettings,
   onOpenShare,
   onCallMeeting,
@@ -162,6 +166,14 @@ export function CommandPalette({
       category: 'settings' as const,
       keywords: ['sound', 'audio', 'sfx', 'mute', 'volume'],
       onSelect: () => { onToggleSFX(); },
+    }] : []),
+    ...(onToggleMusic ? [{
+      id: 'settings-music',
+      icon: musicPlaying ? '⏹️' : '🎵',
+      label: musicPlaying ? 'Stop Background Music' : 'Play Chiptune Music',
+      category: 'settings' as const,
+      keywords: ['music', 'chiptune', '8-bit', 'lo-fi', 'background', 'soundtrack', 'audio'],
+      onSelect: () => { onToggleMusic(); },
     }] : []),
     ...(onOpenSettings ? [{
       id: 'settings-open',

@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useDemoMode } from '../hooks/useDemoMode';
 import { useRetroSFX } from '../hooks/useRetroSFX';
+import { useChiptune } from '../hooks/useChiptune';
 import { useAuthenticatedFetch } from '../hooks/useAuthenticatedFetch';
 import type { Agent, AgentStatus, Mood, PendingAction, Accomplishment, ChatMessage } from '../components/types';
 import { randomColor, generateAgentDefaults, prettifyTask, formatInterval } from '../components/utils';
@@ -23,6 +24,7 @@ import { AutoworkBanner } from '../components/AutoworkBanner';
 import { CallMeetingModal } from '../components/CallMeetingModal';
 import { AccomplishmentDetailModal } from '../components/AccomplishmentDetailModal';
 import { OfficeEvents } from '../components/OfficeEvents';
+import { OnboardingModal } from '../components/OnboardingModal';
 import { CommandPalette } from '../components/CommandPalette';
 
 
@@ -52,6 +54,7 @@ export default function HomePage() {
 
   const { isDemoMode, getApiPath } = useDemoMode();
   const sfx = useRetroSFX();
+  const music = useChiptune();
   const authenticatedFetch = useAuthenticatedFetch();
   
   const secureFetch = useCallback(async (url: string, options: RequestInit = {}) => {
@@ -105,6 +108,7 @@ export default function HomePage() {
   const [showSettings, setShowSettings] = useState(false);
   const [sfxEnabled, setSfxEnabled] = useState(false);
   const [darkMode, setDarkMode] = useState(true); // Default to dark mode
+  const [showOnboarding, setShowOnboarding] = useState(false);
   const [screenSize, setScreenSize] = useState<'mobile' | 'tablet' | 'desktop'>('desktop');
   const [githubStars, setGithubStars] = useState<number | null>(null);
   const [showBoot, setShowBoot] = useState(false);
@@ -127,6 +131,15 @@ export default function HomePage() {
     const savedDarkMode = localStorage.getItem('openclawfice-dark-mode');
     if (savedDarkMode === 'false') {
       setDarkMode(false);
+    }
+
+    // Show onboarding on first visit (after boot sequence)
+    const onboardingDismissed = localStorage.getItem('openclawfice-onboarding-dismissed');
+    if (!onboardingDismissed && !demoMode) {
+      // Wait for boot sequence to finish
+      setTimeout(() => {
+        setShowOnboarding(true);
+      }, seen ? 500 : 3500);
     }
   }, []);
 
@@ -1243,6 +1256,26 @@ export default function HomePage() {
             title={sfxEnabled ? 'Mute SFX' : 'Unmute SFX'}
           >
             {sfxEnabled ? '🔊' : '🔇'}
+          </button>
+          <button
+            onClick={() => {
+              music.toggle();
+              sfx.play('click');
+            }}
+            style={{
+              background: music.playing ? 'rgba(99,102,241,0.12)' : 'none',
+              border: music.playing ? '1px solid rgba(99,102,241,0.3)' : '1px solid transparent',
+              borderRadius: 4,
+              color: music.playing ? '#818cf8' : theme.textDim,
+              cursor: 'pointer',
+              fontSize: 14,
+              padding: '2px 4px',
+              opacity: music.playing ? 1 : 0.5,
+              transition: 'all 0.2s',
+            }}
+            title={music.playing ? 'Stop Music' : 'Play Chiptune Music 🎵'}
+          >
+            {music.playing ? '🎵' : '🎵'}
           </button>
           {!isMobile && (
             <button
@@ -2733,6 +2766,8 @@ export default function HomePage() {
           const newVal = !sfx.enabled.current;
           sfx.setEnabled(newVal);
         }}
+        onToggleMusic={() => music.toggle()}
+        musicPlaying={music.playing}
         onOpenSettings={() => setShowSettings(true)}
         onOpenShare={() => setShowShareModal(true)}
         onCallMeeting={() => { sfx.play('meetingStart'); setShowCallMeeting(true); }}

@@ -5,7 +5,7 @@ import React, { useState, useEffect } from 'react';
 const TOUR_STEPS = [
   {
     title: '🏠 Your AI Office',
-    body: 'Your AI agents are pixel-art NPCs with roles, personalities, and moods — like The Sims, but they ship code.',
+    body: 'Your AI agents are pixel-art NPCs with moods, XP levels, and unique looks — like The Sims, but they ship code.',
     target: 'work-room',
     position: 'bottom' as const,
   },
@@ -16,20 +16,26 @@ const TOUR_STEPS = [
     position: 'top' as const,
   },
   {
+    title: '📡 Office Feed',
+    body: 'Random events happen in the office — funny moments, milestones, and chaos. Watch the drama unfold!',
+    target: 'office-events',
+    position: 'left' as const,
+  },
+  {
     title: '💬 Water Cooler',
-    body: 'Agents chat, debate, and collaborate. Send group messages or just watch the banter unfold.',
+    body: 'Agents chat, debate, and collaborate in real-time. Send group messages or just watch the banter.',
     target: 'water-cooler',
     position: 'left' as const,
   },
   {
     title: '🏆 Accomplishments',
-    body: 'Every completed task gets logged with a video replay. Your team\'s highlight reel.',
+    body: 'Every completed task gets logged with a video replay. Your team\'s highlight reel, with XP rewards.',
     target: 'accomplishments',
     position: 'top' as const,
   },
   {
-    title: '🎮 Click an Agent!',
-    body: 'Tap any NPC to see stats, send a DM, or set auto-work schedules. Try it!',
+    title: '🎮 Pro Tips!',
+    body: 'Press ⌘K to open the command palette. Try the Konami Code for a surprise. Click any agent for stats + DMs!',
     target: 'work-room',
     position: 'bottom' as const,
   },
