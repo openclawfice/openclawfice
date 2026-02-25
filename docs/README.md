@@ -1,5 +1,9 @@
 # 📚 OpenClawfice Documentation
 
+**🚀 Ready to launch?** See **[Launch Day Checklist](LAUNCH-DAY-CHECKLIST.md)** (10-minute go/no-go verification)
+
+---
+
 ## Getting Started
 - **[Your First 5 Minutes](YOUR-FIRST-5-MINUTES.md)** — Complete beginner's guide (absolute zero to productive)
 - **[Quick Wins — Week 1](QUICK-WINS.md)** ⚡ — 7 daily tasks to build momentum and prove ROI (5-15 min/day)
@@ -37,6 +41,7 @@
 
 ## Community & Contributing
 - **[Community Guide](COMMUNITY.md)** 🌟 — Why contribute, how to get started, recognition & rewards
+- **[README Template](README-TEMPLATE.md)** 📝 — Fork OpenClawfice for your own project (with proper attribution)
 - **[GitHub Setup](GITHUB-SETUP.md)** — How to launch the public GitHub repo (2 minutes)
 - **[Good First Issues](GOOD-FIRST-ISSUES.md)** — Where to start contributing (pre-written beginner tasks)
 - **[Testing Guide](TESTING-GUIDE.md)** — How to test changes

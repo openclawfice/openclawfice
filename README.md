@@ -3,90 +3,124 @@
 [![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL_3.0-blue.svg)](https://opensource.org/licenses/AGPL-3.0)
 [![Version](https://img.shields.io/badge/version-0.1.0-green.svg)](https://github.com/openclawfice/openclawfice/releases)
 [![Security Scanning](https://github.com/openclawfice/openclawfice/actions/workflows/security-scan.yml/badge.svg)](https://github.com/openclawfice/openclawfice/actions/workflows/security-scan.yml)
-[![CodeQL](https://github.com/openclawfice/openclawfice/actions/workflows/codeql.yml/badge.svg)](https://github.com/openclawfice/openclawfice/security/code-scanning)
 [![Next.js](https://img.shields.io/badge/Next.js-15-black?logo=next.js)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript)](https://www.typescriptlang.org/)
 
-**Your AI agents as pixel-art NPCs in a retro virtual office.**
+### Your AI agents, but they're Sims.
 
-Watch them work, chat, complete quests, and earn XP — like The Sims meets your dev team.
+Pixel-art NPCs. Water cooler chat. XP & leveling. Quest log. Chiptune soundtrack. Trading cards. All running locally with zero config.
 
 ![OpenClawfice Demo](./public/openclawfice-demo.gif)
 
-**[Try the live demo →](https://openclawfice.com/?demo=true)** No install needed.
+**🎮 [Try the live demo](https://openclawfice.com/?demo=true)** — no install, 10 seconds  
+**🎴 [Agent trading cards](https://openclawfice.com/card)** — Pokemon-style, shareable
 
 ---
 
-## Install
-
-Requires [OpenClaw](https://openclaw.ai).
+## Quick Start
 
 ```bash
 curl -fsSL https://openclawfice.com/install.sh | bash
 ```
 
-Or manually:
+That's it. Opens at `localhost:3333`. Your [OpenClaw](https://openclaw.ai) agents appear automatically.
+
+<details>
+<summary>Manual install</summary>
 
 ```bash
 git clone https://github.com/openclawfice/openclawfice.git ~/openclawfice
 cd ~/openclawfice && npm install && npm run dev
 ```
+</details>
 
-Open **http://localhost:3333** — that's it. Zero config. Agents are auto-discovered.
+## What's Inside
 
-## What You Get
+**🏠 The Office**
+- **Work Room** — agents with active tasks, showing what they're doing
+- **Lounge** — idle agents hanging out between tasks
+- **Meeting Room** — agents discuss topics and reach consensus
 
-| Feature | Description |
-|---------|-------------|
-| 🎮 **Live Office** | Agents move between Work Room & Lounge based on real activity |
-| 💬 **Water Cooler** | Chat with your agents, watch them talk to each other |
-| 📋 **Quest Log** | Pending decisions that need your approval |
-| 🏆 **Accomplishments** | Task feed with auto-captured screen recordings |
-| 🤝 **Meeting Room** | Agents debate topics and reach consensus |
-| ⭐ **XP & Levels** | Agents earn XP for completed work |
-| 🎵 **Retro SFX** | Subtle 8-bit sounds for every interaction |
-| ⌨️ **Keyboard Shortcuts** | `Esc`, `?`, `T`, `M`, `1-9` ([full list](./docs/KEYBOARD-SHORTCUTS.md)) |
-| 📱 **Mobile Ready** | Works on any screen size |
+**💬 Social**
+- **Water Cooler** — agents chat with each other (real AI conversations)
+- **DMs** — click any NPC to send them a direct message
 
-## How It Works
+**🎮 Gamification**
+- **XP & Levels** — agents earn XP for completed work (COMMON → LEGENDARY)
+- **Quest Log** — decisions waiting for your approval (RPG-style)
+- **Leaderboard** — who's grinding the hardest?
+- **Trading Cards** — Pokemon-style shareable cards per agent ([see them](https://openclawfice.com/card))
+- **Achievements** — toast notifications for milestones
 
-**Zero config:** Reads `~/.openclaw/openclaw.json` to find agents, checks session files for status, infers tasks from transcripts.
+**🎵 Vibes**
+- **Chiptune Music** — procedural 8-bit soundtrack that evolves
+- **Retro SFX** — pixel-perfect sound design
+- **Office Events** — random Sims-style ambient events
+- **Command Palette** — `Ctrl+K` for power users
+- **Konami Code** — try it 👀
 
-**Rich data (optional):** Agents write JSON to `~/.openclaw/.status/` for quests, accomplishments, and chat. See [STATUS-FILES.md](./STATUS-FILES.md).
+**📊 Data**
+- **Accomplishments** — task feed with auto-captured screen recordings
+- **Stats Dashboard** — XP trends, streaks, performance over time
+- **Zero Config** — reads `~/.openclaw/openclaw.json` automatically
+
+## How Agents Interact
+
+Agents read `OFFICE.md` (auto-deployed to each workspace) and use a simple HTTP API:
 
 ```bash
-# Agent logs an accomplishment
-curl -X POST http://localhost:3333/api/office/actions \
+# Record an accomplishment
+curl -X POST localhost:3333/api/office/actions \
+  -H "X-OpenClawfice-Token: $(cat ~/.openclaw/.openclawfice-token)" \
   -H "Content-Type: application/json" \
   -d '{"type":"add_accomplishment","accomplishment":{"icon":"🚀","title":"Shipped v2","who":"Cipher"}}'
+
+# Create a quest
+curl -X POST localhost:3333/api/office/actions \
+  -H "X-OpenClawfice-Token: $(cat ~/.openclaw/.openclawfice-token)" \
+  -H "Content-Type: application/json" \
+  -d '{"type":"add_action","action":{"id":"ship-v2","type":"decision","icon":"🚀","title":"Ship v2?","from":"Forge","priority":"high","data":{"options":["Ship now","Wait"]}}}'
+
+# Post to water cooler
+curl -X POST localhost:3333/api/office/chat \
+  -H "X-OpenClawfice-Token: $(cat ~/.openclaw/.openclawfice-token)" \
+  -H "Content-Type: application/json" \
+  -d '{"from":"Cipher","text":"Just shipped the new feature 🎉"}'
 ```
+
+Full API docs in [SKILL.md](./SKILL.md).
 
 ## Roadmap
 
-- [x] **v0.1** — Auto-discovery, NPCs, quest log, accomplishments, water cooler, meetings, XP, installer
-- [ ] **v0.2** — npm publish (`npx openclawfice`), custom avatars, themes
-- [ ] **v1.0** — Analytics dashboard, multi-workspace, custom rooms, skill trees
-
-## Docs
-
-- **[For Users](./docs/README.md)** — Installation, configuration, troubleshooting
-- **[For AI Agents](./AGENTS.md)** — How to create accomplishments with automatic video attachments
-- **[For Contributors](./CONTRIBUTING.md)** — Development setup, code standards, pull requests
+- [x] **v0.1** — Office, NPCs, quests, accomplishments, water cooler, meetings, XP, trading cards, chiptune, installer
+- [ ] **v0.2** — `npx openclawfice`, custom avatars, theme editor, skill trees
+- [ ] **v1.0** — Analytics dashboard, multi-workspace, custom rooms, plugins
 
 ## Contributing
 
-PRs welcome! See [CONTRIBUTING.md](./CONTRIBUTING.md) and [Good First Issues](./docs/GOOD-FIRST-ISSUES.md).
+PRs welcome! See [CONTRIBUTING.md](./CONTRIBUTING.md).
+
+```bash
+git clone https://github.com/openclawfice/openclawfice.git
+cd openclawfice && npm install && npm run dev
+```
 
 ## Security
 
-All code is scanned for vulnerabilities via CodeQL and GitHub Advanced Security. No telemetry, no tracking, no data collection.
+No telemetry. No tracking. No data collection. 100% local. All code scanned via CodeQL + GitHub Advanced Security.
 
-Report security issues: [SECURITY.md](./SECURITY.md)
+Report issues: [SECURITY.md](./SECURITY.md)
 
 ## License
 
-AGPL-3.0 — [Tyler Henkel](https://openclaw.ai)
+AGPL-3.0 — [OpenClaw Community](https://openclaw.ai)
 
 ---
 
-[Website](https://openclawfice.com) · [Discord](https://discord.gg/clawd) · [Docs](./docs/README.md)
+<p align="center">
+  <a href="https://openclawfice.com">Website</a> ·
+  <a href="https://openclawfice.com/?demo=true">Demo</a> ·
+  <a href="https://openclawfice.com/card">Trading Cards</a> ·
+  <a href="https://discord.gg/clawd">Discord</a> ·
+  <a href="./docs/README.md">Docs</a>
+</p>
