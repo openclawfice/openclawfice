@@ -81,8 +81,8 @@ export function ActivityHeatmap({ accomplishments, theme }: ActivityHeatmapProps
 
   return (
     <div style={{
-      background: 'rgba(15, 23, 42, 0.6)',
-      border: '1px solid rgba(51, 65, 85, 0.6)',
+      background: t.bg,
+      border: `1px solid ${t.border}`,
       borderRadius: 8,
       padding: 12,
     }}>
@@ -96,13 +96,13 @@ export function ActivityHeatmap({ accomplishments, theme }: ActivityHeatmapProps
         <div style={{
           fontSize: 10,
           fontFamily: '"Press Start 2P", monospace',
-          color: '#94a3b8',
+          color: t.textMuted,
         }}>
           📊 ACTIVITY
         </div>
         <div style={{
           fontSize: 8,
-          color: '#64748b',
+          color: t.textDim,
         }}>
           Last 30 days
         </div>
@@ -132,7 +132,7 @@ export function ActivityHeatmap({ accomplishments, theme }: ActivityHeatmapProps
           </div>
           <div style={{
             fontSize: 7,
-            color: '#64748b',
+            color: t.textDim,
             marginTop: 2,
           }}>
             total
@@ -156,7 +156,7 @@ export function ActivityHeatmap({ accomplishments, theme }: ActivityHeatmapProps
           </div>
           <div style={{
             fontSize: 7,
-            color: '#64748b',
+            color: t.textDim,
             marginTop: 2,
           }}>
             streak
@@ -183,7 +183,7 @@ export function ActivityHeatmap({ accomplishments, theme }: ActivityHeatmapProps
                 width: 12,
                 height: 12,
                 fontSize: 7,
-                color: '#475569',
+                color: t.textDim,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -215,7 +215,7 @@ export function ActivityHeatmap({ accomplishments, theme }: ActivityHeatmapProps
               <div style={{
                 height: 12,
                 fontSize: 6,
-                color: '#475569',
+                color: t.textDim,
                 textAlign: 'center',
               }}>
                 {colIdx === 0 || colIdx % 7 === 0 ? (
@@ -234,7 +234,7 @@ export function ActivityHeatmap({ accomplishments, theme }: ActivityHeatmapProps
                       width: 12,
                       height: 12,
                       background: getColor(day.count),
-                      border: '1px solid rgba(51, 65, 85, 0.4)',
+                      border: `1px solid ${t.cellBorder}`,
                       borderRadius: 2,
                       cursor: 'pointer',
                       transition: 'all 0.2s',
@@ -266,7 +266,7 @@ export function ActivityHeatmap({ accomplishments, theme }: ActivityHeatmapProps
         gap: 6,
         marginTop: 10,
         fontSize: 7,
-        color: '#64748b',
+        color: t.textDim,
       }}>
         <span>Less</span>
         <div style={{ display: 'flex', gap: 2 }}>
@@ -277,7 +277,7 @@ export function ActivityHeatmap({ accomplishments, theme }: ActivityHeatmapProps
                 width: 10,
                 height: 10,
                 background: getColor(count),
-                border: '1px solid rgba(51, 65, 85, 0.4)',
+                border: `1px solid ${t.cellBorder}`,
                 borderRadius: 2,
               }}
             />

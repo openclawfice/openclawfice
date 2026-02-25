@@ -12,3 +12,4 @@ export type { AchievementToastData } from './AchievementToast';
 export { TemplateGallery } from './TemplateGallery';
 export { DemoBanner } from './DemoBanner';
 export { ShareModal } from './ShareModal';
+export { ActivityHeatmap } from './ActivityHeatmap';

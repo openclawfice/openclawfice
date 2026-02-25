@@ -1919,7 +1919,7 @@ export default function HomePage() {
 
           {/* Activity Heatmap */}
           {!isMobile && (
-            <ActivityHeatmap accomplishments={[...accomplishments, ...archivedAccomplishments]} />
+            <ActivityHeatmap accomplishments={[...accomplishments, ...archivedAccomplishments]} theme={theme} />
           )}
         </div>
 
