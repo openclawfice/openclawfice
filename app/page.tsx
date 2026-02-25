@@ -14,6 +14,7 @@ import { SettingsPanel } from '../components/SettingsPanel';
 import { CooldownTimer, linkifyFiles, Stat } from '../components/CooldownTimer';
 import { TemplateGallery } from '../components/TemplateGallery';
 import { DemoBanner } from '../components/DemoBanner';
+import { CustomizeDemo } from '../components/CustomizeDemo';
 import { ShareCard } from '../components/ShareCard';
 import { Celebration } from '../components/Celebration';
 import { AchievementToastContainer, AchievementToastData } from '../components/AchievementToast';
@@ -2810,6 +2811,36 @@ export default function HomePage() {
         isDarkMode={darkMode}
         sfxEnabled={sfx.enabled.current}
       />
+
+      {/* Demo mode: customize agent names */}
+      {isDemoMode && (
+        <CustomizeDemo
+          currentNames={agents.filter(a => a.id !== '_owner').map(a => a.name)}
+          onCustomize={(names) => {
+            setAgents(prev => {
+              const nonOwner = prev.filter(a => a.id !== '_owner');
+              const owner = prev.filter(a => a.id === '_owner');
+              const EMOJIS = ['⚡', '🔍', '✨', '🔧', '🎨', '📊', '✍️', '🚀'];
+              const ROLES = ['Engineer', 'Researcher', 'Strategist', 'Builder', 'Designer', 'Analyst', 'Writer', 'Ops Lead'];
+              const updated = names.map((name, i) => {
+                const existing = nonOwner[i];
+                if (existing) return { ...existing, name };
+                return {
+                  ...nonOwner[0],
+                  id: `custom-${i}`,
+                  name,
+                  emoji: EMOJIS[i % EMOJIS.length],
+                  role: ROLES[i % ROLES.length],
+                  color: `hsl(${(i * 60 + 200) % 360}, 70%, 60%)`,
+                  level: Math.floor(Math.random() * 15) + 5,
+                  xp: Math.floor(Math.random() * 5000),
+                };
+              });
+              return [...owner, ...updated];
+            });
+          }}
+        />
+      )}
     </div>
   );
 }
