@@ -216,7 +216,25 @@ export default function CardPage() {
   }, [agent]);
 
   useEffect(() => {
-    if (agent) generateImage();
+    if (!agent) return;
+    // Ensure font is loaded before rendering canvas
+    const link = document.createElement('link');
+    link.href = 'https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap';
+    link.rel = 'stylesheet';
+    document.head.appendChild(link);
+    
+    // Use document.fonts API to wait for font
+    if (document.fonts && document.fonts.load) {
+      document.fonts.load('12px "Press Start 2P"').then(() => {
+        generateImage();
+      }).catch(() => {
+        // Fallback: wait a bit then render anyway
+        setTimeout(generateImage, 500);
+      });
+    } else {
+      // Fallback for older browsers
+      setTimeout(generateImage, 500);
+    }
   }, [agent, generateImage]);
 
   const copyImage = async () => {
@@ -251,9 +269,10 @@ export default function CardPage() {
   const rarity = getRarity(agent.level);
 
   return (
+    <>
+      <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
     <div style={{
       minHeight: '100vh',
-      background: `radial-gradient(ellipse at center, ${rarity.bg} 0%, #0f172a 70%)`,
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
@@ -319,6 +338,7 @@ export default function CardPage() {
         </div>
       </div>
     </div>
+    </>
   );
 }
 
