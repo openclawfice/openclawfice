@@ -143,8 +143,8 @@ echo "  🔑 Cutting office keys..."
 mkdir -p "$(dirname "$LAUNCHER")"
 cat > "$LAUNCHER" <<'LAUNCHER'
 #!/bin/bash
-PORT=${PORT:-3333}
-cd ~/openclawfice && npx next dev -p $PORT --turbopack 2>/dev/null || npx next dev -p $PORT
+# OpenClawfice launcher — uses CLI for proper first-run setup & auth
+cd ~/openclawfice && node bin/openclawfice.js "$@"
 LAUNCHER
 chmod +x "$LAUNCHER"
 

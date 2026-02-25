@@ -29,7 +29,7 @@
     "openclawfice": "./bin/openclawfice.js"
   },
   "scripts": {
-    "dev": "next dev -p 3333",
+    "dev": "next dev -p 3333 --turbopack",
     "build": "next build",
     "start": "next start -p 3333",
     "lint": "next lint",
