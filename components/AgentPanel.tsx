@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import type { Agent, Skill } from './types';
+import type { Agent, Skill, Accomplishment } from './types';
 import { formatInterval } from './utils';
 import { useAuthenticatedFetch } from '../hooks/useAuthenticatedFetch';
+import { ActivityHeatmap } from './ActivityHeatmap';
 
 const COOLDOWN_PRESETS = [
   { label: '1m', ms: 60000 },
@@ -75,6 +76,7 @@ export function AgentPanel({ agent, onClose, autowork, onAutoworkUpdate, onStop,
   const [logLoading, setLogLoading] = useState(true);
   const [logCollapsed, setLogCollapsed] = useState<Record<number, boolean>>({});
   const logRef = useRef<HTMLDivElement>(null);
+  const [accomplishments, setAccomplishments] = useState<Accomplishment[]>([]);
 
   useEffect(() => {
     let cancelled = false;
@@ -98,6 +100,29 @@ export function AgentPanel({ agent, onClose, autowork, onAutoworkUpdate, onStop,
     const interval = setInterval(fetchLogs, 5000);
     return () => { cancelled = true; clearInterval(interval); };
   }, [agent.id]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const fetchAccomplishments = async () => {
+      try {
+        const res = await secureFetch('/api/office/actions');
+        if (!res.ok || cancelled) return;
+        const data = await res.json();
+        if (!cancelled) {
+          // Filter accomplishments for this agent only
+          const agentAccomplishments = (data.accomplishments || []).filter(
+            (acc: Accomplishment) => acc.who.toLowerCase() === agent.name.toLowerCase()
+          );
+          setAccomplishments(agentAccomplishments);
+        }
+      } catch {
+        // Silent fail - heatmap just won't show
+      }
+    };
+    fetchAccomplishments();
+    const interval = setInterval(fetchAccomplishments, 10000);
+    return () => { cancelled = true; clearInterval(interval); };
+  }, [agent.id, agent.name]);
 
   const sendDM = async () => {
     if (!dmMessage.trim() || sending) return;
@@ -367,6 +392,11 @@ export function AgentPanel({ agent, onClose, autowork, onAutoworkUpdate, onStop,
           </div>
         );
       })()}
+
+      {/* Activity Heatmap */}
+      <div style={{ marginBottom: 16 }}>
+        <ActivityHeatmap accomplishments={accomplishments} />
+      </div>
 
       {/* Activity Log */}
       <div style={{

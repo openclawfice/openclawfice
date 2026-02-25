@@ -1,231 +1,299 @@
-# Post-Launch First Hour Checklist
+# ✅ Post-Launch First Hour Checklist
 
-**You just launched OpenClawfice! Here's what to do in the next 60 minutes.**
+**You just launched! Here's what to do in the next 60 minutes.**
+
+**Goal:** Maximize early engagement + fix any critical bugs fast
 
 ---
 
-## Minute 0-5: Monitor Initial Reactions
+## Minute 0-5: Monitor Initial Response
 
 ### Discord
-✅ Watch #announcements for:
-- Reactions (❤️, 🔥, 👀, ✅)
-- Comments/questions
-- Bug reports
-
-**Action:** Reply to EVERY comment within 5 minutes
-- "Thanks for trying it!"
-- "Let me know if you hit any issues"
-- "What features would you want to see?"
+- [ ] Check #announcements for reactions
+- [ ] Reply to FIRST comment within 30 seconds (sets tone)
+- [ ] Answer every question immediately
+- [ ] React with 🔥 to positive comments
 
 ### Twitter
-✅ Watch for:
-- Likes (refresh every 30 seconds)
-- Retweets
-- Replies
-- Quote tweets
+- [ ] Watch for first like/RT
+- [ ] Reply to first comment
+- [ ] Like every reply
+- [ ] RT positive reactions
 
-**Action:** Like + reply to every interaction
-
----
-
-## Minute 5-15: Quick Triage
-
-### If Someone Reports a Bug
-
-**Priority triage:**
-1. **Critical** (app won't start, crashes immediately) → Fix NOW
-2. **High** (feature broken, bad UX) → Note for today
-3. **Low** (polish, edge cases) → Note for week 1
-
-**Response template:**
-```
-Thanks for reporting! Can you share:
-- OS (Mac/Linux/Windows)
-- Node version (node --version)
-- Error message or screenshot
-
-I'll fix ASAP.
-```
-
-### If Someone Asks "What's OpenClaw?"
-
-**Copy-paste response:**
-```
-OpenClaw is a local AI agent framework (like AutoGPT but better).
-
-OpenClawfice is a visual dashboard that shows what your agents are doing in real-time - think The Sims, but for AI agents.
-
-Try the demo (no install): https://openclawfice.com/?demo=true
-```
+**Red flag:** Zero reactions after 5 minutes = might need to boost visibility (pin in Discord, tag a friend on Twitter)
 
 ---
 
-## Minute 15-30: Cross-Post to Reddit
+## Minute 5-15: Check Technical Health
 
-### If Getting Good Traction (10+ reactions)
-
-**Post to r/LocalLLaMA:**
-
-**Title:** "I built a pixel art dashboard for my AI agents (like The Sims meets AI ops)"
-
-**Body:**
+### Demo Site
+```bash
+curl -s "https://openclawfice.com/?demo=true" | grep -q "OpenClawfice" && echo "✅ Demo working" || echo "🚨 Demo broken!"
 ```
-I've been using OpenClaw for AI agents but had zero visibility into what they were doing.
 
-Built OpenClawfice to solve this:
-- Agents as pixel art NPCs in an office
-- See who's working vs idle in real-time
-- Quest log for pending decisions
-- Water cooler chat between agents
-- Accomplishment feed (what shipped today)
-- Meeting rooms when agents collaborate
+### GitHub Stars
+```bash
+open "https://github.com/openclawfice/openclawfice/stargazers"
+```
 
-[Screenshot of your office]
+**Look for:**
+- [ ] Stars starting to tick up (even +1-2 is good)
+- [ ] Any issues opened (respond within 5 minutes)
+- [ ] Any forks (shows serious interest)
+
+### Demo Analytics (if you have them)
+- Check visitor count
+- Look for demo interactions (agent clicks, chat)
+- Note any error spikes
+
+**Red flag:** Issues opened about broken install = URGENT FIX NEEDED
+
+---
+
+## Minute 15-30: Cross-Post to Secondary Channels
+
+**IF initial response is positive** (5+ reactions, 1+ star):
+
+### Hacker News
+```bash
+open "https://news.ycombinator.com/submit"
+```
+
+**Title:** "Show HN: OpenClawfice – Pixel art office for AI agents (retro RPG style)"  
+**URL:** https://openclawfice.com/?demo=true
+
+**First comment (post this immediately):**
+```
+Hey HN! I built OpenClawfice to make managing AI agents more fun.
+
+Main features:
+• Watch agents as pixel art NPCs in a virtual office
+• See their mood change (😊→😰) as they work
+• Daily challenges + XP system (like an actual RPG)
+• Zero config - just `npx openclawfice`
+
+Built it this weekend because I wanted my agents to feel less like logs and more like a team.
+
+Live demo works without install - try it in 10 seconds!
+
+Happy to answer questions about the tech (Next.js + Canvas API for rendering).
+```
+
+### Reddit (r/LocalLLaMA)
+**Title:** "[Project] I turned my AI agents into Sims 🎮 - OpenClawfice"
+
+**Post:**
+```
+I got tired of looking at CLI output to see what my agents were doing, so I built a pixel art office dashboard.
 
 Demo (no install): https://openclawfice.com/?demo=true
+
+Features:
+- NPCs represent each agent
+- Mood expressions change as they work
+- XP + daily challenges (makes it feel like a game)
+- Meeting rooms when agents collaborate
+- Zero config install
+
 GitHub: https://github.com/openclawfice/openclawfice
 
-Open source, MIT licensed. Would love feedback!
+Tech stack: Next.js + Canvas API. Open source (AGPL-3.0).
+
+Would love feedback!
 ```
 
-**Also post to:**
-- r/SideProject (same post, different audience)
-- r/ProductHuntDev (if you want ProductHunt prep feedback)
+**Red flag:** IF initial response is crickets (0-2 reactions, 0 stars) = WAIT before cross-posting. Give it 2 hours.
 
 ---
 
-## Minute 30-45: Approve Outreach Batch & Highlight Viral Features
+## Minute 30-45: Engage Individually
 
-### Decision Point: 16 Email Batch
+### Reply to Every Person Who Engaged
 
-**Recommendation:** Reply "Send all 16" to Scout's quest
+**Discord:**
+- Thank them for trying it
+- Ask if they have any feedback
+- Offer to help with install if needed
 
-**Why now:**
-- Post-launch momentum = perfect timing
-- "Just launched" narrative in emails
-- Time-sensitive (7 follow-ups at 6-7 days)
-- 16.1M reach, 2-4 expected responses
+**Twitter:**
+- Like their tweet
+- Reply with something personal (not generic)
+- Ask a question to keep conversation going
 
-**Scout executes in 20 minutes**, you monitor responses over next week.
+**GitHub:**
+- Star back if they starred you
+- Follow interesting profiles
 
-**See:** `POST-LAUNCH-OUTREACH-PRIORITY.md` for full analysis
-
-### NEW: Call Out Viral Features in Replies
-
-When people engage, mention these hooks:
-
-**Leaderboard (🏆):**
-- "Check out /leaderboard to see agent rankings!"
-- "My top agent has 4500 XP - what's yours?"
-- "The leaderboard updates live every 10 seconds"
-
-**GitHub Stars (⭐):**
-- Live counter in header creates FOMO
-- "Already at X stars in first hour!"
-- Encourage starring: "Hit that ⭐ if you like it"
-
-These features drive engagement + sharing = viral growth
+**Pro tip:** Personal engagement = higher viral coefficient. People share things when they feel heard.
 
 ---
 
-## Minute 45-60: GitHub Housekeeping
+## Minute 45-60: Assess and Adjust
 
-### Add Repo Description + Topics (30 seconds)
+### Check Metrics
 
-**Quick guide:** See `docs/GITHUB-REPO-SETUP-30-SECONDS.md` for step-by-step
+**Good signs:**
+- 5-10+ GitHub stars
+- 10+ Discord reactions
+- 20+ Twitter likes
+- 1-2 organic shares (someone RTs without you asking)
 
-**Or do it manually:**
+**Great signs:**
+- 20+ stars
+- Someone posts screenshot of their install
+- HN front page
+- "This is cool!" comments
 
-Go to: https://github.com/openclawfice/openclawfice → Settings
-
-**Description:**
-```
-Your AI agents, but they're Sims 🏢 Pixel art virtual office for OpenClaw agents
-```
-
-**Website:**
-```
-https://openclawfice.com
-```
-
-**Topics (add 13 tags):**
-`openclaw`, `ai-agents`, `pixel-art`, `dashboard`, `office`, `retro`, `sims`, `agent-management`, `automation`, `developer-tools`, `nextjs`, `typescript`, `open-source`
-
-**Bonus:** Approve Vercel GitHub App (pending in org settings)
-
-**Why:** 10x improvement in GitHub discoverability
-
-**Pro tip:** The live GitHub star counter in the header (⭐) will start growing immediately. Screenshot it throughout the day as social proof: "10 stars → 50 stars → 100 stars!"
-
-### Pin the Repo
-
-Go to: Your GitHub profile → Pinned repositories → Pin openclawfice
-
-**Why:** Shows up at top of your profile, increases visibility
+**Red flags:**
+- Zero stars after 1 hour
+- Multiple install error reports
+- "What is this for?" confusion
 
 ---
 
-## Hour 1 Summary
+### If Things Are Going Well
 
-**If you did everything above:**
-✅ Responded to all early reactions  
-✅ Triaged any bugs  
-✅ Cross-posted to Reddit (if getting traction)  
-✅ Approved 16 email outreach batch  
-✅ Fixed GitHub repo metadata  
+**Do this:**
+1. Keep responding to every comment
+2. Start DM campaign (see LAUNCH-DM-TARGET-LIST.md)
+3. Post on LinkedIn (professional audience)
+4. Share in relevant Slack/Discord communities
 
-**You're now set up for the next 24 hours.**
-
----
-
-## What NOT to Do
-
-❌ **Don't stress about low initial numbers** - tech launches are slow
-❌ **Don't delete/edit your posts** - let them breathe for 24h
-❌ **Don't spam multiple subreddits at once** - space them 2-4 hours apart
-❌ **Don't argue with critics** - thank constructive feedback, ignore trolls
-❌ **Don't make big product changes** - collect feedback first, ship later
+**Don't:**
+- Disappear (stay engaged for 2-3 hours minimum)
+- Over-hype (let others do the hyping)
+- Ignore bugs (fix fast, users forgive bugs but not silence)
 
 ---
 
-## Next Steps
+### If Things Are Slow
 
-**Hour 2-6:** Monitor + respond (see `FIRST-24-HOURS-PLAYBOOK.md`)
+**Do this:**
+1. Tag 2-3 friends on Twitter ("Hey @friend, built this thing - what do you think?")
+2. Post in smaller communities first (Slack groups, niche Discords)
+3. Ask for honest feedback in comments ("Too niche? Confusing? Let me know!")
 
-**Day 2-7:** Growth + iteration (see `WEEK-1-GROWTH-PLAYBOOK.md`)
+**Don't:**
+- Panic and delete
+- Post 10x in a row (looks desperate)
+- Give up after 1 hour (viral moments can take 4-6 hours)
 
-**Week 2+:** Scale (see `POST-LAUNCH-ROADMAP.md`)
+---
+
+## Critical Bugs to Fix Immediately
+
+**If reported, fix within 15 minutes:**
+
+1. **Demo broken** (404, blank page, JS errors)
+   - Check Vercel deployment status
+   - Rollback to previous deploy if needed
+   - Post update in Discord/Twitter
+
+2. **Install fails** (`npx openclawfice` errors)
+   - Test install yourself
+   - Fix package.json if needed
+   - Publish new npm version
+   - Update install instructions
+
+3. **Nothing renders** (agents don't show up)
+   - Check if OpenClaw config is required
+   - Add better error message
+   - Update FAQ
+
+**For non-critical bugs:** Log as GitHub issue, fix within 24 hours
+
+---
+
+## After First Hour
+
+**If going well:**
+- Follow POST-LAUNCH-SOCIAL-PLAYBOOK.md for Days 2-7
+- Start reaching out to bigger accounts (see LAUNCH-DM-TARGET-LIST.md)
+- Write a blog post about building it
+
+**If slow:**
+- Focus on smaller communities
+- Get 5-10 users first before going big
+- Iterate based on feedback
+
+**Either way:**
+- Respond to EVERY comment/question for first 24 hours
+- Ship fixes fast
+- Thank people who share it
 
 ---
 
 ## Emergency Contacts
 
-**Demo site down?**
+**Demo down?**
 ```bash
-# Check Vercel dashboard
-# Or redeploy from main branch
-```
+# Check status
+curl -I https://openclawfice.com
 
-**Install broken?**
-```bash
-# Send users to:
-git clone https://github.com/openclawfice/openclawfice.git
-cd openclawfice
-npm install
-npm run dev
-```
-
-**Major bug?**
-```bash
+# If needed, redeploy
 cd ~/clawd-openclawfice/openclawfice
-# Fix it
-git commit -m "hotfix: [bug]"
-git push
-# Redeploy if needed
+git pull origin main
+npm run build
+# Vercel auto-deploys on push to main
 ```
+
+**NPM package broken?**
+```bash
+# Test locally
+npm pack
+npm install -g ./openclawfice-*.tgz
+openclawfice
+
+# If broken, fix and republish
+npm version patch
+npm publish
+```
+
+**Need help?**
+- Ask in OpenClaw Discord #dev
+- DM Tyler's dev friends
+- Post in Twitter replies ("Anyone seeing [bug]?")
 
 ---
 
-**You got this! 🚀**
+## Success Metrics (First Hour)
 
-Now go monitor those channels and respond to everyone who tries it.
+**Minimum viable:**
+- 5 GitHub stars
+- 10 Discord reactions
+- 1 organic share
+
+**Good:**
+- 20 stars
+- 50+ Discord/Twitter engagement
+- 2-3 organic shares
+
+**Great:**
+- 50+ stars
+- HN front page
+- Multiple people posting screenshots
+
+**Viral:**
+- 100+ stars
+- Trending on Twitter
+- Dev influencers sharing it
+
+---
+
+## Bottom Line
+
+**Your job for the next hour:**
+1. Respond to EVERYONE
+2. Fix critical bugs instantly
+3. Cross-post if going well
+4. Stay visible
+
+**The launch is the start, not the finish.** Engagement in hour 1-3 determines if it goes viral.
+
+**Stay online. Stay responsive. Have fun with it.** 🚀
+
+---
+
+**Created:** Feb 24, 2026, 8:30 PM  
+**By:** Scout  
+**For:** Tyler (post-launch execution)
