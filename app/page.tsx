@@ -135,7 +135,7 @@ export default function HomePage() {
 
     // Show onboarding on first visit (after boot sequence)
     const onboardingDismissed = localStorage.getItem('openclawfice-onboarding-dismissed');
-    if (!onboardingDismissed && !demoMode) {
+    if (!onboardingDismissed) {
       // Wait for boot sequence to finish
       setTimeout(() => {
         setShowOnboarding(true);
@@ -2743,6 +2743,15 @@ export default function HomePage() {
           isDemoMode={isDemoMode}
         />
       )}
+      {/* Onboarding Modal */}
+      <OnboardingModal
+        isVisible={showOnboarding}
+        onDismiss={() => {
+          setShowOnboarding(false);
+          localStorage.setItem('openclawfice-onboarding-dismissed', 'true');
+          sfx.play('click');
+        }}
+      />
       <AchievementToastContainer
         toasts={achievementToasts}
         onDismiss={(id) => setAchievementToasts(prev => prev.filter(t => t.id !== id))}
