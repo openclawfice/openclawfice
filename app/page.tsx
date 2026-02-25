@@ -16,6 +16,7 @@ import { TemplateGallery } from '../components/TemplateGallery';
 import { DemoBanner } from '../components/DemoBanner';
 import { CustomizeDemo } from '../components/CustomizeDemo';
 import { DailyChallenge } from '../components/DailyChallenge';
+import { OnboardingModal } from '../components/OnboardingModal';
 import { ShareCard } from '../components/ShareCard';
 import { Celebration } from '../components/Celebration';
 import { AchievementToastContainer, AchievementToastData } from '../components/AchievementToast';
@@ -113,6 +114,10 @@ export default function HomePage() {
   const [screenSize, setScreenSize] = useState<'mobile' | 'tablet' | 'desktop'>('desktop');
   const [githubStars, setGithubStars] = useState<number | null>(null);
   const [showBoot, setShowBoot] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return !localStorage.getItem('openclawfice-onboarded');
+  });
   const [nowMs, setNowMs] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [partyMode, setPartyMode] = useState(false);
@@ -2817,6 +2822,15 @@ export default function HomePage() {
         onOpenTemplates={() => setShowTemplateGallery(true)}
         isDarkMode={darkMode}
         sfxEnabled={sfx.enabled.current}
+      />
+
+      {/* Onboarding modal for first-time users */}
+      <OnboardingModal
+        isVisible={showOnboarding && !isDemoMode}
+        onDismiss={() => {
+          setShowOnboarding(false);
+          localStorage.setItem('openclawfice-onboarded', 'true');
+        }}
       />
 
       {/* Demo mode: customize agent names */}
