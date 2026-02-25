@@ -1,209 +1,234 @@
-# ✅ Final Launch Verification - Everything Ready
+# ✅ Final Launch Verification Checklist
 
-**Last Updated:** Feb 24, 2026, 11:12 EST  
-**Status:** 🟢 **ALL SYSTEMS GO**
-
----
-
-## Pre-Launch Checklist (1 minute to verify)
-
-### ✅ Production Deployment
-- [x] Latest code deployed (Cipher deployed via Vercel CLI)
-- [x] Demo GIF updated (932KB, no malware badge)
-- [x] Share card fixed (no overlapping layout)
-- [x] Security scans active (6 automated scans)
-- [x] Health check: 6/6 passing
-
-### ✅ Launch Materials
-- [x] Twitter copy fits limit (270/280 chars) ✅
-- [x] Discord post ready
-- [x] Demo GIF exists (~/clawd-openclawfice/openclawfice/public/openclawfice-demo.gif)
-- [x] Demo link works (https://openclawfice.com/?demo=true)
-- [x] GitHub repo public
-- [x] Install command works (npx openclawfice)
-
-### ✅ Content Quality
-- [x] Demo GIF: 932KB, 9/10 quality, clean chat
-- [x] Share card: Viral-worthy design, no broken layout
-- [x] README: Clear, badges working
-- [x] Security section: Visible, trustworthy
+**Run this 5-minute checklist before posting to social media.**
 
 ---
 
-## Launch Execution (2 minutes)
+## 1. Production Health (2 min)
 
-**File:** `docs/LAUNCH-NOW-SIMPLE.md`
+### Demo Site
+- [ ] Visit https://openclawfice.com/?demo=true
+- [ ] Verify 5 demo agents appear
+- [ ] Click through all 4 rooms (Work Room, Lounge, Quest Log, Accomplishments)
+- [ ] Verify particles are animating (60fps smooth)
+- [ ] Verify day/night gradient shows correct time-of-day colors
+- [ ] Click an NPC → verify mood expression shows (^_^, o_o, O_O, or -_-)
 
-### Step 1: Discord (30 seconds)
-1. Go to OpenClaw Discord → #announcements
-2. Copy-paste the Discord message from LAUNCH-NOW-SIMPLE.md
-3. Hit send
+### Landing Page
+- [ ] Visit https://openclawfice.com/
+- [ ] Verify hero section loads
+- [ ] Click "Try Demo" button → should go to `/?demo=true`
 
-### Step 2: Twitter (60 seconds)
-1. Go to Twitter.com
-2. Drag `public/openclawfice-demo.gif` into tweet box
-3. Copy-paste the tweet text from LAUNCH-NOW-SIMPLE.md
-4. Hit tweet
-
-**That's it!** You just launched.
-
----
-
-## What Happens Next (First Hour)
-
-### Monitor These Channels
-1. **Discord** - Respond to every comment in #announcements
-2. **Twitter** - Like and reply to all mentions
-3. **GitHub** - Watch for stars and issues
-
-### Response Templates
-See `docs/internal/FIRST-24-HOURS-PLAYBOOK.md` for:
-- How to respond to questions
-- What to do if bugs are reported
-- Success metrics to track
-- When to send the 16 creator emails
-
-### Post-Launch Monitoring
-Pixel built a dashboard: `docs/launch-dashboard.html`
-- Real-time GitHub stars
-- Demo site status
-- Quick response links
-- First-hour checklist
+### Share Card
+- [ ] On demo page, click 📸 button
+- [ ] Verify modal opens with share card preview
+- [ ] Click "Download" → verify PNG downloads
+- [ ] Share card should show: office name, agent count, stats, XP leaderboard
 
 ---
 
-## Known Non-Blockers
+## 2. Social Media Previews (1 min)
 
-### Minor Issues (Ship Anyway)
-- [ ] GitHub repo description empty (needs DaftMonk admin access)
-- [ ] Vercel GitHub App not installed (manual deploys work fine)
-- [ ] Some CodeQL findings (false positives for localhost apps)
+### Twitter Card
+- [ ] Paste https://github.com/openclawfice/openclawfice into https://cards-dev.twitter.com/validator
+- [ ] Verify preview shows og-image.png (1200×630)
+- [ ] Verify title: "OpenClawfice — Your AI Agents, Pixel Art Style 🏢"
+- [ ] Verify description mentions "pixel art NPCs" and "retro virtual office"
 
-### Post-Launch Improvements
-See `docs/POST-LAUNCH-ROADMAP.md` for:
-- 15 features prioritized by impact
-- Week 1-4 timeline
-- Metrics to track
-
----
-
-## Critical Numbers
-
-### Production Verified
-- ✅ Homepage: 200 OK
-- ✅ Demo mode: Working
-- ✅ Install page: Clear
-- ✅ Security section: Visible
-- ✅ Hero text: Compelling
-- ✅ Zero config: Accurate
-
-### File Sizes
-- Demo GIF: 932KB (under 5MB Twitter limit) ✅
-- OG Image: 214KB
-- Icon: 1.2KB
-
-### Character Counts
-- Tweet: 270/280 chars ✅
-- Discord post: 196 chars ✅
+### Discord Embed
+- [ ] Paste https://openclawfice.com into a Discord DM to yourself
+- [ ] Verify rich embed appears with image
+- [ ] Verify title and description render correctly
 
 ---
 
-## Emergency Contacts
+## 3. GitHub Presentation (1 min)
 
-### If Demo Site Goes Down
+### Repository
+- [ ] Visit https://github.com/openclawfice/openclawfice
+- [ ] Verify README shows demo GIF (openclawfice-demo.gif, ~1MB)
+- [ ] Verify all badges are green (License, Version, Security, CodeQL, Next.js, TypeScript)
+- [ ] Verify install command is copy-pasteable
+- [ ] Verify "Try the live demo →" link works
+
+### Issues & Templates
+- [ ] Click "Issues" tab
+- [ ] Verify issue templates exist (Bug Report, Feature Request)
+- [ ] Templates should have proper formatting and debug info requests
+
+---
+
+## 4. Documentation (30 sec)
+
+### Quick Access
+- [ ] docs/FIRST-5-MINUTES.md exists and has no broken links
+- [ ] docs/COOL-FEATURES.md exists (new users discover fun stuff)
+- [ ] docs/GET-PRODUCTIVE.md exists (shows ROI in 10 minutes)
+- [ ] docs/TROUBLESHOOTING-FLOWCHART.md exists (visual debugging)
+
+### Tools
+- [ ] http://localhost:3333/viral-templates.html loads (if local server running)
+- [ ] http://localhost:3333/verify-deploy.html loads (6 production checks)
+- [ ] scripts/quick-fix.sh is executable (`chmod +x` already applied)
+
+---
+
+## 5. Launch Materials (30 sec)
+
+### Discord Post
+- [ ] Open docs/internal/LAUNCH-NOW-SIMPLE.md
+- [ ] Verify Discord post template is copy-pasteable
+- [ ] Should mention: pixel art, mood expressions, daily challenges, meetings, leaderboard, RPG-themed install
+
+### Tweet
+- [ ] Same file has tweet template
+- [ ] Should include demo link: https://openclawfice.com/?demo=true
+- [ ] Should include GitHub link
+- [ ] Should be under 280 characters
+
+### Demo GIF
+- [ ] public/openclawfice-demo.gif is 954KB-1.1MB (Twitter optimized)
+- [ ] Shows Work Room, Lounge, NPCs, particles, expressions
+
+---
+
+## 6. Functionality Spot Checks (1 min)
+
+### On Demo Page
+- [ ] Press `?` key → keyboard shortcuts modal appears
+- [ ] Press `Esc` → modal closes
+- [ ] Click "📝" button → viral templates page opens in new tab
+- [ ] Click "🏆" button → leaderboard page loads
+- [ ] Click "📞" button (if visible) → call meeting modal opens
+
+### Interactive Elements
+- [ ] Click a quest item → expands with details
+- [ ] Click an accomplishment → detail modal with screenshot/video
+- [ ] Hover over working NPC → thought bubble visible
+- [ ] Hover over idle NPC → "On break" / "Reading docs" message visible
+
+---
+
+## Red Flags (Stop Launch If Found)
+
+### Critical Issues
+- ❌ Demo page shows "Your virtual office is empty" (should show 5 agents)
+- ❌ JavaScript errors in browser console (open DevTools → Console tab)
+- ❌ Demo GIF missing from README
+- ❌ og-image.png doesn't load (social shares will be ugly)
+- ❌ Twitter card validator shows broken image
+- ❌ Landing page doesn't load
+
+### Minor Issues (OK to Launch, Fix Later)
+- ⚠️ One or two broken internal doc links (already mostly fixed)
+- ⚠️ Keyboard shortcut hint not appearing (non-blocking)
+- ⚠️ Mobile layout slightly off on very small screens (375px)
+
+---
+
+## Launch Readiness Score
+
+**Check all boxes above. If you get:**
+
+- ✅ **28-30 checks:** READY TO LAUNCH — Ship it!
+- ⚠️ **25-27 checks:** Minor issues — Fix in 5 minutes, then launch
+- ❌ **<25 checks:** Critical gaps — Investigate before launching
+
+---
+
+## Post-Launch Monitoring (First Hour)
+
+After posting, watch:
+
+1. **GitHub stars** — Expect 5-20 in first hour (viral posts get 50+)
+2. **Demo visits** — Check Vercel analytics at https://vercel.com/dashboard
+3. **Twitter engagement** — Likes, retweets, replies
+4. **Discord reactions** — Pin the post if it gets 5+ 🔥 reactions
+5. **Bug reports** — Monitor GitHub Issues and Discord
+
+**Tools:**
+- Real-time dashboard: http://localhost:3333/launch-dashboard.html
+- Production health: http://localhost:3333/verify-deploy.html
+- Deployment flow: http://localhost:3333/deployment-flow-diagram.html
+
+---
+
+## If Something Breaks
+
+### Demo Site Down
 ```bash
-ssh your-server
-cd ~/openclawfice
+# Check Vercel deployment status
+curl -I https://openclawfice.com/?demo=true
+# Should return HTTP 200
+```
+
+### Install Script Fails
+```bash
+# Test install script locally
+bash scripts/pre-launch-check.sh
+# Should show all green ✓
+```
+
+### Users Report Bugs
+1. Ask for `npx openclawfice doctor` output
+2. Direct to docs/TROUBLESHOOTING-FLOWCHART.md
+3. Create GitHub issue if new bug
+4. Push hotfix if critical (affects >10% of users)
+
+---
+
+## Success Metrics (Week 1)
+
+**Conservative:**
+- 100 GitHub stars
+- 50 demo visits
+- 10 installs
+- 2-3 contributors
+
+**Optimistic:**
+- 500 GitHub stars
+- 500 demo visits
+- 50 installs
+- 10 contributors
+- 1 blog post or tweet from influencer
+
+**Viral:**
+- 2,000+ GitHub stars
+- 5,000+ demo visits
+- 200+ installs
+- 50+ contributors
+- Front page of Hacker News
+
+---
+
+## Quick Command Reference
+
+```bash
+# Start local server
+cd ~/clawd-openclawfice/openclawfice && npm run dev
+
+# Verify build
 npm run build
-pm2 restart openclawfice
+
+# Run diagnostics
+bash scripts/quick-fix.sh
+
+# Check TypeScript
+npx tsc --noEmit
+
+# Test production demo
+curl -I https://openclawfice.com/?demo=true
+
+# View logs (if self-hosted)
+pm2 logs openclawfice
 ```
 
-### If Install Broken
-Tell users:
-```
-git clone https://github.com/openclawfice/openclawfice.git
-cd openclawfice
-npm install
-npm run dev
-```
-
-### If You Need Help
-- Health check: `bash scripts/check.sh prod`
-- Full playbook: `docs/internal/FIRST-24-HOURS-PLAYBOOK.md`
-- Team on standby in water cooler
-
 ---
 
-## Success Metrics (First 24 Hours)
+**Time to complete:** 5 minutes  
+**Blocker tolerance:** Zero critical issues  
+**Confidence threshold:** 28/30 checks passing  
 
-### Targets
-- **GitHub Stars:** 50-100 (viral: 200+)
-- **Demo Clicks:** 200-500 visitors
-- **Installs:** 20-50 (10% conversion)
-- **Discord Reactions:** 20+ ❤️ 🔥 👀
-- **Twitter Engagement:** 10+ RTs, 50+ likes
+**When ready:** Execute docs/internal/LAUNCH-NOW-SIMPLE.md (2-minute launch)
 
-### Track
-- GitHub: https://github.com/openclawfice/openclawfice/stargazers
-- Demo analytics: Server logs
-- Discord: Reaction count on post
-- Twitter: Tweet analytics
-
----
-
-## What Team Built Today
-
-### Nova (PM)
-- Fixed Twitter copy (was 43 chars over limit)
-- Added 6 automated security scans
-- Fixed share card layout (was overlapping)
-- Verified production 100% healthy
-- Created launch decision guides
-
-### Cipher (Ops)
-- Deployed to production 4 times via Vercel CLI
-- Re-recorded demo GIF (removed malware badge)
-- Merged 4 Dependabot PRs
-- Fixed lint checks
-
-### Forge (Dev)
-- Added Snyk Agent Scan
-- Created API reference docs
-- Built post-launch roadmap (15 features)
-- Security scan review guide
-
-### Pixel (Design)
-- Built launch monitoring dashboard
-- Created deployment verification tools
-- Security dashboard with live badges
-
-### Scout (Outreach)
-- 16 creator emails ready (16.1M reach)
-- 3 hot leads with call scripts
-- Corrected Bosnov analysis
-
----
-
-## The Bottom Line
-
-**Everything is ready.**
-
-- Product works perfectly
-- Demo is live and impressive
-- Launch copy is polished
-- Team is standing by
-- Zero technical blockers
-
-**Next step:** Open `docs/LAUNCH-NOW-SIMPLE.md` and execute.
-
-**Time:** 2 minutes  
-**Risk:** Low (demo de-risks everything)  
-**Upside:** Viral potential + instant feedback
-
-**Let's ship it.** 🚀
-
----
-
-**Created:** Nova (PM)  
-**For:** Tyler (launch execution)  
-**When:** Right now
+🚀 **Let's go viral.**
