@@ -1,54 +1,107 @@
-# 📚 OpenClawfice Documentation
+# OpenClawfice Documentation
 
-**🚀 Ready to launch?** See **[Launch Day Checklist](LAUNCH-DAY-CHECKLIST.md)** (10-minute go/no-go) + **[Visual Quality Checklist](VISUAL-QUALITY-CHECKLIST.md)** (30-minute QA)
+**Welcome to the OpenClawfice docs!** This directory is organized by user journey.
+
+## 📚 Quick Navigation
+
+### Getting Started (New Users)
+- **[QUICKSTART.md](../QUICKSTART.md)** — 5-minute install and first run
+- **[FIRST-5-MINUTES.md](getting-started/FIRST-5-MINUTES.md)** — What to do after install
+- **[YOUR-FIRST-5-MINUTES.md](getting-started/YOUR-FIRST-5-MINUTES.md)** — Alternate beginner guide
+
+### Using OpenClawfice (Core Features)
+- **[UI-GUIDE.md](guides/UI-GUIDE.md)** — Complete UI walkthrough
+- **[KEYBOARD-SHORTCUTS.md](guides/KEYBOARD-SHORTCUTS.md)** — Productivity shortcuts
+- **[WORKFLOWS.md](guides/WORKFLOWS.md)** — Common workflows and patterns
+- **[USE-CASES.md](guides/USE-CASES.md)** — Real-world examples
+
+### Configuration & Customization
+- **[CONFIGURING-YOUR-OFFICE.md](configuration/CONFIGURING-YOUR-OFFICE.md)** — Office setup
+- **[AGENTS.md](configuration/AGENTS.md)** — Agent configuration
+- **[COOL-FEATURES.md](configuration/COOL-FEATURES.md)** — Advanced features
+
+### Productivity & Analytics
+- **[STATS-DASHBOARD.md](productivity/STATS-DASHBOARD.md)** — Analytics guide
+- **[QUICK-WINS.md](productivity/QUICK-WINS.md)** — Week 1 productivity tips
+- **[GET-PRODUCTIVE.md](productivity/GET-PRODUCTIVE.md)** — Productivity overview
+
+### Going Viral & Growth
+- **[GO-VIRAL-PLAYBOOK.md](viral/GO-VIRAL-PLAYBOOK.md)** — 7-day viral launch plan
+- **[AGENT-TRADING-CARDS.md](viral/AGENT-TRADING-CARDS.md)** — Pokemon-style cards
+- **[VIRAL-FEATURES-ROADMAP.md](viral/VIRAL-FEATURES-ROADMAP.md)** — Next viral features
+- **[VIRAL-TEMPLATES.md](viral/VIRAL-TEMPLATES.md)** — Social media templates
+
+### Launch & Marketing
+- **[LAUNCH-NOW-SIMPLE.md](launch/LAUNCH-NOW-SIMPLE.md)** — 2-minute launch guide
+- **[LAUNCH-DAY-CHECKLIST.md](launch/LAUNCH-DAY-CHECKLIST.md)** — Pre-launch verification
+- **[POST-LAUNCH-FIRST-HOUR-CHECKLIST.md](launch/POST-LAUNCH-FIRST-HOUR-CHECKLIST.md)** — Hour-by-hour actions
+- **[LAUNCH-METRICS-DASHBOARD.md](launch/LAUNCH-METRICS-DASHBOARD.md)** — Success metrics
+
+### Community & Contributing
+- **[COMMUNITY.md](community/COMMUNITY.md)** — Community building guide
+- **[README-TEMPLATE.md](community/README-TEMPLATE.md)** — Fork template
+- **[CONTRIBUTING.md](../CONTRIBUTING.md)** — Contribution guidelines
+- **[GOOD-FIRST-ISSUES.md](community/GOOD-FIRST-ISSUES.md)** — Beginner tasks
+
+### Troubleshooting & Support
+- **[TROUBLESHOOTING.md](../TROUBLESHOOTING.md)** — Common issues
+- **[FAQ.md](support/FAQ.md)** — Frequently asked questions
+- **[COMMON-ISSUES.md](support/COMMON-ISSUES.md)** — Issue patterns
+- **[GET-HELP.md](support/GET-HELP.md)** — How to get support
+
+### Development & Testing
+- **[API-REFERENCE.md](development/API-REFERENCE.md)** — API documentation
+- **[TESTING-GUIDE.md](development/TESTING-GUIDE.md)** — Testing guide
+- **[VISUAL-QUALITY-CHECKLIST.md](development/VISUAL-QUALITY-CHECKLIST.md)** — QA checklist
+- **[ROADMAP.md](development/ROADMAP.md)** — Project roadmap
+
+### Security
+- **[SECURITY.md](../SECURITY.md)** — Security policy
+- **[SECURITY-FAQ.md](security/SECURITY-FAQ.md)** — Security questions
 
 ---
 
-## Getting Started
-- **[Your First 5 Minutes](YOUR-FIRST-5-MINUTES.md)** — Complete beginner's guide (absolute zero to productive)
-- **[Quick Wins — Week 1](QUICK-WINS.md)** ⚡ — 7 daily tasks to build momentum and prove ROI (5-15 min/day)
-- **[First 5 Minutes](FIRST-5-MINUTES.md)** — Quick setup and first steps (original short version)
-- **[Cool Features](COOL-FEATURES.md)** — Hidden gems and delightful details
-- **[Get Productive](GET-PRODUCTIVE.md)** — 10-minute guide to daily productivity
-- **[Configuration](CONFIGURING-YOUR-OFFICE.md)** — Customize your office
-- **[Keyboard Shortcuts](KEYBOARD-SHORTCUTS.md)** — Power user shortcuts
+## 📁 Directory Structure
 
-## Using OpenClawfice
-- **[Workflows](WORKFLOWS.md)** — Common workflows and patterns
-- **[Use Cases](USE-CASES.md)** — Real-world examples
-- **[UI Guide](UI-GUIDE.md)** — Understanding the interface
+```
+docs/
+├── README.md (this file)
+├── getting-started/    # New user onboarding
+├── guides/            # Usage guides and tutorials
+├── configuration/     # Setup and customization
+├── productivity/      # Analytics and efficiency
+├── viral/            # Growth and viral features
+├── launch/           # Launch planning and execution
+├── community/        # Community building
+├── support/          # Help and troubleshooting
+├── development/      # API and development
+└── security/         # Security documentation
+```
 
-## Productivity Features
-- **[Stats Dashboard](STATS-DASHBOARD.md)** 📊 — Track XP, streaks, agent leaderboards, and 7-day activity charts
+---
 
-## Viral Features (Share & Show Off)
-- **[Viral Features Roadmap](VIRAL-FEATURES-ROADMAP.md)** 🎯 — Next wave of shareable features (team GIFs, battles, tours, badges)
-- **[Go Viral Playbook](GO-VIRAL-PLAYBOOK.md)** 🚀 — Complete guide to getting 1,000+ people to see your setup (7-day launch plan)
-- **[Agent Trading Cards](AGENT-TRADING-CARDS.md)** 🎴 — Pokemon-style shareable cards for your agents
-- **[Viral Templates](VIRAL-TEMPLATES.md)** — Copy-paste social media posts (Twitter, Discord, LinkedIn, Reddit, HN)
+## 🎯 Recommended Reading Paths
 
-## For Agents
-- **[Agent Guide](AGENTS.md)** — How AI agents interact with OpenClawfice
+### First-Time User (10 minutes)
+1. [QUICKSTART.md](../QUICKSTART.md)
+2. [FIRST-5-MINUTES.md](getting-started/FIRST-5-MINUTES.md)
+3. [UI-GUIDE.md](guides/UI-GUIDE.md)
 
-## Reference
-- **[API Reference](API-REFERENCE.md)** — REST API endpoints
-- **[FAQ](FAQ.md)** — Frequently asked questions
-- **[Common Issues](COMMON-ISSUES.md)** — Known issues and fixes
-- **[Troubleshooting](TROUBLESHOOTING-FLOWCHART.md)** — Step-by-step debugging
+### Preparing to Launch (30 minutes)
+1. [LAUNCH-DAY-CHECKLIST.md](launch/LAUNCH-DAY-CHECKLIST.md)
+2. [LAUNCH-NOW-SIMPLE.md](launch/LAUNCH-NOW-SIMPLE.md)
+3. [POST-LAUNCH-FIRST-HOUR-CHECKLIST.md](launch/POST-LAUNCH-FIRST-HOUR-CHECKLIST.md)
 
-## Security
-- **[Security](SECURITY.md)** — Security model and practices
-- **[Security FAQ](SECURITY-FAQ.md)** — Common security questions
+### Going Viral (1 hour)
+1. [GO-VIRAL-PLAYBOOK.md](viral/GO-VIRAL-PLAYBOOK.md)
+2. [AGENT-TRADING-CARDS.md](viral/AGENT-TRADING-CARDS.md)
+3. [VIRAL-TEMPLATES.md](viral/VIRAL-TEMPLATES.md)
 
-## Community & Contributing
-- **[Community Guide](COMMUNITY.md)** 🌟 — Why contribute, how to get started, recognition & rewards
-- **[README Template](README-TEMPLATE.md)** 📝 — Fork OpenClawfice for your own project (with proper attribution)
-- **[GitHub Setup](GITHUB-SETUP.md)** — How to launch the public GitHub repo (2 minutes)
-- **[Good First Issues](GOOD-FIRST-ISSUES.md)** — Where to start contributing (pre-written beginner tasks)
-- **[Testing Guide](TESTING-GUIDE.md)** — How to test changes
-- **[Roadmap](ROADMAP.md)** — What's planned next
+### Contributing (20 minutes)
+1. [COMMUNITY.md](community/COMMUNITY.md)
+2. [CONTRIBUTING.md](../CONTRIBUTING.md)
+3. [GOOD-FIRST-ISSUES.md](community/GOOD-FIRST-ISSUES.md)
 
-## Support
-- **[Get Help](GET-HELP.md)** — How to get help
-- [Discord](https://discord.com/invite/clawd) — Community chat
-- [GitHub Issues](https://github.com/openclawfice/openclawfice/issues) — Bug reports & feature requests
+---
+
+**Need help?** See [GET-HELP.md](support/GET-HELP.md) or join the [Discord](https://discord.gg/clawd).

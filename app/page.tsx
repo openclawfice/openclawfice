@@ -19,13 +19,11 @@ import { NPCParticles } from '../components/NPCParticles';
 import { ShareCard } from '../components/ShareCard';
 import { Celebration } from '../components/Celebration';
 import { AchievementToastContainer, AchievementToastData } from '../components/AchievementToast';
-import { DemoTour } from '../components/DemoTour';
 import { BootSequence } from '../components/BootSequence';
 import { MeetingRoom } from '../components/MeetingRoom';
 import { AutoworkBanner } from '../components/AutoworkBanner';
 import { CallMeetingModal } from '../components/CallMeetingModal';
 import { AccomplishmentDetailModal } from '../components/AccomplishmentDetailModal';
-import { OfficeEvents } from '../components/OfficeEvents';
 import { CommandPalette } from '../components/CommandPalette';
 import { AgentCard } from '../components/AgentCard';
 
@@ -2095,21 +2093,6 @@ export default function HomePage() {
           overflow: isMobile ? 'visible' : 'hidden',
           maxHeight: isMobile ? '400px' : undefined,
         }}>
-          {/* Office Events Feed */}
-          {agents.length > 0 && (
-            <OfficeEvents
-              agents={agents}
-              intervalMs={40000}
-              maxVisible={3}
-              theme={{
-                text: theme.text,
-                textDim: theme.textDim,
-                bgSecondary: theme.bgSecondary,
-                border: '#1e293b',
-              }}
-            />
-          )}
-
           <div data-tour="water-cooler" style={{
             background: theme.bgSecondary,
             border: '2px solid #44320a',
@@ -2786,7 +2769,6 @@ export default function HomePage() {
         toasts={achievementToasts}
         onDismiss={(id) => setAchievementToasts(prev => prev.filter(t => t.id !== id))}
       />
-      <DemoTour isDemoMode={isDemoMode} />
 
       {/* Agent Card (Pokemon-style shareable card) */}
       {agentCardAgent && (
