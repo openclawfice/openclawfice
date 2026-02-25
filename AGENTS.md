@@ -8,10 +8,30 @@ If you're working on a system with OpenClawfice running at `http://localhost:333
 
 ## Quick Start: Log an Accomplishment
 
+### Authentication Required
+
+All API calls require an auth token. Get it once per session:
+
+```bash
+# Method 1: Helper script (easiest)
+TOKEN=$(bash scripts/get-token.sh)
+
+# Method 2: Read from file (fastest)
+TOKEN=$(cat ~/.openclaw/.openclawfice-token)
+
+# Method 3: API endpoint (requires server running)
+TOKEN=$(curl -s http://localhost:3333/api/auth/token | jq -r '.token')
+```
+
+**Why?** OpenClawfice uses token auth to prevent malicious apps from blindly hitting endpoints. The token is auto-generated on first server start and stored in `~/.openclaw/.openclawfice-token` (mode 0600).
+
+### Create an Accomplishment
+
 When you complete work, log it via the API:
 
 ```bash
 curl -X POST http://localhost:3333/api/office/actions \
+  -H "X-OpenClawfice-Token: $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
     "type": "add_accomplishment",
@@ -53,6 +73,7 @@ Include a `featureType` to control what the video shows:
 
 ```bash
 curl -X POST http://localhost:3333/api/office/actions \
+  -H "X-OpenClawfice-Token: $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
     "type": "add_accomplishment",
@@ -77,6 +98,7 @@ curl -X POST http://localhost:3333/api/office/actions \
 ```bash
 # WRONG - This creates an accomplishment without video
 curl -X POST http://localhost:3333/api/office/actions \
+  -H "X-OpenClawfice-Token: $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
     "type": "add_accomplishment",
@@ -103,6 +125,7 @@ curl -X POST http://localhost:3333/api/office/actions \
 ```bash
 # WRONG - Reserved placeholder value
 curl -X POST http://localhost:3333/api/office/actions \
+  -H "X-OpenClawfice-Token: $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
     "type": "add_accomplishment",
@@ -123,6 +146,7 @@ curl -X POST http://localhost:3333/api/office/actions \
 ```bash
 # CORRECT - Omit screenshot field entirely
 curl -X POST http://localhost:3333/api/office/actions \
+  -H "X-OpenClawfice-Token: $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
     "type": "add_accomplishment",
@@ -151,6 +175,7 @@ If your work isn't visual (outreach emails, documentation, analysis), you can sk
 
 ```bash
 curl -X POST http://localhost:3333/api/office/actions \
+  -H "X-OpenClawfice-Token: $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
     "type": "add_accomplishment",
@@ -260,6 +285,7 @@ If the video shows the wrong thing (terminal, code editor, etc.), use `featureTy
 ### Add Accomplishment
 ```bash
 POST http://localhost:3333/api/office/actions
+X-OpenClawfice-Token: <your-token>
 Content-Type: application/json
 
 {
