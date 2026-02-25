@@ -24,6 +24,7 @@ export function useDemoMode() {
       '/api/office/meeting/start': '/api/demo/meeting/start',
       '/api/office/message': '/api/demo/message',
       '/api/office/stop': '/api/demo/stop',
+      '/api/office/challenges': '/api/demo/challenges',
     };
     
     return demoMap[path] || path;

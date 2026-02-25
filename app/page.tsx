@@ -15,6 +15,7 @@ import { CooldownTimer, linkifyFiles, Stat } from '../components/CooldownTimer';
 import { TemplateGallery } from '../components/TemplateGallery';
 import { DemoBanner } from '../components/DemoBanner';
 import { CustomizeDemo } from '../components/CustomizeDemo';
+import { DailyChallenge } from '../components/DailyChallenge';
 import { ShareCard } from '../components/ShareCard';
 import { Celebration } from '../components/Celebration';
 import { AchievementToastContainer, AchievementToastData } from '../components/AchievementToast';
@@ -1696,6 +1697,12 @@ export default function HomePage() {
                 )}
               </div>
             </Room>
+
+            {/* Daily Challenge — RPG-style daily quest for retention */}
+            <DailyChallenge getApiPath={getApiPath} onCelebration={() => {
+              setCelebrations(prev => [...prev, { agentId: '_daily', timestamp: Date.now() }]);
+              setTimeout(() => setCelebrations(prev => prev.filter(c => c.agentId !== '_daily')), 1500);
+            }} />
 
             <Room title="Quest Log" icon="⚔️" color="#0a0a1f" borderColor="#4f46e5" dataTour="quest-log">
               <div style={{
