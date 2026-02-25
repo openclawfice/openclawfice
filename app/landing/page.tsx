@@ -270,44 +270,66 @@ export default function LandingPage() {
               title: 'Water Cooler Chat',
               desc: 'Agents chat with each other. DM any agent or broadcast to all from the dashboard.',
             },
-          ].map((feature, i) => (
-            <div
-              key={i}
-              style={{
-                background: theme.cardBg,
-                border: `2px solid ${theme.cardBorder}`,
-                borderRadius: 12,
-                padding: 24,
-                transition: 'transform 0.2s, border-color 0.2s',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-4px)';
-                e.currentTarget.style.borderColor = '#8b5cf6';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.borderColor = theme.cardBorder;
-              }}
-            >
-              <div style={{ fontSize: 40, marginBottom: 16 }}>{feature.icon}</div>
-              <h3 style={{
-                fontFamily: '"Press Start 2P", monospace',
-                fontSize: 12,
-                marginBottom: 12,
-                color: theme.text,
-              }}>
-                {feature.title}
-              </h3>
-              <p style={{
-                color: theme.textMuted,
-                fontSize: 14,
-                lineHeight: 1.6,
-                margin: 0,
-              }}>
-                {feature.desc}
-              </p>
-            </div>
-          ))}
+            {
+              icon: '🎴',
+              title: 'Trading Cards',
+              desc: 'Pokemon-style shareable agent cards with rarity tiers, stats, and XP. Share your team on social media.',
+              link: '/card',
+            },
+            {
+              icon: '🎵',
+              title: 'Chiptune Soundtrack',
+              desc: 'Procedural 8-bit background music that evolves as your agents work. Toggle on/off anytime.',
+            },
+          ].map((feature: any, i: number) => {
+            const card = (
+              <div
+                key={i}
+                style={{
+                  background: theme.cardBg,
+                  border: `2px solid ${theme.cardBorder}`,
+                  borderRadius: 12,
+                  padding: 24,
+                  transition: 'transform 0.2s, border-color 0.2s',
+                  cursor: feature.link ? 'pointer' : 'default',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-4px)';
+                  e.currentTarget.style.borderColor = '#8b5cf6';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.borderColor = theme.cardBorder;
+                }}
+              >
+                <div style={{ fontSize: 40, marginBottom: 16 }}>{feature.icon}</div>
+                <h3 style={{
+                  fontFamily: '"Press Start 2P", monospace',
+                  fontSize: 12,
+                  marginBottom: 12,
+                  color: theme.text,
+                }}>
+                  {feature.title}
+                </h3>
+                <p style={{
+                  color: theme.textMuted,
+                  fontSize: 14,
+                  lineHeight: 1.6,
+                  margin: 0,
+                }}>
+                  {feature.desc}
+                </p>
+                {feature.link && (
+                  <div style={{ marginTop: 12, fontSize: 12, color: '#8b5cf6' }}>
+                    View →
+                  </div>
+                )}
+              </div>
+            );
+            return feature.link ? (
+              <a key={i} href={feature.link} style={{ textDecoration: 'none', color: 'inherit' }}>{card}</a>
+            ) : card;
+          })}
         </div>
       </div>
 

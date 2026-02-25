@@ -2,6 +2,7 @@
 
 ## Getting Started
 - **[Your First 5 Minutes](YOUR-FIRST-5-MINUTES.md)** — Complete beginner's guide (absolute zero to productive)
+- **[Quick Wins — Week 1](QUICK-WINS.md)** ⚡ — 7 daily tasks to build momentum and prove ROI (5-15 min/day)
 - **[First 5 Minutes](FIRST-5-MINUTES.md)** — Quick setup and first steps (original short version)
 - **[Cool Features](COOL-FEATURES.md)** — Hidden gems and delightful details
 - **[Get Productive](GET-PRODUCTIVE.md)** — 10-minute guide to daily productivity
