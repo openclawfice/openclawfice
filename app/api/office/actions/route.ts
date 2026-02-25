@@ -127,14 +127,16 @@ let lastRecordingStarted = 0;
 function detectFeatureType(title: string, detail: string = ''): string {
   const text = `${title} ${detail}`.toLowerCase();
   
-  // Detect feature type from accomplishment title/detail
+  // UI features — these have specific demo triggers that show the feature
   if (text.match(/\bxp\b|experience|level|celebration|animation|points/i)) return 'xp';
   if (text.match(/meeting|collaborate|discussion|sync|call/i)) return 'meeting';
   if (text.match(/quest|modal|decision|approval/i)) return 'quest';
   if (text.match(/water[- ]?cooler|chat|conversation/i)) return 'watercooler';
   if (text.match(/accomplishment|achievement|feed|completed/i)) return 'accomplishment';
   
-  return 'default';
+  // Non-UI work — skip recording (a generic dashboard recording is misleading)
+  // These accomplishments don't have a visual feature to demo
+  return 'skip';
 }
 
 function triggerRecording(accomplishmentId: string, title: string, who: string, detail: string = '') {
@@ -163,6 +165,21 @@ function triggerRecording(accomplishmentId: string, title: string, who: string, 
 
   // Detect what feature this accomplishment is about
   const featureType = detectFeatureType(title, detail);
+
+  // Skip recording for non-UI work — a generic dashboard recording is misleading
+  if (featureType === 'skip') {
+    console.log(`[recording] Skipped for ${accomplishmentId} (non-UI work, no feature to demo)`);
+    // Remove the 'recording' marker since we're not actually recording
+    try {
+      const accs2 = readJson(ACCOMPLISHMENTS_FILE);
+      const target2 = accs2.find((a: any) => a.id === accomplishmentId && a.screenshot === 'recording');
+      if (target2) {
+        delete target2.screenshot;
+        writeJson(ACCOMPLISHMENTS_FILE, accs2);
+      }
+    } catch {}
+    return;
+  }
 
   // Build command — isolated headless recorder or legacy screencapture
   let cmd: string;
