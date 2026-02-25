@@ -179,6 +179,26 @@ export function AgentPanel({ agent, onClose, autowork, onAutoworkUpdate, onStop,
         >
           📋 Copy ID
         </button>
+        <button
+          onClick={() => {
+            if (typeof window !== 'undefined') {
+              window.dispatchEvent(new CustomEvent('openclawfice-agent-card', { detail: { agentId: agent.id } }));
+            }
+          }}
+          style={{
+            background: '#1e293b',
+            border: '1px solid #334155',
+            borderRadius: 6,
+            padding: '4px 8px',
+            color: '#94a3b8',
+            fontSize: 9,
+            cursor: 'pointer',
+            transition: 'all 0.2s',
+          }}
+          title="Generate shareable agent card"
+        >
+          🎴 Card
+        </button>
       </div>
 
       {/* Stop Button */}

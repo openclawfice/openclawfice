@@ -26,6 +26,7 @@ import { AccomplishmentDetailModal } from '../components/AccomplishmentDetailMod
 import { OfficeEvents } from '../components/OfficeEvents';
 import { OnboardingModal } from '../components/OnboardingModal';
 import { CommandPalette } from '../components/CommandPalette';
+import { AgentCard } from '../components/AgentCard';
 
 
 function Clock({ color }: { color: string }) {
@@ -116,6 +117,7 @@ export default function HomePage() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [partyMode, setPartyMode] = useState(false);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
+  const [agentCardAgent, setAgentCardAgent] = useState<Agent | null>(null);
   const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
   const konamiProgress = useRef<string[]>([]);
 
@@ -160,6 +162,19 @@ export default function HomePage() {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [sfx]);
+
+  // Agent card event listener
+  useEffect(() => {
+    const handleAgentCard = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (detail?.agentId) {
+        const agent = agents.find(a => a.id === detail.agentId);
+        if (agent) setAgentCardAgent(agent);
+      }
+    };
+    window.addEventListener('openclawfice-agent-card', handleAgentCard);
+    return () => window.removeEventListener('openclawfice-agent-card', handleAgentCard);
+  }, [agents]);
 
   // Command palette keyboard shortcut (Ctrl+K / Cmd+K / `/")
   useEffect(() => {
@@ -2757,6 +2772,15 @@ export default function HomePage() {
         onDismiss={(id) => setAchievementToasts(prev => prev.filter(t => t.id !== id))}
       />
       <DemoTour isDemoMode={isDemoMode} />
+
+      {/* Agent Card (Pokemon-style shareable card) */}
+      {agentCardAgent && (
+        <AgentCard
+          agent={agentCardAgent}
+          accomplishments={accomplishments}
+          onClose={() => setAgentCardAgent(null)}
+        />
+      )}
 
       {/* Command Palette (Ctrl+K / Cmd+K / "/") */}
       <CommandPalette
