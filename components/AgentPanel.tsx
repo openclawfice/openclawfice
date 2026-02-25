@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import type { Agent, Skill } from './types';
 import { formatInterval } from './utils';
 import { useAuthenticatedFetch } from '../hooks/useAuthenticatedFetch';
+import { useDemoMode } from '../hooks/useDemoMode';
 
 const COOLDOWN_PRESETS = [
   { label: '1m', ms: 60000 },
@@ -59,6 +60,7 @@ export function AgentPanel({ agent, onClose, autowork, onAutoworkUpdate, onStop,
   pendingChanges?: Partial<{ enabled: boolean; intervalMs: number; directive: string }>;
 }) {
   const secureFetch = useAuthenticatedFetch();
+  const { getApiPath } = useDemoMode();
   const [awSaving, setAwSaving] = useState(false);
   const merged = { ...(autowork || { enabled: false, intervalMs: 600_000, directive: '', lastSentAt: 0 }), ...pendingChanges };
   const [awEnabled, setAwEnabled] = useState(merged.enabled ?? false);
@@ -185,7 +187,7 @@ export function AgentPanel({ agent, onClose, autowork, onAutoworkUpdate, onStop,
           onClick={async () => {
             setStopping(true);
             try {
-              const res = await secureFetch('/api/office/stop', {
+              const res = await secureFetch(getApiPath('/api/office/stop'), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ agentId: agent.id }),
@@ -194,8 +196,13 @@ export function AgentPanel({ agent, onClose, autowork, onAutoworkUpdate, onStop,
                 setAwEnabled(false);
                 onAutoworkUpdate?.(agent.id, { enabled: false });
                 onStop?.(agent.id);
+              } else {
+                const data = await res.json().catch(() => ({}));
+                alert(data?.error || `Failed to stop agent (${res.status})`);
               }
-            } catch {}
+            } catch (err: any) {
+              alert(err?.message || 'Failed to stop agent');
+            }
             setStopping(false);
           }}
           disabled={stopping}

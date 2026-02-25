@@ -229,6 +229,7 @@ export function NPC({ agent, size = 1, onClick, forceThought, flipped, hasCelebr
       <div style={{ position: 'relative', width: s * 8, height: s * 10 }}>
         <NPCParticles
           agentStatus={agent.status}
+          agentMood={agent.mood}
           agentRole={agent.role}
           width={s * 8}
           height={s * 10}

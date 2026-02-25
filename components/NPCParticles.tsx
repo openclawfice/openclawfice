@@ -17,6 +17,7 @@ interface Particle {
 
 interface NPCParticlesProps {
   agentStatus: 'working' | 'idle';
+  agentMood?: 'great' | 'good' | 'okay' | 'stressed';
   agentRole?: string;
   width: number;
   height: number;
@@ -26,11 +27,11 @@ interface NPCParticlesProps {
  * Animated particles that float around working NPCs.
  * Different particle types based on agent role:
  * - Developers: Code symbols (< > / { })
- * - Analysts: Data symbols (0 1 Σ ∞)
- * - Creatives: Design symbols (✦ ◆ ● ★)
+ * - Analysts: Chart/data symbols (▁ ▂ ▃ ▄)
+ * - Designers: Design symbols (✦ ◆ ● ★)
  * - Default: Generic work symbols (• … —)
  */
-export function NPCParticles({ agentStatus, agentRole, width, height }: NPCParticlesProps) {
+export function NPCParticles({ agentStatus, agentMood, agentRole, width, height }: NPCParticlesProps) {
   const [particles, setParticles] = useState<Particle[]>([]);
 
   useEffect(() => {
@@ -45,15 +46,15 @@ export function NPCParticles({ agentStatus, agentRole, width, height }: NPCParti
       const roleLower = role?.toLowerCase() || '';
       
       if (roleLower.includes('dev') || roleLower.includes('engineer') || roleLower.includes('code')) {
-        return ['<', '>', '/', '{', '}', '[', ']', '(', ')'];
+        return ['<', '>', '/', '{', '}', '[', ']', '(', ')', ';'];
       }
       
       if (roleLower.includes('data') || roleLower.includes('analyst') || roleLower.includes('research')) {
-        return ['0', '1', 'Σ', '∞', 'π', '∫', '√', '±'];
+        return ['▁', '▂', '▃', '▄', '▅', '▆', '▇', '█', 'Σ', '%'];
       }
       
       if (roleLower.includes('design') || roleLower.includes('creative') || roleLower.includes('art')) {
-        return ['✦', '◆', '●', '★', '◇', '○', '☆', '♦'];
+        return ['✦', '◆', '●', '★', '◇', '○', '☆', '△', '✎'];
       }
       
       if (roleLower.includes('ops') || roleLower.includes('devops') || roleLower.includes('infra')) {
@@ -65,12 +66,21 @@ export function NPCParticles({ agentStatus, agentRole, width, height }: NPCParti
     };
 
     const particleChars = getParticleChars(agentRole);
-    const colors = ['#6366f1', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981'];
+    const roleLower = agentRole?.toLowerCase() || '';
+    const colors = roleLower.includes('dev') || roleLower.includes('engineer') || roleLower.includes('code')
+      ? ['#60a5fa', '#6366f1', '#818cf8']
+      : roleLower.includes('data') || roleLower.includes('analyst') || roleLower.includes('research')
+        ? ['#22c55e', '#10b981', '#84cc16']
+        : roleLower.includes('design') || roleLower.includes('creative') || roleLower.includes('art')
+          ? ['#f59e0b', '#ec4899', '#f97316']
+          : ['#6366f1', '#8b5cf6', '#10b981'];
+
+    const focusedBoost = agentStatus === 'working' && agentMood !== 'stressed';
 
     let particleId = 0;
     const createParticle = (): Particle => {
       const angle = Math.random() * Math.PI * 2;
-      const speed = 0.3 + Math.random() * 0.5;
+      const speed = (0.55 + Math.random() * 0.8) * (focusedBoost ? 1.15 : 1) * 2;
       
       return {
         id: particleId++,
@@ -79,16 +89,16 @@ export function NPCParticles({ agentStatus, agentRole, width, height }: NPCParti
         vx: Math.cos(angle) * speed,
         vy: Math.sin(angle) * speed - 0.3, // Slight upward bias
         life: 0,
-        maxLife: 60 + Math.random() * 60, // 1-2 seconds at 60fps
+        maxLife: 18 + Math.random() * 12, // ~0.3-0.5 seconds at 60fps
         char: particleChars[Math.floor(Math.random() * particleChars.length)],
         color: colors[Math.floor(Math.random() * colors.length)],
-        size: 8 + Math.random() * 4,
+        size: 10.5 + Math.random() * 5.25,
       };
     };
 
     // Spawn initial particles
     const initialParticles: Particle[] = [];
-    for (let i = 0; i < 8; i++) {
+    for (let i = 0; i < (focusedBoost ? 10 : 8); i++) {
       initialParticles.push(createParticle());
     }
     setParticles(initialParticles);
@@ -107,8 +117,10 @@ export function NPCParticles({ agentStatus, agentRole, width, height }: NPCParti
         // Remove dead particles
         updated = updated.filter(p => p.life < p.maxLife);
 
-        // Spawn new particle occasionally (every ~20 frames = 3/sec)
-        if (Math.random() < 0.15 && updated.length < 12) {
+        // Focused agents emit particles a bit more frequently.
+        const spawnChance = focusedBoost ? 0.22 : 0.15;
+        const maxParticles = focusedBoost ? 16 : 12;
+        if (Math.random() < spawnChance && updated.length < maxParticles) {
           updated.push(createParticle());
         }
 
@@ -118,7 +130,7 @@ export function NPCParticles({ agentStatus, agentRole, width, height }: NPCParti
 
     const interval = setInterval(animate, 1000 / 60); // 60fps
     return () => clearInterval(interval);
-  }, [agentStatus, agentRole, width, height]);
+  }, [agentStatus, agentMood, agentRole, width, height]);
 
   if (agentStatus !== 'working' || particles.length === 0) {
     return null;
@@ -128,9 +140,9 @@ export function NPCParticles({ agentStatus, agentRole, width, height }: NPCParti
     <div
       style={{
         position: 'absolute',
-        inset: 0,
+        inset: '-12px',
         pointerEvents: 'none',
-        overflow: 'hidden',
+        overflow: 'visible',
       }}
     >
       {particles.map(p => {

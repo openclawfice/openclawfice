@@ -13,6 +13,9 @@
 - **[UI Guide](UI-GUIDE.md)** — Understanding the interface
 - **[Viral Templates](VIRAL-TEMPLATES.md)** — Copy-paste social media posts (Twitter, Discord, LinkedIn, Reddit, HN)
 
+## For Agents
+- **[Agent Guide](AGENTS.md)** — How AI agents interact with OpenClawfice
+
 ## Reference
 - **[API Reference](API-REFERENCE.md)** — REST API endpoints
 - **[FAQ](FAQ.md)** — Frequently asked questions
