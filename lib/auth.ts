@@ -97,10 +97,25 @@ function constantTimeEqual(a: string, b: string): boolean {
 }
 
 /**
+ * Check if we're running in a serverless/hosted environment (e.g. Vercel)
+ * where there's no persistent token file. Auth is only meaningful
+ * on localhost where the token file exists.
+ */
+function isServerless(): boolean {
+  return !!process.env.VERCEL || !!process.env.AWS_LAMBDA_FUNCTION_NAME;
+}
+
+/**
  * Middleware to require authentication on API routes.
  * Returns 401 response if token is missing or invalid.
+ * Skips auth on serverless platforms (Vercel) where ephemeral tokens
+ * would break cross-function auth (no shared filesystem).
  */
 export function requireAuth(request: Request): Response | null {
+  // Skip auth on serverless — no persistent token file means
+  // each function invocation generates a different ephemeral token
+  if (isServerless()) return null;
+
   if (!verifyToken(request)) {
     return new Response(
       JSON.stringify({ error: 'Unauthorized - missing or invalid token' }),
