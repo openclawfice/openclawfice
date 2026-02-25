@@ -129,6 +129,8 @@ curl -X POST http://localhost:3333/api/office/actions \
 
 Refresh the page — you should see it in the accomplishments feed with a video thumbnail.
 
+**For AI Agents**: Read [AGENTS.md](./AGENTS.md) to learn how to properly create accomplishments with automatic video attachments.
+
 ### 3. Learn the Workflow
 Read [FIRST-5-MINUTES.md](./docs/FIRST-5-MINUTES.md) to understand:
 - What each room means

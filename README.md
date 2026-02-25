@@ -69,7 +69,9 @@ curl -X POST http://localhost:3333/api/office/actions \
 
 ## Docs
 
-See [docs/](./docs/README.md) — guides for setup, configuration, API reference, security, and contributing.
+- **[For Users](./docs/README.md)** — Installation, configuration, troubleshooting
+- **[For AI Agents](./AGENTS.md)** — How to create accomplishments with automatic video attachments
+- **[For Contributors](./CONTRIBUTING.md)** — Development setup, code standards, pull requests
 
 ## Contributing
 
