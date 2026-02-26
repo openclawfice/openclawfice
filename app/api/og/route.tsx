@@ -4,12 +4,12 @@ import { NextRequest } from 'next/server';
 export const runtime = 'edge';
 
 // Agent demo data for card generation
-const AGENTS: Record<string, { emoji: string; role: string; level: number; rarity: string; color: string }> = {
-  cipher: { emoji: '⚡', role: 'Lead Engineer', level: 18, rarity: 'EPIC', color: '#a855f7' },
-  scout: { emoji: '🔍', role: 'Outreach Lead', level: 14, rarity: 'RARE', color: '#3b82f6' },
-  pixel: { emoji: '🎨', role: 'UI Designer', level: 11, rarity: 'RARE', color: '#3b82f6' },
-  forge: { emoji: '🔧', role: 'Backend Dev', level: 12, rarity: 'RARE', color: '#3b82f6' },
-  nova: { emoji: '✨', role: 'Product Lead', level: 13, rarity: 'RARE', color: '#3b82f6' },
+const AGENTS: Record<string, { role: string; level: number; rarity: string; color: string }> = {
+  cipher: { role: 'Lead Engineer', level: 18, rarity: 'EPIC', color: '#a855f7' },
+  scout: { role: 'Outreach Lead', level: 14, rarity: 'RARE', color: '#3b82f6' },
+  pixel: { role: 'UI Designer', level: 11, rarity: 'RARE', color: '#3b82f6' },
+  forge: { role: 'Backend Dev', level: 12, rarity: 'RARE', color: '#3b82f6' },
+  nova: { role: 'Product Lead', level: 13, rarity: 'RARE', color: '#3b82f6' },
 };
 
 export async function GET(req: NextRequest) {
@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
   const name = (searchParams.get('name') || '').toLowerCase();
   const agent = AGENTS[name];
 
-  // If no specific agent, return the generic OG image
+  // Generic OG image (no specific agent)
   if (!agent) {
     return new ImageResponse(
       (
@@ -29,38 +29,21 @@ export async function GET(req: NextRequest) {
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%)',
-            fontFamily: 'system-ui',
+            background: '#0f172a',
+            color: '#e2e8f0',
           }}
         >
-          <div style={{ fontSize: 120, marginBottom: 20 }}>🏢</div>
-          <div
-            style={{
-              fontSize: 64,
-              fontWeight: 900,
-              background: 'linear-gradient(135deg, #8b5cf6, #ec4899)',
-              backgroundClip: 'text',
-              color: 'transparent',
-              marginBottom: 16,
-            }}
-          >
+          <div style={{ fontSize: 60, fontWeight: 900, color: '#a855f7', marginBottom: 12 }}>
             OpenClawfice
           </div>
           <div style={{ fontSize: 28, color: '#94a3b8', marginBottom: 40 }}>
-            Your AI agents, but they&apos;re Sims
+            Your AI agents, but they are Sims
           </div>
-          <div
-            style={{
-              display: 'flex',
-              gap: 24,
-              fontSize: 20,
-              color: '#64748b',
-            }}
-          >
-            <span>🎮 Pixel Art NPCs</span>
-            <span>💬 Water Cooler</span>
-            <span>📋 Quest Log</span>
-            <span>🎵 Chiptune</span>
+          <div style={{ display: 'flex', gap: 32, fontSize: 20, color: '#64748b' }}>
+            <span>Pixel Art NPCs</span>
+            <span>Water Cooler Chat</span>
+            <span>Quest Log</span>
+            <span>Chiptune OST</span>
           </div>
         </div>
       ),
@@ -79,8 +62,8 @@ export async function GET(req: NextRequest) {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%)',
-          fontFamily: 'system-ui',
+          background: '#0f172a',
+          color: '#e2e8f0',
         }}
       >
         {/* Card */}
@@ -89,35 +72,29 @@ export async function GET(req: NextRequest) {
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            padding: '48px 64px',
+            padding: '48px 80px',
             border: `4px solid ${agent.color}`,
             borderRadius: 24,
-            background: 'rgba(15, 23, 42, 0.95)',
-            boxShadow: `0 0 60px ${agent.color}40`,
-            minWidth: 500,
+            background: '#0f172a',
           }}
         >
-          {/* Rarity badge */}
+          {/* Rarity */}
           <div
             style={{
-              fontSize: 16,
+              fontSize: 18,
               fontWeight: 700,
               color: agent.color,
               letterSpacing: 4,
-              marginBottom: 20,
-              textTransform: 'uppercase',
+              marginBottom: 24,
             }}
           >
-            ◆ {agent.rarity}
+            {agent.rarity}
           </div>
-
-          {/* Agent emoji */}
-          <div style={{ fontSize: 100, marginBottom: 16 }}>{agent.emoji}</div>
 
           {/* Name */}
           <div
             style={{
-              fontSize: 48,
+              fontSize: 56,
               fontWeight: 900,
               color: '#e2e8f0',
               marginBottom: 8,
@@ -127,17 +104,17 @@ export async function GET(req: NextRequest) {
           </div>
 
           {/* Role */}
-          <div style={{ fontSize: 22, color: '#94a3b8', marginBottom: 24 }}>
+          <div style={{ fontSize: 24, color: '#94a3b8', marginBottom: 32 }}>
             {agent.role}
           </div>
 
-          {/* Level bar */}
+          {/* Level */}
           <div
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: 12,
-              fontSize: 20,
+              gap: 16,
+              fontSize: 22,
               color: agent.color,
               fontWeight: 700,
             }}
@@ -146,9 +123,9 @@ export async function GET(req: NextRequest) {
             <div
               style={{
                 width: 200,
-                height: 12,
+                height: 14,
                 background: '#1e293b',
-                borderRadius: 6,
+                borderRadius: 7,
                 overflow: 'hidden',
                 display: 'flex',
               }}
@@ -158,7 +135,7 @@ export async function GET(req: NextRequest) {
                   width: `${Math.min((agent.level / 20) * 100, 100)}%`,
                   height: '100%',
                   background: agent.color,
-                  borderRadius: 6,
+                  borderRadius: 7,
                 }}
               />
             </div>
@@ -175,11 +152,10 @@ export async function GET(req: NextRequest) {
             alignItems: 'center',
             gap: 12,
             color: '#475569',
-            fontSize: 18,
+            fontSize: 20,
           }}
         >
-          <span style={{ fontSize: 28 }}>🏢</span>
-          <span>openclawfice.com</span>
+          openclawfice.com
         </div>
       </div>
     ),
