@@ -26,6 +26,7 @@ import { CallMeetingModal } from '../components/CallMeetingModal';
 import { AccomplishmentDetailModal } from '../components/AccomplishmentDetailModal';
 import { CommandPalette } from '../components/CommandPalette';
 import { AgentCard } from '../components/AgentCard';
+import { ChatBubble } from '../components/ChatBubble';
 
 
 function Clock({ color }: { color: string }) {
@@ -116,6 +117,7 @@ export default function HomePage() {
   const [partyMode, setPartyMode] = useState(false);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [agentCardAgent, setAgentCardAgent] = useState<Agent | null>(null);
+  const [agentChatBubbles, setAgentChatBubbles] = useState<Record<string, { message: string; timestamp: number; color: string }>>({});
   const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
   const konamiProgress = useRef<string[]>([]);
 
@@ -753,6 +755,40 @@ export default function HomePage() {
     }, 1000);
     return () => clearInterval(tick);
   }, []);
+
+  // Track recent chat messages to show bubbles over idle agents
+  useEffect(() => {
+    if (chatLog.length === 0) return;
+    
+    const recentMessage = chatLog[chatLog.length - 1];
+    if (!recentMessage.from || !recentMessage.text) return;
+    
+    // Find the agent who sent this message
+    const agent = agents.find(a => a.name === recentMessage.from);
+    if (!agent || agent.id === '_owner') return;
+    
+    // Only show bubble if agent is idle (in lounge)
+    if (agent.status !== 'idle') return;
+    
+    // Add chat bubble for this agent
+    setAgentChatBubbles(prev => ({
+      ...prev,
+      [agent.id]: {
+        message: recentMessage.text,
+        timestamp: Date.now(),
+        color: agent.color,
+      }
+    }));
+    
+    // Auto-remove after 8 seconds
+    setTimeout(() => {
+      setAgentChatBubbles(prev => {
+        const next = { ...prev };
+        delete next[agent.id];
+        return next;
+      });
+    }, 8000);
+  }, [chatLog, agents]);
 
   // Fluctuate needs slightly
   useEffect(() => {
@@ -1667,14 +1703,22 @@ export default function HomePage() {
                           ]}
                         </div>
                       )}
-                      <NPC
-                        agent={a}
-                        size={npcSize}
-                        onClick={() => { sfx.play('click'); setSelectedAgent(a); }}
-                        forceThought={activeThought && activeThought.agentId === a.id ? activeThought.text : null}
-                        hasCelebration={celebrations.some(c => c.agentId === a.id)}
-                        partyMode={partyMode}
-                      />
+                      <div style={{ position: 'relative' }}>
+                        {agentChatBubbles[a.id] && (
+                          <ChatBubble
+                            message={agentChatBubbles[a.id].message}
+                            agentColor={agentChatBubbles[a.id].color}
+                          />
+                        )}
+                        <NPC
+                          agent={a}
+                          size={npcSize}
+                          onClick={() => { sfx.play('click'); setSelectedAgent(a); }}
+                          forceThought={activeThought && activeThought.agentId === a.id ? activeThought.text : null}
+                          hasCelebration={celebrations.some(c => c.agentId === a.id)}
+                          partyMode={partyMode}
+                        />
+                      </div>
                     </div>
                   ))
                 ) : (
@@ -2702,6 +2746,16 @@ export default function HomePage() {
         @keyframes npcBlink {
           0%, 90%, 100% { transform: scaleY(1); }
           95% { transform: scaleY(0.1); }
+        }
+        @keyframes chatBubbleAppear {
+          0% {
+            opacity: 0;
+            transform: translateX(-50%) translateY(6px) scale(0.9);
+          }
+          100% {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0) scale(1);
+          }
         }
       `}</style>
 
