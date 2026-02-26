@@ -118,6 +118,7 @@ export default function HomePage() {
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [agentCardAgent, setAgentCardAgent] = useState<Agent | null>(null);
   const [agentChatBubbles, setAgentChatBubbles] = useState<Record<string, { message: string; timestamp: number; color: string }>>({});
+  const lastProcessedChatIndex = useRef<number>(-1);
   const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
   const konamiProgress = useRef<string[]>([]);
 
@@ -775,7 +776,13 @@ export default function HomePage() {
   useEffect(() => {
     if (chatLog.length === 0) return;
     
-    const recentMessage = chatLog[chatLog.length - 1];
+    // Only process NEW messages (index greater than last processed)
+    const lastIndex = chatLog.length - 1;
+    if (lastIndex <= lastProcessedChatIndex.current) return;
+    
+    const recentMessage = chatLog[lastIndex];
+    lastProcessedChatIndex.current = lastIndex;
+    
     if (!recentMessage.from || !recentMessage.text) return;
     
     // Find the agent who sent this message
@@ -784,6 +791,8 @@ export default function HomePage() {
     
     // Only show bubble if agent is idle (in lounge)
     if (agent.status !== 'idle') return;
+    
+    console.log('[ChatBubble] Showing bubble for', agent.name, ':', recentMessage.text);
     
     // Add chat bubble for this agent
     setAgentChatBubbles(prev => ({
