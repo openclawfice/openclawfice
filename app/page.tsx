@@ -670,10 +670,17 @@ export default function HomePage() {
   useEffect(() => {
     if (isDemoMode) return; // Demo mode has its own chat simulation
     const waterCoolerConfig = config.waterCooler || {};
-    if (waterCoolerConfig.enabled === false) return;
+    if (waterCoolerConfig.enabled === false) {
+      console.log('[WaterCooler] Disabled in config');
+      return;
+    }
 
     const npcAgents = agents.filter(a => a.id !== '_owner');
-    if (npcAgents.length < 2) return;
+    console.log('[WaterCooler] Agent count check:', npcAgents.length, 'agents:', npcAgents.map(a => a.name));
+    if (npcAgents.length < 2) {
+      console.log('[WaterCooler] Need at least 2 agents, only have', npcAgents.length);
+      return;
+    }
 
     if (waterCoolerConfig.quiet?.enabled) {
       const now = new Date();
@@ -700,15 +707,18 @@ export default function HomePage() {
     const delay = baseFreq + (Math.random() - 0.5) * baseFreq * 0.5;
     chatTargetRef.current = Date.now() + delay;
     setNextChatIn(Math.round(delay / 1000));
+    console.log('[WaterCooler] Scheduling next chat in', Math.round(delay / 1000), 'seconds');
 
     chatTimerRef.current = setTimeout(async () => {
       chatTimerRef.current = null;
       chatTargetRef.current = 0;
       setNextChatIn(-1);
+      console.log('[WaterCooler] Timer fired, generating chat...');
       try {
         const allAgentData = agents
           .filter(a => a.id !== '_owner')
           .map(a => ({ id: a.id, name: a.name, role: a.role, status: a.status, task: a.task }));
+        console.log('[WaterCooler] Sending POST with agents:', allAgentData.map(a => a.name));
         const res = await secureFetch('/api/office/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -717,6 +727,7 @@ export default function HomePage() {
             allAgents: allAgentData,
           }),
         });
+        console.log('[WaterCooler] POST response:', res.status, res.ok);
         // Immediately fetch updated chat so we don't wait for the next poll cycle
         if (res.ok) {
           try {
@@ -728,9 +739,13 @@ export default function HomePage() {
                 if (chatRef.current) chatRef.current.scrollTop = chatRef.current.scrollHeight;
               }, 100);
             }
-          } catch {}
+          } catch (err) {
+            console.error('[WaterCooler] Failed to fetch updated chat:', err);
+          }
         }
-      } catch {}
+      } catch (err) {
+        console.error('[WaterCooler] Chat generation failed:', err);
+      }
       // Trigger re-schedule by updating nextChatIn to 0 which will cause effect to re-run
       setNextChatIn(0);
       // Force re-trigger of the scheduling effect by touching chatLogLen dependency
