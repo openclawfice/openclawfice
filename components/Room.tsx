@@ -71,7 +71,7 @@ export function Room({
       background: `linear-gradient(180deg, ${color} 0%, ${color}ee 100%)`,
       border: `3px solid ${borderColor}`,
       borderRadius: 16,
-      overflow: 'hidden',
+      overflow: roomType === 'lounge' ? 'visible' : 'hidden',
       position: 'relative',
       ...extraStyle,
     }}>
