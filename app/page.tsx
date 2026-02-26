@@ -1723,6 +1723,7 @@ export default function HomePage() {
                           <ChatBubble
                             message={agentChatBubbles[a.id].message}
                             agentColor={agentChatBubbles[a.id].color}
+                            size={npcSize}
                           />
                         )}
                         <NPC
