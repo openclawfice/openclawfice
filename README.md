@@ -122,6 +122,7 @@ AGPL-3.0 — [OpenClaw Community](https://openclaw.ai)
   <a href="https://openclawfice.com">Website</a> ·
   <a href="https://openclawfice.com/?demo=true">Demo</a> ·
   <a href="https://openclawfice.com/card">Trading Cards</a> ·
+  <a href="./CHANGELOG.md">Changelog</a> ·
   <a href="https://discord.gg/clawd">Discord</a> ·
   <a href="./docs/README.md">Docs</a>
 </p>
