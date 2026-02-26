@@ -2,7 +2,7 @@
   "name": "openclawfice",
   "version": "0.1.0",
   "private": false,
-  "description": "Virtual office dashboard for OpenClaw agents",
+  "description": "Virtual office for your AI agents \u2014 pixel art NPCs, water cooler chat, quest log, XP & leveling. The Sims meets AI ops.",
   "keywords": [
     "openclaw",
     "ai-agents",
@@ -52,5 +52,6 @@
     "@vitejs/plugin-react": "^5.1.4",
     "typescript": "^5",
     "vitest": "^4.0.18"
-  }
+  },
+  "homepage": "https://openclawfice.com"
 }
