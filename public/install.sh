@@ -5,6 +5,7 @@ INSTALL_DIR="$HOME/openclawfice"
 REPO_URL="https://github.com/openclawfice/openclawfice.git"
 LAUNCHER="$HOME/.local/bin/openclawfice"
 MIN_NODE=18
+VERSION="0.1.0"
 
 # ── RPG Boot Sequence ───────────────────────────
 
@@ -15,6 +16,7 @@ echo "  ║                                          ║"
 echo "  ║   🏢  O P E N C L A W F I C E  🏢      ║"
 echo "  ║                                          ║"
 echo "  ║   Your AI agents, but they're Sims       ║"
+echo "  ║         v$VERSION                           ║"
 echo "  ║                                          ║"
 echo "  ╚══════════════════════════════════════════╝"
 echo ""
@@ -31,43 +33,74 @@ echo "  📋 Checking inventory..."
 echo ""
 sleep 0.2
 
+MISSING=0
+
 # Check git
 if ! command -v git &>/dev/null; then
   echo "  ❌ ITEM MISSING: git"
   echo "     macOS: xcode-select --install"
   echo "     Ubuntu: sudo apt install git"
-  exit 1
+  echo "     Fedora: sudo dnf install git"
+  MISSING=1
+else
+  echo "  ✅ git ............ equipped"
 fi
-echo "  ✅ git ............ equipped"
 sleep 0.1
 
 # Check Node.js
 if ! command -v node &>/dev/null; then
   echo "  ❌ ITEM MISSING: Node.js $MIN_NODE+"
   echo "     Get it at https://nodejs.org"
-  exit 1
+  echo "     Or: curl -fsSL https://fnm.vercel.app/install | bash"
+  MISSING=1
+else
+  NODE_VER=$(node -e "console.log(process.versions.node.split('.')[0])")
+  if [ "$NODE_VER" -lt "$MIN_NODE" ] 2>/dev/null; then
+    echo "  ❌ Node.js $MIN_NODE+ required (found v$NODE_VER)"
+    echo "     Upgrade at https://nodejs.org"
+    MISSING=1
+  else
+    echo "  ✅ Node.js v$(node -v | tr -d 'v') . equipped"
+  fi
 fi
-
-NODE_VER=$(node -e "console.log(process.versions.node.split('.')[0])")
-if [ "$NODE_VER" -lt "$MIN_NODE" ] 2>/dev/null; then
-  echo "  ❌ Node.js $MIN_NODE+ required (found v$NODE_VER)"
-  echo "     Upgrade at https://nodejs.org"
-  exit 1
-fi
-echo "  ✅ Node.js v$(node -v | tr -d 'v') . equipped"
 sleep 0.1
 
 # Check npm
 if ! command -v npm &>/dev/null; then
   echo "  ❌ ITEM MISSING: npm"
   echo "     Comes with Node.js — reinstall from https://nodejs.org"
-  exit 1
+  MISSING=1
+else
+  echo "  ✅ npm ............ equipped"
 fi
-echo "  ✅ npm ............ equipped"
 sleep 0.1
 
+# Bail if anything's missing
+if [ "$MISSING" -eq 1 ]; then
+  echo ""
+  echo "  ❌ Missing required items. Install them and try again."
+  exit 1
+fi
+
+# Check disk space (need ~200MB for node_modules + build)
+AVAIL_MB=$(df -m "$HOME" 2>/dev/null | awk 'NR==2 {print $4}')
+if [ -n "$AVAIL_MB" ] && [ "$AVAIL_MB" -lt 300 ] 2>/dev/null; then
+  echo ""
+  echo "  ⚠️  Low disk space: ${AVAIL_MB}MB free (need ~300MB)"
+  read -p "  Continue anyway? (y/N) " -n 1 -r
+  echo ""
+  if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    echo "  Free up some space and try again."
+    exit 0
+  fi
+fi
+
 # Check if OpenClaw is installed
-if [ ! -f "$HOME/.openclaw/openclaw.json" ]; then
+HAS_OPENCLAW=0
+if [ -f "$HOME/.openclaw/openclaw.json" ]; then
+  echo "  ✅ OpenClaw ...... equipped"
+  HAS_OPENCLAW=1
+else
   echo ""
   echo "  ⚠️  OpenClaw not detected"
   echo ""
@@ -81,8 +114,6 @@ if [ ! -f "$HOME/.openclaw/openclaw.json" ]; then
     echo "  Quest abandoned. Return when ready, adventurer."
     exit 0
   fi
-else
-  echo "  ✅ OpenClaw ...... equipped"
 fi
 
 echo ""
@@ -92,7 +123,9 @@ sleep 0.3
 
 # ── Installation ────────────────────────────────
 
+UPGRADING=0
 if [ -d "$INSTALL_DIR" ]; then
+  UPGRADING=1
   echo "  ⚠️  Existing office found at $INSTALL_DIR"
   echo ""
   read -p "  Upgrade to latest version? (Y/n) " -n 1 -r
@@ -115,6 +148,7 @@ else
   sleep 0.3
   if ! git clone -q --depth 1 "$REPO_URL" "$INSTALL_DIR" 2>/dev/null; then
     echo "  ❌ Failed to clone. Check your internet connection."
+    echo "     Try: git clone $REPO_URL $INSTALL_DIR"
     exit 1
   fi
 fi
@@ -126,7 +160,7 @@ sleep 0.2
 echo "  📚 Hiring contractors (installing dependencies)..."
 echo ""
 cd "$INSTALL_DIR"
-if ! npm install --no-audit --no-fund 2>&1 | tail -3; then
+if ! npm install --no-audit --no-fund 2>&1 | tail -5; then
   echo ""
   echo "  ❌ npm install failed. Try manually:"
   echo "     cd $INSTALL_DIR && npm install"
@@ -134,6 +168,20 @@ if ! npm install --no-audit --no-fund 2>&1 | tail -3; then
 fi
 echo ""
 echo "  ✅ All contractors on site"
+echo ""
+sleep 0.2
+
+# Pre-build for instant first launch
+echo "  🔨 Constructing office (this takes ~30s)..."
+echo ""
+cd "$INSTALL_DIR"
+if npm run build 2>&1 | tail -5; then
+  echo ""
+  echo "  ✅ Office constructed — first launch will be instant!"
+else
+  echo ""
+  echo "  ⚠️  Build skipped (dev mode will compile on the fly)"
+fi
 echo ""
 sleep 0.2
 
@@ -149,12 +197,17 @@ LAUNCHER
 chmod +x "$LAUNCHER"
 
 # Add to PATH if needed
+PATH_ADDED=0
 if [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
   SHELL_RC=""
   [ -f "$HOME/.zshrc" ] && SHELL_RC="$HOME/.zshrc"
   [ -f "$HOME/.bashrc" ] && SHELL_RC="$HOME/.bashrc"
   if [ -n "$SHELL_RC" ]; then
-    echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$SHELL_RC"
+    # Only add if not already in the file
+    if ! grep -q '$HOME/.local/bin' "$SHELL_RC" 2>/dev/null; then
+      echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$SHELL_RC"
+      PATH_ADDED=1
+    fi
     export PATH="$HOME/.local/bin:$PATH"
     echo "     Added to PATH via $SHELL_RC"
   fi
@@ -166,9 +219,17 @@ sleep 0.3
 
 # ── Quest Complete ──────────────────────────────
 
+ELAPSED=$SECONDS
+MINS=$((ELAPSED / 60))
+SECS=$((ELAPSED % 60))
+
 echo "  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
-echo "  🎉 QUEST COMPLETE: Office Built!"
+if [ "$UPGRADING" -eq 1 ]; then
+  echo "  🎉 QUEST COMPLETE: Office Upgraded!"
+else
+  echo "  🎉 QUEST COMPLETE: Office Built!"
+fi
 echo ""
 echo "  ╔══════════════════════════════════════════╗"
 echo "  ║                                          ║"
@@ -178,11 +239,25 @@ echo "  ║   🏢 Your office is ready                ║"
 echo "  ║   🎮 Your agents await                   ║"
 echo "  ║                                          ║"
 echo "  ║   Launch:  openclawfice                  ║"
-echo "  ║   Demo:    localhost:3333/?demo=true      ║"
-echo "  ║   Docs:    openclawfice.com/install       ║"
+echo "  ║   Demo:    openclawfice --demo            ║"
+echo "  ║   Help:    openclawfice --help            ║"
+echo "  ║                                          ║"
+echo "  ║   ⏱️  Installed in ${MINS}m ${SECS}s              ║"
 echo "  ║                                          ║"
 echo "  ╚══════════════════════════════════════════╝"
 echo ""
+
+if [ "$PATH_ADDED" -eq 1 ]; then
+  echo "  💡 TIP: Restart your terminal or run:"
+  echo "     source ~/${SHELL_RC##*/}"
+  echo ""
+fi
+
+if [ "$HAS_OPENCLAW" -eq 0 ]; then
+  echo "  💡 TIP: Install OpenClaw to connect real agents:"
+  echo "     https://openclaw.ai"
+  echo ""
+fi
 
 # Ask to launch
 read -p "  Enter the office now? (Y/n) " -n 1 -r
