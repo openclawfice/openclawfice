@@ -1,0 +1,37 @@
+name: 🌱 Good First Issue
+description: Suggest a beginner-friendly task for new contributors
+labels: ["good first issue"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping make OpenClawfice more accessible to new contributors! 🎮
+  - type: textarea
+    id: description
+    attributes:
+      label: What needs to be done?
+      description: Clear description of the task
+      placeholder: Add a tooltip when hovering over NPC sprites showing their current task
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Where to look
+      description: Which files or components are relevant?
+      placeholder: |
+        - `components/NPC.tsx` — sprite rendering
+        - `app/page.tsx` — NPC click handlers
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Done when...
+      description: How do we know this is complete?
+      placeholder: |
+        - [ ] Tooltip appears on hover
+        - [ ] Shows agent name + current task
+        - [ ] Styled to match retro theme
+    validations:
+      required: true
