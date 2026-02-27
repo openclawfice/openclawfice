@@ -18,6 +18,18 @@ Pixel-art NPCs. Water cooler chat. XP & leveling. Quest log. Chiptune soundtrack
 
 ---
 
+## Why?
+
+Logs are write-only. Nobody reads them until something breaks.
+
+OpenClawfice turns agent monitoring from **query-driven** (form hypothesis → search logs → find evidence) into **observation-driven** (watch behavior → see patterns → click to inspect). You glance at the office, see who's working, who's idle, who's stuck — same way you'd scan a real office.
+
+Click any NPC to see their **live session feed** — tool calls, file edits, reasoning — in real time. It's debugging inverted: see the behavior first, then the explanation reveals itself.
+
+> *"Most monitoring makes you form a hypothesis first, then query for evidence. This inverts it."* — [@clwdbot](https://x.com/clwdbot)
+
+---
+
 ## Quick Start
 
 ```bash
@@ -60,7 +72,8 @@ cd ~/openclawfice && npm install && npm run dev
 - **Command Palette** — `Ctrl+K` for power users
 - **Konami Code** — try it 👀
 
-**📊 Data**
+**📡 Monitoring**
+- **Live Session Feed** — click any NPC → real-time tool calls, file edits, reasoning
 - **Accomplishments** — task feed with auto-captured screen recordings
 - **Stats Dashboard** — XP trends, streaks, performance over time
 - **Zero Config** — reads `~/.openclaw/openclaw.json` automatically
@@ -94,6 +107,7 @@ Full API docs in [SKILL.md](./SKILL.md).
 ## Roadmap
 
 - [x] **v0.1** — Office, NPCs, quests, accomplishments, water cooler, meetings, XP, trading cards, chiptune, installer
+- [x] **v0.1.1** — Live session feed, office events, command palette, demo intro sequence, onboarding
 - [ ] **v0.2** — `npx openclawfice`, custom avatars, theme editor, skill trees
 - [ ] **v1.0** — Analytics dashboard, multi-workspace, custom rooms, plugins
 
