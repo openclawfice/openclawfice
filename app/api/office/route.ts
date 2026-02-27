@@ -230,6 +230,50 @@ function readStatusFile(agentId: string): { task?: string; status?: string; mood
   return {};
 }
 
+type Mood = 'great' | 'good' | 'okay' | 'stressed';
+
+function readStopMarker(agentId: string): { stoppedUntil: number } | null {
+  try {
+    const file = join(STATUS_DIR, `${agentId}-stopped.json`);
+    if (existsSync(file)) {
+      const data = JSON.parse(readFileSync(file, 'utf-8'));
+      if (data.stoppedUntil && typeof data.stoppedUntil === 'number') return data;
+    }
+  } catch {}
+  return null;
+}
+
+function computeMood(
+  agentName: string,
+  status: 'working' | 'idle' | 'blocked',
+  lastActiveTs: number,
+  now: number,
+  accomplishments: any[],
+  pendingActions: any[],
+): Mood {
+  const recentAccomplishment = accomplishments.some(
+    (a: any) => a.who === agentName && now - (a.timestamp || 0) < 30 * 60_000,
+  );
+  if (recentAccomplishment) return 'great';
+
+  if (status === 'working') return 'good';
+
+  const stalePending = pendingActions.some((a: any) => {
+    if (a.actionAgent !== agentName && a.agent !== agentName) return false;
+    if (a.response || a.archived) return false;
+    const age = now - (a.createdAt || a.timestamp || 0);
+    return age > 4 * 3600_000;
+  });
+  if (stalePending) return 'stressed';
+
+  if (status === 'blocked') return 'stressed';
+
+  const idleMinutes = lastActiveTs > 0 ? (now - lastActiveTs) / 60_000 : Infinity;
+  if (idleMinutes > 60) return 'okay';
+
+  return 'good';
+}
+
 /**
  * Read cron jobs and find the next scheduled run per agent.
  */
@@ -623,6 +667,24 @@ export async function GET(request: Request) {
     }
   } catch {}
 
+  // Load accomplishments + pending actions for mood computation
+  let allAccomplishments: any[] = [];
+  try {
+    if (existsSync(ACCOMPLISHMENTS_FILE))
+      allAccomplishments = JSON.parse(readFileSync(ACCOMPLISHMENTS_FILE, 'utf-8'));
+  } catch {}
+
+  let allPendingActions: any[] = [];
+  try {
+    const actionsFile = join(STATUS_DIR, 'actions.json');
+    if (existsSync(actionsFile)) {
+      const raw = JSON.parse(readFileSync(actionsFile, 'utf-8'));
+      allPendingActions = (Array.isArray(raw) ? raw : []).filter(
+        (a: any) => !a.response && !a.archived,
+      );
+    }
+  } catch {}
+
   // Build agent statuses
   const agents = agentConfigs.map(cfg => {
     const agentDirId = cfg.id === '_owner' ? 'main' : cfg.id;
@@ -645,12 +707,10 @@ export async function GET(request: Request) {
 
     let status: 'working' | 'idle' | 'blocked' = 'idle';
     let task = '';
-    let mood: 'great' | 'good' | 'okay' | 'stressed' = 'good';
     let updatedAt = targetSession?.updatedAt || 0;
 
     // Primary signal: session activity
     const agentDir = cfg.id === '_owner' ? 'main' : cfg.id;
-    // Check if session activity is just from watercooler chat
     const wcLastActive = wcMarkers[cfg.id] || 0;
     const isWatercoolerActivity = (now - wcLastActive) < WC_GRACE_MS;
 
@@ -664,26 +724,19 @@ export async function GET(request: Request) {
         if (cfg.id === '_owner') {
           task = inferOwnerTask(agentDir, targetSession.sessionId);
           status = 'working';
-          mood = 'great';
         } else {
           evidence = inferTaskWithEvidence(agentDir, targetSession.sessionId);
           task = evidence.task;
 
-          // Only count as "working" if there are actual tool calls (real work),
-          // OR if the last tool call was recent. Text-only responses (no tools)
-          // use a much shorter window — the agent just replied but isn't doing work.
           const hasRecentToolUse = evidence.lastToolUseTs > 0 &&
             (now - evidence.lastToolUseTs) / 60000 < threshold;
-          const textOnlyThresholdMin = 0.5; // 30 seconds for text-only
+          const textOnlyThresholdMin = 0.5;
 
           if (hasRecentToolUse) {
             status = 'working';
-            mood = 'great';
           } else if (minsSinceUpdate < textOnlyThresholdMin) {
             status = 'working';
-            mood = 'good';
           }
-          // Otherwise stays idle — agent just chatted or said it's idle
         }
         if (status === 'working' && !task) task = 'Working...';
       }
@@ -695,7 +748,6 @@ export async function GET(request: Request) {
       if (statusMins < (cfg.workingThresholdMin || 5)) {
         status = statusFile.status as any;
         if (statusFile.task) task = statusFile.task;
-        if (statusFile.mood) mood = statusFile.mood as any;
         updatedAt = statusFile.updatedAt;
       }
     }
@@ -708,13 +760,22 @@ export async function GET(request: Request) {
         const sessMins = (now - session.updatedAt) / 60000;
         if (sessMins < (cfg.workingThresholdMin || 5)) {
           status = 'working';
-          mood = 'good';
           task = inferTask(agentDir, session.sessionId) || 'Working on a subtask...';
           updatedAt = session.updatedAt;
           break;
         }
       }
     }
+
+    // Respect manual stop — force idle until cooldown expires
+    const stopMarker = readStopMarker(agentDirId);
+    if (stopMarker && now < stopMarker.stoppedUntil) {
+      status = 'idle';
+      task = '';
+    }
+
+    // Compute mood from real signals instead of hardcoding
+    const mood = computeMood(cfg.name, status, updatedAt, now, allAccomplishments, allPendingActions);
 
     // Detect if agent has ever run
     const hasEverRun = updatedAt > 0;

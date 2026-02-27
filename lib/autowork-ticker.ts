@@ -407,6 +407,14 @@ export function runTick(forceAgent?: string): TickResult {
   const due: [string, AutoworkPolicy][] = [];
   for (const [agentId, policy] of Object.entries(policies)) {
     if (!policy.enabled) continue;
+    // Respect manual stop cooldown
+    try {
+      const stopFile = join(STATUS_DIR, `${agentId}-stopped.json`);
+      if (existsSync(stopFile)) {
+        const stopData = JSON.parse(readFileSync(stopFile, 'utf-8'));
+        if (stopData.stoppedUntil && now < stopData.stoppedUntil) continue;
+      }
+    } catch {}
     const elapsed = now - (policy.lastSentAt || 0);
     if (elapsed >= policy.intervalMs && elapsed >= MIN_GAP_MS) {
       due.push([agentId, policy]);
