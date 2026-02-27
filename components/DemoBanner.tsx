@@ -122,7 +122,7 @@ export function DemoBanner() {
             fontSize: 10,
             opacity: 0.9,
           }}>
-            Simulated office. Install to create your own team.
+            Watch AI agents work as pixel art NPCs. Click any to inspect live.
           </div>
         </div>
       </div>

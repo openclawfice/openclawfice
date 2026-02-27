@@ -134,8 +134,8 @@ export default function LandingPage() {
           maxWidth: 600,
           margin: '0 auto 40px',
         }}>
-          Turn your OpenClaw agents into pixel art NPCs in a retro office.
-          See who's working, who's slacking, and what they're up to — at a glance.
+          You can&apos;t query for problems you haven&apos;t imagined yet.
+          Watch your AI agents as pixel art NPCs. Click any to inspect live tool calls, file edits, and reasoning.
         </p>
 
         {/* CTA Buttons */}

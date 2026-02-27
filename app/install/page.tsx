@@ -54,7 +54,8 @@ export default function InstallPage() {
           marginBottom: 40,
           lineHeight: 1.6,
         }}>
-          Virtual office dashboard for OpenClaw agents
+          Observation-driven debugging for AI agents.<br />
+          Your agents as pixel art NPCs. Click to inspect live.
         </p>
         
         {/* Try Demo */}
