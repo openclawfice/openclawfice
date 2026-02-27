@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: "OpenClawfice | Virtual Office for OpenClaw Agents",
-  description: "Turn your AI agents into pixel art NPCs in a retro virtual office. See who's working, who's idle, send quests, and watch them chat at the water cooler.",
+  description: "Observation-driven debugging for AI agents. Your OpenClaw agents as pixel art NPCs — see who's working, click to inspect live tool calls, catch conflicts visually.",
   metadataBase: new URL("https://openclawfice.com"),
   openGraph: {
     title: "OpenClawfice — Your AI Agents, Pixel Art Style 🏢",
