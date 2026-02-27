@@ -194,16 +194,25 @@ function discoverAgents(): AgentInfo[] {
         const sessFile = join(OPENCLAW_DIR, 'agents', agent.id, 'sessions', 'sessions.json');
         if (existsSync(sessFile)) {
           const sessions = JSON.parse(readFileSync(sessFile, 'utf-8'));
-          const main = sessions.main || sessions[Object.keys(sessions)[0]];
-          if (main && Date.now() - (main.updatedAt || 0) < 5 * 60_000) status = 'working';
+          const mainKey = `agent:${agent.id}:main`;
+          const mainSess = sessions[mainKey];
+          if (mainSess && Date.now() - (mainSess.updatedAt || 0) < 3 * 60_000) status = 'working';
         }
       } catch {}
       try {
-        const sf = join(STATUS_DIR, `${agent.id}.json`);
-        if (existsSync(sf)) {
-          const s = JSON.parse(readFileSync(sf, 'utf-8'));
-          if (s.task) task = s.task;
-          if (s.status) status = s.status;
+        // Status files may be keyed by display name (e.g. cipher.json) or agent id
+        const candidates = [join(STATUS_DIR, `${agent.id}.json`), join(STATUS_DIR, `${name.toLowerCase()}.json`)];
+        for (const sf of candidates) {
+          if (existsSync(sf)) {
+            const s = JSON.parse(readFileSync(sf, 'utf-8'));
+            if (s.task) task = s.task;
+            // Only trust status file if updated within the last 15 minutes
+            const age = Date.now() - (s.updatedAt || 0);
+            if (s.status && age < 15 * 60_000) {
+              status = s.status;
+            }
+            break;
+          }
         }
       } catch {}
 
