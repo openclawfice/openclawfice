@@ -1307,29 +1307,58 @@ export default function HomePage() {
           height: 'calc(100vh - 100px)',
           textAlign: 'center',
           padding: '20px',
+          background: '#0a0e14',
+          position: 'relative',
+          overflow: 'hidden',
         }}>
-          <div style={{ fontSize: 64, marginBottom: 16, animation: 'npcBob 2s ease-in-out infinite' }}>🏢</div>
+          {/* Scanline overlay for CRT effect */}
+          <div style={{
+            position: 'absolute',
+            inset: 0,
+            background: 'repeating-linear-gradient(0deg, rgba(0,255,65,0.03) 0px, transparent 1px, transparent 2px, rgba(0,255,65,0.03) 3px)',
+            pointerEvents: 'none',
+            zIndex: 1,
+          }} />
+          
+          {/* Vignette effect */}
+          <div style={{
+            position: 'absolute',
+            inset: 0,
+            background: 'radial-gradient(ellipse at center, transparent 0%, rgba(0,0,0,0.4) 100%)',
+            pointerEvents: 'none',
+            zIndex: 1,
+          }} />
+          
+          <div style={{ fontSize: 64, marginBottom: 16, animation: 'npcBob 2s ease-in-out infinite', filter: 'drop-shadow(0 0 8px #00ff41)', position: 'relative', zIndex: 2 }}>🏢</div>
           <h2 style={{
             fontSize: isMobile ? 16 : 20,
-            fontFamily: '"Press Start 2P", monospace',
+            fontFamily: '"Courier New", monospace',
             marginBottom: 12,
-            color: theme.text,
+            color: '#00ff41',
+            textShadow: '0 0 10px rgba(0,255,65,0.5)',
+            letterSpacing: '2px',
+            position: 'relative',
+            zIndex: 2,
           }}>
-            Welcome to OpenClawfice!
+            &gt; OPENCLAWFICE SYSTEM
           </h2>
           <div style={{
             fontSize: isMobile ? 12 : 14,
-            color: '#94a3b8',
+            color: '#00ff41',
             maxWidth: 500,
-            lineHeight: 1.8,
+            lineHeight: 2,
             marginBottom: 24,
+            fontFamily: '"Courier New", monospace',
+            opacity: 0.8,
+            position: 'relative',
+            zIndex: 2,
           }}>
             {setupCheck?.status === 'not_installed' ? (
-              <>OpenClaw is not installed. Install it first to get started.</>
+              <><span style={{color: '#ff6b6b'}}>ERROR:</span> OpenClaw runtime not detected<br/>Install required to proceed...</>
             ) : setupCheck?.status === 'not_configured' ? (
-              <>OpenClaw is installed but no agents are configured yet.</>
+              <><span style={{color: '#ffd93d'}}>WARNING:</span> No agents configured<br/>Initialize at least one agent...</>
             ) : (
-              <>Your virtual office is empty. Let&apos;s fix that.</>
+              <>SYSTEM READY | OFFICE EMPTY<br/>Initialize agents to begin...</>
             )}
           </div>
           <div style={{
@@ -1338,63 +1367,103 @@ export default function HomePage() {
             marginBottom: 28,
             flexWrap: 'wrap',
             justifyContent: 'center',
+            position: 'relative',
+            zIndex: 2,
           }}>
-            <a href="/?demo=true" style={{
-              background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-              color: '#fff',
-              padding: '12px 24px',
-              borderRadius: 8,
-              fontSize: 11,
-              fontFamily: '"Press Start 2P", monospace',
-              textDecoration: 'none',
-              boxShadow: '0 4px 16px rgba(99,102,241,0.4)',
-              transition: 'transform 0.2s',
-            }}>
-              ▶ Try Demo
+            <a 
+              href="/?demo=true"
+              onClick={() => sfx.play('click')}
+              style={{
+                background: 'rgba(0,255,65,0.1)',
+                color: '#00ff41',
+                padding: '12px 24px',
+                border: '2px solid #00ff41',
+                borderRadius: 0,
+                fontSize: 11,
+                fontFamily: '"Courier New", monospace',
+                textDecoration: 'none',
+                boxShadow: '0 0 20px rgba(0,255,65,0.3), inset 0 0 20px rgba(0,255,65,0.1)',
+                transition: 'all 0.2s',
+                letterSpacing: '1px',
+                fontWeight: 'bold',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'rgba(0,255,65,0.2)';
+                e.currentTarget.style.boxShadow = '0 0 30px rgba(0,255,65,0.6), inset 0 0 30px rgba(0,255,65,0.2)';
+                sfx.play('hover');
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'rgba(0,255,65,0.1)';
+                e.currentTarget.style.boxShadow = '0 0 20px rgba(0,255,65,0.3), inset 0 0 20px rgba(0,255,65,0.1)';
+              }}
+            >
+              &gt; RUN DEMO
             </a>
-            <a href="/install" style={{
-              background: 'rgba(99,102,241,0.15)',
-              color: '#a5b4fc',
-              padding: '12px 24px',
-              borderRadius: 8,
-              fontSize: 11,
-              fontFamily: '"Press Start 2P", monospace',
-              textDecoration: 'none',
-              border: '1px solid rgba(99,102,241,0.3)',
-              transition: 'transform 0.2s',
-            }}>
-              📖 Setup Guide
+            <a 
+              href="/install"
+              onClick={() => sfx.play('click')}
+              style={{
+                background: 'transparent',
+                color: '#00ff41',
+                padding: '12px 24px',
+                border: '2px solid #00ff41',
+                borderRadius: 0,
+                fontSize: 11,
+                fontFamily: '"Courier New", monospace',
+                textDecoration: 'none',
+                boxShadow: '0 0 10px rgba(0,255,65,0.2)',
+                transition: 'all 0.2s',
+                letterSpacing: '1px',
+                opacity: 0.7,
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.opacity = '1';
+                e.currentTarget.style.boxShadow = '0 0 20px rgba(0,255,65,0.4)';
+                sfx.play('hover');
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.opacity = '0.7';
+                e.currentTarget.style.boxShadow = '0 0 10px rgba(0,255,65,0.2)';
+              }}
+            >
+              &gt; INSTALL GUIDE
             </a>
           </div>
           <div style={{
             fontSize: isMobile ? 11 : 12,
-            color: theme.textMuted,
-            maxWidth: 500,
+            color: '#00ff41',
+            maxWidth: 600,
             lineHeight: 1.8,
+            fontFamily: '"Courier New", monospace',
+            position: 'relative',
+            zIndex: 2,
           }}>
             {setupCheck?.status === 'not_installed' ? (
               <div style={{
-                background: 'rgba(239,68,68,0.1)',
-                border: '1px solid rgba(239,68,68,0.3)',
-                borderRadius: 8,
+                background: 'rgba(255,107,107,0.05)',
+                border: '2px solid #ff6b6b',
+                borderRadius: 0,
                 padding: 12,
                 marginBottom: 12,
+                boxShadow: '0 0 20px rgba(255,107,107,0.2)',
               }}>
-                <div style={{ fontSize: 10, fontFamily: '"Press Start 2P", monospace', color: '#fca5a5', marginBottom: 8 }}>
-                  ❌ OpenClaw Not Detected
+                <div style={{ fontSize: 10, fontFamily: '"Courier New", monospace', color: '#ff6b6b', marginBottom: 8, letterSpacing: '1px' }}>
+                  [ERROR] OPENCLAW RUNTIME NOT FOUND
                 </div>
-                <div style={{ fontSize: 11, marginBottom: 12 }}>
-                  Install OpenClaw first:
+                <div style={{ fontSize: 11, marginBottom: 12, opacity: 0.8 }}>
+                  Execute installation command:
                 </div>
                 <div style={{
-                  background: theme.bgTertiary,
+                  background: 'rgba(0,0,0,0.5)',
                   padding: '8px 12px',
-                  borderRadius: 6,
-                  fontFamily: 'monospace',
+                  borderRadius: 0,
+                  fontFamily: '"Courier New", monospace',
                   fontSize: 10,
                   marginBottom: 8,
                   cursor: 'pointer',
-                  border: '1px solid rgba(148,163,184,0.2)',
+                  border: '1px solid #00ff41',
+                  color: '#00ff41',
+                  boxShadow: '0 0 10px rgba(0,255,65,0.2)',
                 }}
                 onClick={() => {
                   if (setupCheck?.installCommand) {
@@ -1403,34 +1472,41 @@ export default function HomePage() {
                   }
                 }}
                 title="Click to copy">
-                  {setupCheck?.installCommand || 'curl -fsSL https://openclaw.ai/install.sh | bash'}
+                  $ {setupCheck?.installCommand || 'curl -fsSL https://openclaw.ai/install.sh | bash'}
                 </div>
                 <a href="https://openclaw.ai/install" target="_blank" rel="noopener noreferrer" style={{
-                  color: '#60a5fa',
+                  color: '#00ff41',
                   fontSize: 10,
-                  textDecoration: 'underline',
+                  textDecoration: 'none',
+                  borderBottom: '1px solid #00ff41',
+                  opacity: 0.8,
                 }}>
-                  → Full installation guide
+                  &gt; View full installation guide
                 </a>
               </div>
             ) : setupCheck?.status === 'not_configured' ? (
-              <div>
-                <div style={{ marginBottom: 4 }}>✅ OpenClaw is installed</div>
-                <div style={{ marginBottom: 4 }}>❌ No agents configured yet</div>
-                <div style={{ marginBottom: 12 }}>→ Configure agents in <code style={{ background: theme.bgTertiary, padding: '1px 4px', borderRadius: 3, fontSize: 10 }}>~/.openclaw/openclaw.json</code></div>
+              <div style={{ opacity: 0.9 }}>
+                <div style={{ marginBottom: 4, color: '#00ff41' }}>[✓] Runtime detected</div>
+                <div style={{ marginBottom: 4, color: '#ffd93d' }}>[!] Agent registry empty</div>
+                <div style={{ marginBottom: 12, fontSize: 10 }}>
+                  &gt; Configure agents in <code style={{ background: 'rgba(0,0,0,0.5)', padding: '2px 6px', border: '1px solid #00ff41', fontSize: 9, color: '#00ff41' }}>~/.openclaw/openclaw.json</code>
+                </div>
                 <a href="/install" style={{
-                  color: '#60a5fa',
+                  color: '#00ff41',
                   fontSize: 10,
-                  textDecoration: 'underline',
+                  textDecoration: 'none',
+                  borderBottom: '1px solid #00ff41',
+                  opacity: 0.8,
                 }}>
-                  → Setup guide
+                  &gt; Setup guide
                 </a>
               </div>
             ) : (
-              <div>
-                <div style={{ marginBottom: 4 }}>✅ Make sure OpenClaw is running</div>
-                <div style={{ marginBottom: 4 }}>✅ Agents appear automatically from <code style={{ background: theme.bgTertiary, padding: '1px 4px', borderRadius: 3, fontSize: 10 }}>~/.openclaw/openclaw.json</code></div>
-                <div>✅ Send a message in OpenClaw to wake them up</div>
+              <div style={{ opacity: 0.8, fontSize: 10 }}>
+                <div style={{ marginBottom: 6 }}>[✓] System operational</div>
+                <div style={{ marginBottom: 6 }}>[✓] Auto-discovery enabled</div>
+                <div style={{ marginBottom: 6 }}>[✓] Monitoring <code style={{ background: 'rgba(0,0,0,0.5)', padding: '1px 4px', border: '1px solid #00ff41', fontSize: 9 }}>~/.openclaw/</code></div>
+                <div style={{ marginTop: 12, color: '#ffd93d' }}>&gt; Send message to wake agents...</div>
               </div>
             )}
           </div>

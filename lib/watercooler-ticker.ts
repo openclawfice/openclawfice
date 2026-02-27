@@ -229,7 +229,10 @@ function buildRoster(allAgents: AgentInfo[], speakerId?: string): string {
     .map(a => {
       const you = a.id === speakerId ? ' (you)' : '';
       const vibeStr = a.vibe ? ` | ${a.vibe}` : '';
-      return `- ${a.name}${you} (${a.role || a.creature || a.id}${vibeStr}): ${a.status}${a.task ? ` — ${a.task}` : ''}`;
+      const hbSummary = a.heartbeat
+        ? ` [Focus: ${a.heartbeat.split('\n').find(l => l.trim().length > 10)?.trim().slice(0, 80) || 'see heartbeat'}]`
+        : '';
+      return `- ${a.name}${you} (${a.role || a.creature || a.id}${vibeStr}): ${a.status}${a.task ? ` — ${a.task}` : ''}${hbSummary}`;
     })
     .join('\n');
 }
@@ -240,6 +243,20 @@ function buildSoulBlock(agent: AgentInfo): string {
   if (agent.role) parts.push(`Role: ${agent.role}`);
   if (agent.creature) parts.push(`Type: ${agent.creature}`);
   if (agent.vibe) parts.push(`Personality: ${agent.vibe}`);
+
+  if (agent.soul) {
+    parts.push(`\n--- ${agent.name}'s Soul (personality & approach) ---`);
+    parts.push(agent.soul);
+  }
+  if (agent.heartbeat) {
+    parts.push(`\n--- ${agent.name}'s Current Focus (real priorities) ---`);
+    parts.push(agent.heartbeat);
+  }
+  if (agent.memory) {
+    parts.push(`\n--- ${agent.name}'s Memory (real experience) ---`);
+    parts.push(agent.memory);
+  }
+
   return parts.join('\n');
 }
 
@@ -253,16 +270,18 @@ function buildPrompt(
 ): string {
   const lines: string[] = [];
 
-  // System framing with full identity injection
+  // System framing with full identity + real context injection
   lines.push(
     `THIS IS THE WATER COOLER THREAD — a dedicated space for team brainstorming.`,
     '',
-    `You ARE ${speaker.name}. Embody this identity fully:`,
+    `You ARE ${speaker.name}. Here is everything about who they are and what they're actually working on:`,
+    '',
     buildSoulBlock(speaker),
     '',
-    `Speak in ${speaker.name}'s voice and personality. Draw from their unique perspective,`,
-    `expertise, and way of thinking. Don't be generic — be distinctly ${speaker.name}.`,
-    `Reply with ONLY the message text. No tools, no actions, no markdown.`,
+    `CRITICAL: Only reference things from ${speaker.name}'s ACTUAL memory, heartbeat, and soul above.`,
+    `Do NOT make up projects, data, or experiences. If ${speaker.name}'s context doesn't mention`,
+    `something, don't claim they know about it. Stay grounded in what's real.`,
+    `Speak in ${speaker.name}'s voice. Reply with ONLY the message text. No tools, no actions, no markdown.`,
     '',
   );
 
