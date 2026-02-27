@@ -1324,7 +1324,13 @@ export default function HomePage() {
             lineHeight: 1.8,
             marginBottom: 24,
           }}>
-            Your virtual office is empty. Let&apos;s fix that.
+            {setupCheck?.status === 'not_installed' ? (
+              <>OpenClaw is not installed. Install it first to get started.</>
+            ) : setupCheck?.status === 'not_configured' ? (
+              <>OpenClaw is installed but no agents are configured yet.</>
+            ) : (
+              <>Your virtual office is empty. Let&apos;s fix that.</>
+            )}
           </div>
           <div style={{
             display: 'flex',
@@ -1363,12 +1369,70 @@ export default function HomePage() {
           <div style={{
             fontSize: isMobile ? 11 : 12,
             color: theme.textMuted,
-            maxWidth: 400,
+            maxWidth: 500,
             lineHeight: 1.8,
           }}>
-            <div style={{ marginBottom: 4 }}>✅ Make sure OpenClaw is running</div>
-            <div style={{ marginBottom: 4 }}>✅ Agents appear automatically from <code style={{ background: theme.bgTertiary, padding: '1px 4px', borderRadius: 3, fontSize: 10 }}>~/.openclaw/openclaw.json</code></div>
-            <div>✅ Send a message in OpenClaw to wake them up</div>
+            {setupCheck?.status === 'not_installed' ? (
+              <div style={{
+                background: 'rgba(239,68,68,0.1)',
+                border: '1px solid rgba(239,68,68,0.3)',
+                borderRadius: 8,
+                padding: 12,
+                marginBottom: 12,
+              }}>
+                <div style={{ fontSize: 10, fontFamily: '"Press Start 2P", monospace', color: '#fca5a5', marginBottom: 8 }}>
+                  ❌ OpenClaw Not Detected
+                </div>
+                <div style={{ fontSize: 11, marginBottom: 12 }}>
+                  Install OpenClaw first:
+                </div>
+                <div style={{
+                  background: theme.bgTertiary,
+                  padding: '8px 12px',
+                  borderRadius: 6,
+                  fontFamily: 'monospace',
+                  fontSize: 10,
+                  marginBottom: 8,
+                  cursor: 'pointer',
+                  border: '1px solid rgba(148,163,184,0.2)',
+                }}
+                onClick={() => {
+                  if (setupCheck?.installCommand) {
+                    navigator.clipboard.writeText(setupCheck.installCommand);
+                    sfx.play('click');
+                  }
+                }}
+                title="Click to copy">
+                  {setupCheck?.installCommand || 'curl -fsSL https://openclaw.ai/install.sh | bash'}
+                </div>
+                <a href="https://openclaw.ai/install" target="_blank" rel="noopener noreferrer" style={{
+                  color: '#60a5fa',
+                  fontSize: 10,
+                  textDecoration: 'underline',
+                }}>
+                  → Full installation guide
+                </a>
+              </div>
+            ) : setupCheck?.status === 'not_configured' ? (
+              <div>
+                <div style={{ marginBottom: 4 }}>✅ OpenClaw is installed</div>
+                <div style={{ marginBottom: 4 }}>❌ No agents configured yet</div>
+                <div style={{ marginBottom: 12 }}>→ Configure agents in <code style={{ background: theme.bgTertiary, padding: '1px 4px', borderRadius: 3, fontSize: 10 }}>~/.openclaw/openclaw.json</code></div>
+                <a href="/install" style={{
+                  color: '#60a5fa',
+                  fontSize: 10,
+                  textDecoration: 'underline',
+                }}>
+                  → Setup guide
+                </a>
+              </div>
+            ) : (
+              <div>
+                <div style={{ marginBottom: 4 }}>✅ Make sure OpenClaw is running</div>
+                <div style={{ marginBottom: 4 }}>✅ Agents appear automatically from <code style={{ background: theme.bgTertiary, padding: '1px 4px', borderRadius: 3, fontSize: 10 }}>~/.openclaw/openclaw.json</code></div>
+                <div>✅ Send a message in OpenClaw to wake them up</div>
+              </div>
+            )}
           </div>
         </div>
       )}

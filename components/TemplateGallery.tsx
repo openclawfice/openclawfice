@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { QUEST_TEMPLATES, type QuestTemplate, cloneTemplate } from '../app/quest-templates/data';
+import { track } from '../lib/track';
 
 interface TemplateGalleryProps {
   onSelectTemplate: (quest: any) => void;
@@ -13,6 +14,7 @@ export function TemplateGallery({ onSelectTemplate, onClose }: TemplateGalleryPr
 
   const handleSelectTemplate = (template: QuestTemplate) => {
     const clonedQuest = cloneTemplate(template.template);
+    track('quest_viewed', { template: template.name });
     onSelectTemplate(clonedQuest);
     onClose();
   };
