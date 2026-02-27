@@ -513,6 +513,21 @@ export async function generateChat(): Promise<{ success: boolean; message?: any;
   if (!reply) return { success: false, error: 'agent did not respond' };
 
   const text = cleanReply(speaker.name, reply);
+
+  // ─── Dedup guard: reject if text matches any of the last 10 messages ────────
+  const recentChat = readChat();
+  const recentTexts = recentChat.slice(-10).map(m => m.text.toLowerCase().trim());
+  const normalised = text.toLowerCase().trim();
+  if (recentTexts.some(t => t === normalised || (normalised.length > 40 && t.startsWith(normalised.slice(0, 40))))) {
+    console.log(`[watercooler] ⚠ Dedup: "${text.slice(0, 60)}…" matches recent message — skipping`);
+    // Abandon the current thread to break the echo loop
+    if (state.currentThread) {
+      console.log(`[watercooler] Abandoning thread ${state.currentThread.threadId} due to echo loop`);
+      state.currentThread = null;
+    }
+    return { success: false, error: 'duplicate message detected — echo loop prevented' };
+  }
+
   const threadId = thread?.threadId || randomUUID().slice(0, 8);
   const msg: ChatMessage = {
     from: speaker.name,
@@ -522,7 +537,7 @@ export async function generateChat(): Promise<{ success: boolean; message?: any;
     threadId,
   };
 
-  const chat = readChat();
+  const chat = recentChat;
   chat.push(msg);
   writeChat(chat);
 

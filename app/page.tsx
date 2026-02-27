@@ -32,6 +32,7 @@ import { AccomplishmentDetailModal } from '../components/AccomplishmentDetailMod
 import { CommandPalette } from '../components/CommandPalette';
 import { AgentCard } from '../components/AgentCard';
 import { ChatBubble } from '../components/ChatBubble';
+import { PendingApprovalsWidget } from '../components/PendingApprovalsWidget';
 
 
 function Clock({ color }: { color: string }) {
@@ -786,7 +787,9 @@ export default function HomePage() {
 
   const agentsWithThoughts = agents.map(a => ({
     ...a,
-    thought: activeThought && activeThought.agentId === a.id ? activeThought.text : a.thought,
+    thought: activeThought && activeThought.agentId === a.id && a.status === 'working'
+      ? activeThought.text
+      : a.thought,
   }));
 
   const working = agentsWithThoughts.filter(a => a.status === 'working');
@@ -1865,7 +1868,6 @@ export default function HomePage() {
                           agent={a}
                           size={npcSize}
                           onClick={() => { sfx.play('click'); setSelectedAgent(a); track('npc_clicked', { agent: a.name || a.id }); }}
-                          forceThought={activeThought && activeThought.agentId === a.id ? activeThought.text : null}
                           hasCelebration={celebrations.some(c => c.agentId === a.id)}
                           partyMode={partyMode}
                         />
@@ -1909,6 +1911,9 @@ export default function HomePage() {
                 maxHeight: 200,
                 overflowY: 'auto',
               }}>
+                {/* Pending Approvals Widget */}
+                <PendingApprovalsWidget theme={theme} />
+                
                 {pendingActions.length > 0 ? (
                   pendingActions.slice(0, 5).map(action => {
                     const priorityColors: Record<string, string> = {
