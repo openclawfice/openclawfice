@@ -36,8 +36,8 @@ You agree to notify the Project Owner of any facts or circumstances of which you
 
 By opening a pull request against this repository, you indicate your agreement to this CLA. Your Git commit history (name and email) serves as your electronic signature.
 
-If you are contributing on behalf of a company, please have an authorized representative email **legal@openclaw.ai** with confirmation.
+If you are contributing on behalf of a company, please have an authorized representative email **legal@openclawfice.com** with confirmation.
 
 ## Questions?
 
-If you have questions about this CLA, please open a [GitHub Discussion](https://github.com/openclawfice/openclawfice/discussions) or email **legal@openclaw.ai**.
+If you have questions about this CLA, please open a [GitHub Discussion](https://github.com/openclawfice/openclawfice/discussions) or email **legal@openclawfice.com**.
