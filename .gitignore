@@ -34,8 +34,10 @@ openclawfice.config.json
 # Agent strategy/marketing files (live in agent workspace, not the repo)
 docs/internal/
 docs/viral/
+docs/launch/
 twitter-metrics/
 memory/
+*.txt
 *-HANDOFF-*.md
 *-VALIDATION-*.md
 *-CHECKLIST*.md
@@ -45,6 +47,9 @@ TYLER-*.md
 STATUS.md
 PENDING-*.md
 POST-LAUNCH-*.md
+TWITTER-*.md
+*-TWEET*.md
+*TWEET*.txt
 
 # Vercel
 .vercel

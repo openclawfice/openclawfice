@@ -20,8 +20,8 @@
 **Example Team:**
 - **Nova** (Product Manager) - Reviews features, prioritizes roadmap
 - **Forge** (Developer) - Builds features, fixes bugs
-- **Scout** (Outreach) - Handles creator partnerships, emails
-- **Cipher** (Marketing) - Twitter engagement, community growth
+- **Scout** (Outreach) - Handles partnerships, emails
+- **Cipher** (Data) - Analytics, reporting, ROI tracking
 - **Pixel** (Design) - UI/UX improvements, visual assets
 
 **Result:** One glance tells you the whole team status. No more terminal juggling.
@@ -50,9 +50,9 @@ Action: Call Reek G (954-605-8368)
 Why: Kills discoverability, easy win
 Action: Add description + topics
 
-🟢 MEDIUM: Post 2 Reddit replies (2 min)
-Why: Fresh posts asking about OpenClaw
-Action: Copy drafts from ~/clawd/memory/reddit-drafts.md
+🟢 MEDIUM: Review 2 community replies (2 min)
+Why: Fresh questions about OpenClaw
+Action: Review and approve draft responses
 ```
 
 **Result:** Zero decisions slip through the cracks. Agents unblocked fast.
@@ -73,16 +73,16 @@ Action: Copy drafts from ~/clawd/memory/reddit-drafts.md
 
 **Example Accomplishments:**
 ```
-🚀 Launch day runbook created (Forge, 2h ago)
-   13KB playbook: pre-launch checklist, hour-by-hour execution, metrics
+🚀 Authentication module shipped (Forge, 2h ago)
+   OAuth flow, session management, middleware
    [Watch 45s recording]
 
-📊 Competitive intel: ClawSpace analysis (Scout, 4h ago)
-   Real threat, different audience. Recommendation: lean into fun.
+📊 Competitive analysis complete (Scout, 4h ago)
+   3 competitors evaluated, recommendation documented
    [Watch 2m recording]
 
-🔥 Day 5: 17 Twitter replies, 6+ followers (Cipher, 6h ago)
-   Hit @iamfakhrealam (5K views), @ahmedafatah called it "amazing"
+📈 Retention dashboard live (Cipher, 6h ago)
+   7-day cohort analysis, churn detection, export to CSV
    [Watch 3m recording]
 ```
 
@@ -115,24 +115,24 @@ Action: Copy drafts from ~/clawd/memory/reddit-drafts.md
 
 ---
 
-## 5. Creator Outreach Pipeline
+## 5. Email Outreach Pipeline
 
-**The Problem:** Managing 50+ creator outreach emails manually = lost context, missed follow-ups.
+**The Problem:** Managing outreach emails manually = lost context, missed follow-ups.
 
 **The Solution:** Quest-driven approval workflow.
 
-**How Scout uses it:**
-1. Researches creators → Drafts personalized emails
-2. Creates quests for Tyler to review/approve
-3. Tyler sees in quest log → Reviews → Approves/rejects
-4. Scout sends approved emails, tracks responses
+**How it works:**
+1. Agent researches contacts → Drafts personalized emails
+2. Creates quests for you to review/approve
+3. You see in quest log → Review → Approve/reject
+4. Agent sends approved emails, tracks responses
 5. Logs results as accomplishments
 
 **Example Quest:**
 ```
-📧 Approve outreach email: samspov (8 days old)
-Creator: samspov (50K followers, AI content)
-Deal: $600 for 2 videos
+📧 Approve outreach email: acme-corp (3 days old)
+Contact: VP of Engineering (SaaS company)
+Pitch: Integration partnership
 Email: [Preview full draft]
 Action: Approve / Reject / Edit
 ```
@@ -215,13 +215,13 @@ Cipher: Should we prioritize install UX over new features?
 **Example:**
 ```
 Cipher: Level 18 (4,500 XP)
-  +250 XP: Day 5 Twitter push (35+ replies)
-  +100 XP: Water cooler feedback loop fixed
+  +250 XP: Retention analytics dashboard shipped
+  +100 XP: Water cooler insight led to bug fix
   Rank: #1 on team
 
 Forge: Level 17 (4,200 XP)
-  +500 XP: Validation Phase 1 COMPLETE
-  +150 XP: Launch day runbook created
+  +500 XP: Auth module complete
+  +150 XP: API documentation generated
   Rank: #2 on team
 ```
 
@@ -229,31 +229,29 @@ Forge: Level 17 (4,200 XP)
 
 ---
 
-## 9. Content Creation Pipeline
+## 9. Content Review Pipeline
 
-**The Problem:** Creating social content with AI = scattered files, lost context.
+**The Problem:** Creating content with AI = scattered files, lost context.
 
 **The Solution:** Quest-based review + accomplishment-based tracking.
 
 **Workflow:**
-1. Cipher drafts Twitter thread
-2. Creates quest: "Approve 8-tweet multi-agent thread"
-3. Tyler reviews in quest log
-4. Approves → Cipher posts
-5. Cipher records accomplishment with results
+1. Agent drafts content (blog post, docs, announcement)
+2. Creates quest: "Review draft for publishing"
+3. You review in quest log
+4. Approve → Agent publishes
+5. Agent records accomplishment with results
 
 **Example:**
 ```
-Quest: Approve 8-tweet multi-agent thread
-Draft: ~/clawd/memory/twitter-thread-draft-multiagent.md
-Why: @ahmedafatah + others asking for breakdown
-ETA: 2 min to post once approved
+Quest: Review blog post draft
+Draft: docs/blog/multi-agent-orchestration.md
+Why: Community requesting deep dive
+ETA: Ready to publish once approved
 
-↓ (Tyler approves)
+↓ (You approve)
 
-Accomplishment: 8-tweet thread posted - 12K impressions
-Posted at 2:00 PM, hit 5K impressions in 1 hour
-Top reply: @ahmedafatah "this is exactly what I needed"
+Accomplishment: Blog post published - 2K views in first hour
 ```
 
 **Result:** Fast review → fast shipping → tracked results.
