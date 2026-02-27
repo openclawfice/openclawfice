@@ -40,8 +40,6 @@ export function ChatBubble({
       fontSize: Math.max(9 * size, 8), // Minimum 8px for readability
       maxWidth: 240 * size, // Increased from 180 to allow longer messages
       minWidth: 100 * size, // Prevent too-narrow bubbles
-      maxHeight: 120 * size, // Prevent bubbles from getting too tall
-      overflowY: 'auto', // Scroll for very long messages
       textAlign: 'center',
       boxShadow: `0 ${4 * size}px ${16 * size}px rgba(0,0,0,0.3), 0 0 0 ${2 * size}px ${agentColor}40`,
       animation: 'chatBubbleAppear 0.3s ease-out',
