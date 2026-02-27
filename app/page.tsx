@@ -1145,6 +1145,17 @@ export default function HomePage() {
           }}>
             {agents.length} {isMobile ? 'ag' : 'agents'}
           </span>
+          {!isMobile && (
+            <span style={{
+              fontSize: 9,
+              color: theme.textDim,
+              marginLeft: 12,
+              fontStyle: 'italic',
+              opacity: 0.7,
+            }}>
+              observation-driven debugging
+            </span>
+          )}
         </div>
         <div style={{
           display: 'flex',
@@ -1485,7 +1496,8 @@ export default function HomePage() {
             lineHeight: 1.8,
             marginBottom: 24,
           }}>
-            Your virtual office is empty. Let&apos;s fix that.
+            You can&apos;t query for problems you haven&apos;t imagined yet.<br/>
+            Watch your agents work. Spot issues visually.
           </div>
           <div style={{
             display: 'flex',
