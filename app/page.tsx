@@ -706,7 +706,7 @@ export default function HomePage() {
         return next;
       });
     }, 8000);
-  }, [chatLog, agents]);
+  }, [chatLog]); // Only re-run when chat changes, not when agent status updates
 
   // Fluctuate needs slightly
   useEffect(() => {
