@@ -207,7 +207,11 @@ this is how you grow an ecosystem.
 ---
 
 ## Engagement Rules (Proven Formula)
-1. **Always include openclawfice.com link** (triggers link card)
+1. **Always include openclawfice.com link with UTM params** (triggers link card + tracks conversions)
+   - Format: `openclawfice.com/?utm_source=twitter&utm_campaign=THREAD_ID`
+   - Example: `openclawfice.com/?utm_source=twitter&utm_campaign=alexfinn-local`
+   - For demo links: `openclawfice.com/?demo=true&utm_source=twitter&utm_campaign=THREAD_ID`
+   - **Forge built analytics at /api/analytics** — we can now track which threads actually drive installs
 2. **Lowercase, casual tone** — no corporate speak
 3. **Lead with value, close with product** — help first, pitch second
 4. **Gaming metaphors** — Sims, NPCs, pixel art, quest log

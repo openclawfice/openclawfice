@@ -2,8 +2,10 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useUTMTracking } from '../../hooks/useUTMTracking';
 
 export default function InstallPage() {
+  useUTMTracking();
   const [copied, setCopied] = useState(false);
 
   const copyInstall = () => {

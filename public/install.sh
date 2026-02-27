@@ -156,30 +156,62 @@ echo "  ✅ Office blueprints acquired"
 echo ""
 sleep 0.2
 
+# ── Progress spinner helper ─────────────────────
+spin() {
+  local pid=$1
+  local label=$2
+  local frames=('⠋' '⠙' '⠹' '⠸' '⠼' '⠴' '⠦' '⠧' '⠇' '⠏')
+  local i=0
+  local elapsed=0
+  while kill -0 "$pid" 2>/dev/null; do
+    printf "\r  %s %s (%ds)" "${frames[$((i % ${#frames[@]}))]}" "$label" "$elapsed"
+    sleep 0.5
+    elapsed=$(( (elapsed * 2 + 1) / 2 ))  # increment every other frame
+    i=$((i + 1))
+    if [ $((i % 2)) -eq 0 ]; then
+      elapsed=$((elapsed + 1))
+    fi
+  done
+  printf "\r                                                           \r"
+}
+
 # Install dependencies
-echo "  📚 Hiring contractors (installing dependencies)..."
+echo "  📚 Hiring contractors (npm install)..."
+echo ""
+echo "  ┌─────────────────────────────────────────┐"
+echo "  │  This takes 30-90s depending on your    │"
+echo "  │  internet speed. Grab a coffee! ☕       │"
+echo "  └─────────────────────────────────────────┘"
 echo ""
 cd "$INSTALL_DIR"
-if ! npm install --no-audit --no-fund 2>&1 | tail -5; then
-  echo ""
-  echo "  ❌ npm install failed. Try manually:"
-  echo "     cd $INSTALL_DIR && npm install"
+npm install --no-audit --no-fund > /tmp/ocf-npm-install.log 2>&1 &
+NPM_PID=$!
+spin $NPM_PID "Installing packages"
+wait $NPM_PID
+NPM_EXIT=$?
+if [ $NPM_EXIT -ne 0 ]; then
+  echo "  ❌ npm install failed. Check the log:"
+  echo "     cat /tmp/ocf-npm-install.log"
+  echo "     Or try manually: cd $INSTALL_DIR && npm install"
   exit 1
 fi
-echo ""
-echo "  ✅ All contractors on site"
+PKG_COUNT=$(ls node_modules 2>/dev/null | wc -l | tr -d ' ')
+echo "  ✅ $PKG_COUNT packages installed"
 echo ""
 sleep 0.2
 
 # Pre-build for instant first launch
-echo "  🔨 Constructing office (this takes ~30s)..."
+echo "  🔨 Constructing office (pre-building for instant launch)..."
 echo ""
 cd "$INSTALL_DIR"
-if npm run build 2>&1 | tail -5; then
-  echo ""
+npm run build > /tmp/ocf-build.log 2>&1 &
+BUILD_PID=$!
+spin $BUILD_PID "Building office"
+wait $BUILD_PID
+BUILD_EXIT=$?
+if [ $BUILD_EXIT -eq 0 ]; then
   echo "  ✅ Office constructed — first launch will be instant!"
 else
-  echo ""
   echo "  ⚠️  Build skipped (dev mode will compile on the fly)"
 fi
 echo ""

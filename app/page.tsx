@@ -5,6 +5,7 @@ import { useDemoMode } from '../hooks/useDemoMode';
 import { useRetroSFX } from '../hooks/useRetroSFX';
 import { useChiptune } from '../hooks/useChiptune';
 import { useAuthenticatedFetch } from '../hooks/useAuthenticatedFetch';
+import { useUTMTracking } from '../hooks/useUTMTracking';
 import type { Agent, AgentStatus, Mood, PendingAction, Accomplishment, ChatMessage } from '../components/types';
 import { randomColor, generateAgentDefaults, prettifyTask, formatInterval } from '../components/utils';
 import { NPC } from '../components/NPC';
@@ -14,6 +15,7 @@ import { SettingsPanel } from '../components/SettingsPanel';
 import { CooldownTimer, linkifyFiles, Stat } from '../components/CooldownTimer';
 import { TemplateGallery } from '../components/TemplateGallery';
 import { DemoBanner } from '../components/DemoBanner';
+import { DemoInstallCTA } from '../components/DemoInstallCTA';
 import { CustomizeDemo } from '../components/CustomizeDemo';
 import { NPCParticles } from '../components/NPCParticles';
 import { ShareCard } from '../components/ShareCard';
@@ -54,6 +56,7 @@ let moduleInitialLoaded = false;
 export default function HomePage() {
 
   const { isDemoMode, getApiPath } = useDemoMode();
+  useUTMTracking();
   const sfx = useRetroSFX();
   const music = useChiptune();
   const authenticatedFetch = useAuthenticatedFetch();
@@ -79,8 +82,7 @@ export default function HomePage() {
   const [activeThought, setActiveThought] = useState<{ agentId: string; text: string } | null>(null);
   const [lastSeenChatCount, setLastSeenChatCount] = useState(0);
   const [nextChatIn, setNextChatIn] = useState(0);
-  const chatTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const chatTargetRef = useRef(0);
+  // chatTimerRef/chatTargetRef removed — water cooler runs server-side
   const chatRef = useRef<HTMLDivElement>(null);
   const [groupMessage, setGroupMessage] = useState('');
   const [sendingGroup, setSendingGroup] = useState(false);
@@ -118,7 +120,6 @@ export default function HomePage() {
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [agentCardAgent, setAgentCardAgent] = useState<Agent | null>(null);
   const [agentChatBubbles, setAgentChatBubbles] = useState<Record<string, { message: string; timestamp: number; color: string }>>({});
-  const lastProcessedChatIndex = useRef<number>(-1);
   const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
   const konamiProgress = useRef<string[]>([]);
 
@@ -357,32 +358,7 @@ export default function HomePage() {
     return () => clearInterval(i);
   }, []);
 
-  // Auto-work tick: trigger sends for agents whose timer has elapsed
-  useEffect(() => {
-    const tick = async () => {
-      const hasEnabled = Object.values(autoworkPolicies).some(p => p.enabled);
-      if (!hasEnabled) return;
-      try {
-        const res = await secureFetch('/api/office/autowork', {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({}),
-        });
-        if (res.ok) {
-          const data = await res.json();
-          if (data.sent?.length > 0) {
-            const polRes = await secureFetch(getApiPath('/api/office/autowork'));
-            if (polRes.ok) {
-              const polData = await polRes.json();
-              setAutoworkPolicies(polData.policies || {});
-            }
-          }
-        }
-      } catch {}
-    };
-    const i = setInterval(tick, 15_000);
-    return () => clearInterval(i);
-  }, [autoworkPolicies]);
+  // Auto-work tick runs server-side (instrumentation.ts) — no browser needed.
 
   // Poll status + chat every 3s (initial load handled above)
   const lastStatusJson = useRef('');
@@ -584,7 +560,7 @@ export default function HomePage() {
     };
   }, [isDemoMode]);
 
-  // Demo mode: curated "aha moment" sequence + ambient thought bubbles
+  // Demo mode: ambient thought bubbles for NPC liveliness
   useEffect(() => {
     if (!isDemoMode) return;
     const AMBIENT_THOUGHTS: Record<string, string[]> = {
@@ -594,68 +570,19 @@ export default function HomePage() {
       pixel: ['🎨 These colors pop!', '✨ Pixel perfect!', '🖌️ Needs more contrast', '💜 Love this palette', '🤩 This animation is 🔥'],
       cipher: ['🚀 Deploy looks clean', '📊 Metrics are healthy', '🔒 Security check done', '⚡ Response time: 42ms', '🛡️ All systems nominal'],
     };
-
-    // CURATED INTRO SEQUENCE (first 15 seconds)
-    // 1. At 2s: Forge thinks about code (shows personality)
-    const t1 = setTimeout(() => {
-      setActiveThought({ agentId: 'forge', text: '💻 Shipping new feature...' });
-      setTimeout(() => setActiveThought(null), 3500);
-    }, 2000);
-
-    // 2. At 5s: Forge completes task + XP toast (shows gamification)
-    const t2 = setTimeout(() => {
+    const triggerThought = () => {
       const currentAgents = agentsRef.current;
-      const forge = currentAgents.find(a => a.id === 'forge');
-      if (forge) {
-        setCelebrations(prev => [...prev, { agentId: forge.id, timestamp: Date.now() }]);
-        setTimeout(() => setCelebrations(prev => prev.filter(c => Date.now() - c.timestamp < 1500)), 1800);
-        setAchievementToasts(prev => [...prev.slice(-4), {
-          id: `intro-forge-${Date.now()}`,
-          agentName: forge.name,
-          agentColor: forge.color || '#10b981',
-          icon: '🚀',
-          title: 'Deployed auth refactor to staging',
-          xp: 25,
-        }]);
-      }
-    }, 5000);
-
-    // 3. At 9s: Nova and Cipher chat at water cooler (shows collaboration)
-    const t3 = setTimeout(() => {
-      setActiveThought({ agentId: 'nova', text: '💬 Nice work Forge! That was fast.' });
-      setTimeout(() => setActiveThought(null), 3500);
-    }, 9000);
-
-    // 4. At 13s: Quest notification hint (shows interaction)
-    const t4 = setTimeout(() => {
-      setActiveThought({ agentId: 'cipher', text: '📋 New quest: Review Forge\'s PR' });
-      setTimeout(() => setActiveThought(null), 3500);
-    }, 13000);
-
-    // After intro sequence (18s+), switch to random ambient thoughts
-    const randomStart = setTimeout(() => {
-      const triggerThought = () => {
-        const currentAgents = agentsRef.current;
-        if (currentAgents.length === 0) return;
-        const agent = currentAgents[Math.floor(Math.random() * currentAgents.length)];
-        if (!agent) return;
-        const thoughts = AMBIENT_THOUGHTS[agent.id] || AMBIENT_THOUGHTS.nova;
-        const thought = thoughts[Math.floor(Math.random() * thoughts.length)];
-        setActiveThought({ agentId: agent.id, text: thought });
-        setTimeout(() => setActiveThought(null), 4000);
-      };
-      triggerThought();
-      const interval = setInterval(triggerThought, 7000);
-      return () => clearInterval(interval);
-    }, 18000);
-
-    return () => {
-      clearTimeout(t1);
-      clearTimeout(t2);
-      clearTimeout(t3);
-      clearTimeout(t4);
-      clearTimeout(randomStart);
+      if (currentAgents.length === 0) return;
+      const agent = currentAgents[Math.floor(Math.random() * currentAgents.length)];
+      if (!agent) return;
+      const thoughts = AMBIENT_THOUGHTS[agent.id] || AMBIENT_THOUGHTS.nova;
+      const thought = thoughts[Math.floor(Math.random() * thoughts.length)];
+      setActiveThought({ agentId: agent.id, text: thought });
+      setTimeout(() => setActiveThought(null), 4000);
     };
+    const firstTimeout = setTimeout(triggerThought, 3000);
+    const interval = setInterval(triggerThought, 7000);
+    return () => { clearTimeout(firstTimeout); clearInterval(interval); };
   }, [isDemoMode]);
 
   const loadArchive = async (reset = false) => {
@@ -715,135 +642,43 @@ export default function HomePage() {
     }
   }, [chatLog, lastSeenChatCount, agents]);
 
-  // Schedule next chat message — only reschedule when chatLog length changes (new message arrived)
+  // Water cooler chat generation runs server-side (instrumentation.ts).
+  // Poll the server for the countdown timer so the UI stays in sync.
   const chatLogLen = chatLog.length;
   useEffect(() => {
-    if (isDemoMode) return; // Demo mode has its own chat simulation
-    const waterCoolerConfig = config.waterCooler || {};
-    if (waterCoolerConfig.enabled === false) {
-      console.log('[WaterCooler] Disabled in config');
-      return;
-    }
-
-    const npcAgents = agents.filter(a => a.id !== '_owner');
-    console.log('[WaterCooler] Agent count check:', npcAgents.length, 'agents:', npcAgents.map(a => a.name));
-    if (npcAgents.length < 2) {
-      console.log('[WaterCooler] Need at least 2 agents, only have', npcAgents.length);
-      return;
-    }
-
-    if (waterCoolerConfig.quiet?.enabled) {
-      const now = new Date();
-      const tz = waterCoolerConfig.quiet.timezone || 'America/New_York';
-      const hour = parseInt(now.toLocaleString('en-US', { hour: 'numeric', hour12: false, timeZone: tz }));
-      const quietStart = parseInt(waterCoolerConfig.quiet.start?.split(':')[0] || '23');
-      const quietEnd = parseInt(waterCoolerConfig.quiet.end?.split(':')[0] || '8');
-      if (hour >= quietStart || hour < quietEnd) return;
-    }
-
-    // If a timer is already running and hasn't fired yet, don't reset
-    if (chatTimerRef.current && chatTargetRef.current > Date.now()) return;
-
-    const parseInterval = (str: string): number => {
-      const match = str.match(/^(\d+)(s|m|h|d)$/);
-      if (!match) return 45000;
-      const [, num, unit] = match;
-      const n = parseInt(num, 10);
-      const multipliers: Record<string, number> = { s: 1000, m: 60000, h: 3600000, d: 86400000 };
-      return n * multipliers[unit];
-    };
-
-    const baseFreq = parseInterval(waterCoolerConfig.frequency || '45s');
-    const delay = baseFreq + (Math.random() - 0.5) * baseFreq * 0.5;
-    chatTargetRef.current = Date.now() + delay;
-    setNextChatIn(Math.round(delay / 1000));
-    console.log('[WaterCooler] Scheduling next chat in', Math.round(delay / 1000), 'seconds');
-
-    chatTimerRef.current = setTimeout(async () => {
-      chatTimerRef.current = null;
-      chatTargetRef.current = 0;
-      setNextChatIn(-1);
-      console.log('[WaterCooler] Timer fired, generating chat...');
+    if (isDemoMode) return;
+    const poll = async () => {
       try {
-        const allAgentData = agents
-          .filter(a => a.id !== '_owner')
-          .map(a => ({ id: a.id, name: a.name, role: a.role, status: a.status, task: a.task }));
-        console.log('[WaterCooler] Sending POST with agents:', allAgentData.map(a => a.name));
-        const res = await secureFetch('/api/office/chat', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            agentNames: allAgentData.map(a => a.name),
-            allAgents: allAgentData,
-          }),
-        });
-        console.log('[WaterCooler] POST response:', res.status, res.ok);
-        // Immediately fetch updated chat so we don't wait for the next poll cycle
+        const res = await secureFetch(getApiPath('/api/office/chat?status=1'));
         if (res.ok) {
-          try {
-            const chatRes = await secureFetch('/api/office/chat');
-            const msgs = await chatRes.json();
-            if (Array.isArray(msgs)) {
-              setChatLog(msgs);
-              setTimeout(() => {
-                if (chatRef.current) chatRef.current.scrollTop = chatRef.current.scrollHeight;
-              }, 100);
-            }
-          } catch (err) {
-            console.error('[WaterCooler] Failed to fetch updated chat:', err);
+          const data = await res.json();
+          if (typeof data.nextChatIn === 'number') {
+            setNextChatIn(data.nextChatIn);
           }
         }
-      } catch (err) {
-        console.error('[WaterCooler] Chat generation failed:', err);
-      }
-      // Trigger re-schedule by updating nextChatIn to 0 which will cause effect to re-run
-      setNextChatIn(0);
-      // Force re-trigger of the scheduling effect by touching chatLogLen dependency
-      setChatLog(prev => [...prev]);
-    }, delay);
-
-    return () => {
-      if (chatTimerRef.current) clearTimeout(chatTimerRef.current);
-      chatTimerRef.current = null;
-      chatTargetRef.current = 0;
+      } catch {}
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [chatLogLen, agents.length, config.waterCooler?.frequency, config.waterCooler?.enabled]);
-
-  // Countdown tick — only re-renders when value actually changes
-  useEffect(() => {
-    const tick = setInterval(() => {
-      if (chatTargetRef.current > 0) {
-        const remaining = Math.max(0, Math.round((chatTargetRef.current - Date.now()) / 1000));
-        setNextChatIn(prev => prev === remaining ? prev : remaining);
-      }
-    }, 1000);
-    return () => clearInterval(tick);
-  }, []);
+    poll();
+    const i = setInterval(poll, 5_000);
+    return () => clearInterval(i);
+  }, [isDemoMode]);
 
   // Track recent chat messages to show bubbles over idle agents
+  const lastBubbleMsgRef = useRef('');
   useEffect(() => {
     if (chatLog.length === 0) return;
     
-    // Only process NEW messages (index greater than last processed)
-    const lastIndex = chatLog.length - 1;
-    if (lastIndex <= lastProcessedChatIndex.current) return;
-    
-    const recentMessage = chatLog[lastIndex];
-    lastProcessedChatIndex.current = lastIndex;
-    
+    const recentMessage = chatLog[chatLog.length - 1];
     if (!recentMessage.from || !recentMessage.text) return;
     
-    // Find the agent who sent this message
+    const msgKey = `${recentMessage.from}:${recentMessage.ts || recentMessage.text}`;
+    if (msgKey === lastBubbleMsgRef.current) return;
+    lastBubbleMsgRef.current = msgKey;
+    
     const agent = agents.find(a => a.name === recentMessage.from);
     if (!agent || agent.id === '_owner') return;
-    
-    // Only show bubble if agent is idle (in lounge)
     if (agent.status !== 'idle') return;
     
-    console.log('[ChatBubble] Showing bubble for', agent.name, ':', recentMessage.text);
-    
-    // Add chat bubble for this agent
     setAgentChatBubbles(prev => ({
       ...prev,
       [agent.id]: {
@@ -853,7 +688,6 @@ export default function HomePage() {
       }
     }));
     
-    // Auto-remove after 8 seconds
     setTimeout(() => {
       setAgentChatBubbles(prev => {
         const next = { ...prev };
@@ -1111,6 +945,8 @@ export default function HomePage() {
 
       {/* Demo Mode Banner */}
       {isDemoMode && <DemoBanner />}
+      {/* Demo Mode Install CTA — slides in after 30s */}
+      {isDemoMode && <DemoInstallCTA delayMs={30000} />}
       {/* Spacer for fixed demo banner */}
       {isDemoMode && <div style={{ height: isMobile ? 36 : 48, flexShrink: 0 }} />}
 
@@ -1145,17 +981,6 @@ export default function HomePage() {
           }}>
             {agents.length} {isMobile ? 'ag' : 'agents'}
           </span>
-          {!isMobile && (
-            <span style={{
-              fontSize: 9,
-              color: theme.textDim,
-              marginLeft: 12,
-              fontStyle: 'italic',
-              opacity: 0.7,
-            }}>
-              observation-driven debugging
-            </span>
-          )}
         </div>
         <div style={{
           display: 'flex',
@@ -1496,8 +1321,7 @@ export default function HomePage() {
             lineHeight: 1.8,
             marginBottom: 24,
           }}>
-            You can&apos;t query for problems you haven&apos;t imagined yet.<br/>
-            Watch your agents work. Spot issues visually.
+            Your virtual office is empty. Let&apos;s fix that.
           </div>
           <div style={{
             display: 'flex',
@@ -1793,7 +1617,6 @@ export default function HomePage() {
                           <ChatBubble
                             message={agentChatBubbles[a.id].message}
                             agentColor={agentChatBubbles[a.id].color}
-                            size={npcSize}
                           />
                         )}
                         <NPC
@@ -1977,7 +1800,6 @@ export default function HomePage() {
             </Room>
           </div>
 
-          {/* ACTIVITY LOG */}
           {/* ACCOMPLISHMENTS */}
           <div data-tour="accomplishments" style={{
             background: theme.bgSecondary,
@@ -2710,7 +2532,6 @@ export default function HomePage() {
             onClose={() => { sfx.play('close'); setSelectedAgent(null); }}
             autowork={autoworkPolicies[selectedAgent.id]}
             pendingChanges={pendingAutowork[selectedAgent.id]}
-            activityLog={activityLog}
             onAutoworkUpdate={(agentId, patch) => {
               setPendingAutowork(prev => ({
                 ...prev,
