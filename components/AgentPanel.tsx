@@ -61,6 +61,7 @@ interface LogEntry {
 
 function LiveSessionFeed({ agent, secureFetch }: { agent: Agent; secureFetch: (url: string, opts?: RequestInit) => Promise<Response> }) {
   const [entries, setEntries] = useState<LogEntry[]>([]);
+  const [expandedEntries, setExpandedEntries] = useState<Set<number>>(new Set());
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState(true);
   const feedRef = useRef<HTMLDivElement>(null);
@@ -118,16 +119,34 @@ function LiveSessionFeed({ agent, secureFetch }: { agent: Agent; secureFetch: (u
     return '#e2e8f0';
   };
 
-  const formatContent = (e: LogEntry) => {
+  const isContentTruncated = (e: LogEntry) => {
+    if (e.type === 'tool_use') return e.content.length > 100;
+    if (e.type === 'tool_result') return e.content.length > 80;
+    return e.content.length > 150;
+  };
+
+  const formatContent = (e: LogEntry, isExpanded: boolean = false) => {
     if (e.type === 'tool_use') {
       const name = e.toolName || 'tool';
-      const content = e.content.length > 100 ? e.content.slice(0, 97) + '...' : e.content;
+      if (isExpanded) return `${name}: ${e.content}`;
+      const content = e.content.length > 100 ? e.content.slice(0, 97) + '…' : e.content;
       return `${name}: ${content}`;
     }
     if (e.type === 'tool_result') {
-      return e.content.length > 80 ? e.content.slice(0, 77) + '...' : e.content;
+      if (isExpanded) return e.content;
+      return e.content.length > 80 ? e.content.slice(0, 77) + '…' : e.content;
     }
-    return e.content.length > 150 ? e.content.slice(0, 147) + '...' : e.content;
+    if (isExpanded) return e.content;
+    return e.content.length > 150 ? e.content.slice(0, 147) + '…' : e.content;
+  };
+
+  const toggleEntry = (index: number) => {
+    setExpandedEntries(prev => {
+      const next = new Set(prev);
+      if (next.has(index)) next.delete(index);
+      else next.add(index);
+      return next;
+    });
   };
 
   return (
@@ -184,31 +203,49 @@ function LiveSessionFeed({ agent, secureFetch }: { agent: Agent; secureFetch: (u
               Connecting to session...
             </div>
           ) : entries.length > 0 ? (
-            entries.map((entry, i) => (
-              <div
-                key={`live-${i}`}
-                style={{
-                  display: 'flex',
-                  gap: 5,
-                  paddingBottom: 3,
-                  borderBottom: i < entries.length - 1 ? '1px solid #111827' : 'none',
-                  marginBottom: 3,
-                  opacity: Math.max(0.4, 0.4 + (i / entries.length) * 0.6),
-                }}
-              >
-                <span style={{ flexShrink: 0, fontSize: 8 }}>{getEntryIcon(entry)}</span>
-                <span style={{
-                  color: getEntryColor(entry),
-                  wordBreak: 'break-word',
-                  whiteSpace: 'pre-wrap',
-                }}>
-                  {formatContent(entry)}
-                </span>
-              </div>
-            ))
+            <>
+              {entries.map((entry, i) => {
+                const truncated = isContentTruncated(entry);
+                const entryExpanded = expandedEntries.has(i);
+                return (
+                  <div
+                    key={`live-${i}`}
+                    onClick={truncated ? () => toggleEntry(i) : undefined}
+                    style={{
+                      display: 'flex',
+                      gap: 5,
+                      paddingBottom: 3,
+                      borderBottom: i < entries.length - 1 ? '1px solid #111827' : 'none',
+                      marginBottom: 3,
+                      opacity: Math.max(0.4, 0.4 + (i / entries.length) * 0.6),
+                      cursor: truncated ? 'pointer' : 'default',
+                      background: entryExpanded ? '#0f1729' : 'transparent',
+                      borderRadius: entryExpanded ? 4 : 0,
+                      padding: entryExpanded ? '4px 6px 4px 2px' : undefined,
+                      transition: 'background 0.15s ease',
+                    }}
+                  >
+                    <span style={{ flexShrink: 0, fontSize: 8 }}>{getEntryIcon(entry)}</span>
+                    <span style={{
+                      color: getEntryColor(entry),
+                      wordBreak: 'break-word',
+                      whiteSpace: 'pre-wrap',
+                    }}>
+                      {formatContent(entry, entryExpanded)}
+                      {truncated && !entryExpanded && (
+                        <span style={{ color: '#475569', fontSize: 8, marginLeft: 4 }}>&#9654;</span>
+                      )}
+                      {entryExpanded && (
+                        <span style={{ color: '#475569', fontSize: 8, marginLeft: 4 }}>&#9660;</span>
+                      )}
+                    </span>
+                  </div>
+                );
+              })}
+            </>
           ) : (
             <div style={{ color: '#475569', fontSize: 8, fontStyle: 'italic' }}>
-              No session data — agent may be idle
+              No session data &#8212; agent may be idle
             </div>
           )}
         </div>
