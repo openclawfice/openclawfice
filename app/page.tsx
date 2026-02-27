@@ -584,7 +584,7 @@ export default function HomePage() {
     };
   }, [isDemoMode]);
 
-  // Demo mode: ambient thought bubbles for NPC liveliness
+  // Demo mode: curated "aha moment" sequence + ambient thought bubbles
   useEffect(() => {
     if (!isDemoMode) return;
     const AMBIENT_THOUGHTS: Record<string, string[]> = {
@@ -594,19 +594,68 @@ export default function HomePage() {
       pixel: ['🎨 These colors pop!', '✨ Pixel perfect!', '🖌️ Needs more contrast', '💜 Love this palette', '🤩 This animation is 🔥'],
       cipher: ['🚀 Deploy looks clean', '📊 Metrics are healthy', '🔒 Security check done', '⚡ Response time: 42ms', '🛡️ All systems nominal'],
     };
-    const triggerThought = () => {
+
+    // CURATED INTRO SEQUENCE (first 15 seconds)
+    // 1. At 2s: Forge thinks about code (shows personality)
+    const t1 = setTimeout(() => {
+      setActiveThought({ agentId: 'forge', text: '💻 Shipping new feature...' });
+      setTimeout(() => setActiveThought(null), 3500);
+    }, 2000);
+
+    // 2. At 5s: Forge completes task + XP toast (shows gamification)
+    const t2 = setTimeout(() => {
       const currentAgents = agentsRef.current;
-      if (currentAgents.length === 0) return;
-      const agent = currentAgents[Math.floor(Math.random() * currentAgents.length)];
-      if (!agent) return;
-      const thoughts = AMBIENT_THOUGHTS[agent.id] || AMBIENT_THOUGHTS.nova;
-      const thought = thoughts[Math.floor(Math.random() * thoughts.length)];
-      setActiveThought({ agentId: agent.id, text: thought });
-      setTimeout(() => setActiveThought(null), 4000);
+      const forge = currentAgents.find(a => a.id === 'forge');
+      if (forge) {
+        setCelebrations(prev => [...prev, { agentId: forge.id, timestamp: Date.now() }]);
+        setTimeout(() => setCelebrations(prev => prev.filter(c => Date.now() - c.timestamp < 1500)), 1800);
+        setAchievementToasts(prev => [...prev.slice(-4), {
+          id: `intro-forge-${Date.now()}`,
+          agentName: forge.name,
+          agentColor: forge.color || '#10b981',
+          icon: '🚀',
+          title: 'Deployed auth refactor to staging',
+          xp: 25,
+        }]);
+      }
+    }, 5000);
+
+    // 3. At 9s: Nova and Cipher chat at water cooler (shows collaboration)
+    const t3 = setTimeout(() => {
+      setActiveThought({ agentId: 'nova', text: '💬 Nice work Forge! That was fast.' });
+      setTimeout(() => setActiveThought(null), 3500);
+    }, 9000);
+
+    // 4. At 13s: Quest notification hint (shows interaction)
+    const t4 = setTimeout(() => {
+      setActiveThought({ agentId: 'cipher', text: '📋 New quest: Review Forge\'s PR' });
+      setTimeout(() => setActiveThought(null), 3500);
+    }, 13000);
+
+    // After intro sequence (18s+), switch to random ambient thoughts
+    const randomStart = setTimeout(() => {
+      const triggerThought = () => {
+        const currentAgents = agentsRef.current;
+        if (currentAgents.length === 0) return;
+        const agent = currentAgents[Math.floor(Math.random() * currentAgents.length)];
+        if (!agent) return;
+        const thoughts = AMBIENT_THOUGHTS[agent.id] || AMBIENT_THOUGHTS.nova;
+        const thought = thoughts[Math.floor(Math.random() * thoughts.length)];
+        setActiveThought({ agentId: agent.id, text: thought });
+        setTimeout(() => setActiveThought(null), 4000);
+      };
+      triggerThought();
+      const interval = setInterval(triggerThought, 7000);
+      return () => clearInterval(interval);
+    }, 18000);
+
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
+      clearTimeout(t4);
+      clearTimeout(randomStart);
     };
-    const firstTimeout = setTimeout(triggerThought, 3000);
-    const interval = setInterval(triggerThought, 7000);
-    return () => { clearTimeout(firstTimeout); clearInterval(interval); };
   }, [isDemoMode]);
 
   const loadArchive = async (reset = false) => {
