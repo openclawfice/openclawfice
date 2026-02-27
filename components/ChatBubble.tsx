@@ -16,13 +16,14 @@ export function ChatBubble({
   const [isVisible, setIsVisible] = useState(true);
 
   useEffect(() => {
+    setIsVisible(true); // Reset visibility when message changes
     const timer = setTimeout(() => {
       setIsVisible(false);
       onExpire?.();
     }, 8000); // Show for 8 seconds
 
     return () => clearTimeout(timer);
-  }, [onExpire]);
+  }, [message, onExpire]);
 
   if (!isVisible) return null;
 

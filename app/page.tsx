@@ -1856,6 +1856,7 @@ export default function HomePage() {
                       <div style={{ position: 'relative' }}>
                         {agentChatBubbles[a.id] && (
                           <ChatBubble
+                            key={`${a.id}-${agentChatBubbles[a.id].timestamp}`}
                             message={agentChatBubbles[a.id].message}
                             agentColor={agentChatBubbles[a.id].color}
                           />
