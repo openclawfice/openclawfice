@@ -1395,8 +1395,8 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* No Agents Empty State */}
-      {agents.length === 0 && (
+      {/* No Agents Empty State - Don't show in demo mode (agents are loading) */}
+      {agents.length === 0 && !isDemoMode && (
         <div style={{
           display: 'flex',
           flexDirection: 'column',
