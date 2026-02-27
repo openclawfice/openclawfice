@@ -54,12 +54,14 @@ interface ChatMessage {
 interface AgentInfo {
   id: string;
   name: string;
+  workspace?: string;
   role?: string;
   vibe?: string;
   creature?: string;
-  soul?: string;      // SOUL.md — personality, approach, boundaries
-  heartbeat?: string;  // HEARTBEAT.md — current priorities and real work context
-  memory?: string;     // MEMORY.md excerpt — long-term knowledge (truncated)
+  soul?: string;
+  heartbeat?: string;
+  memory?: string;
+  recentWork?: string;  // recent accomplishments by this agent only
   status: string;
   task?: string;
 }
@@ -128,6 +130,18 @@ function writeInsights(insights: Insight[]) {
   writeFileSync(INSIGHTS_FILE, JSON.stringify(insights.slice(-50), null, 2));
 }
 
+// ─── Agent Context Helpers ───────────────────────────────────────────────────
+
+function getRecentWorkForAgent(agentName: string): string {
+  const accs = readAccomplishments();
+  const mine = accs
+    .filter((a: any) => a.who === agentName)
+    .sort((a: any, b: any) => (b.timestamp || 0) - (a.timestamp || 0))
+    .slice(0, 5);
+  if (mine.length === 0) return '';
+  return mine.map((a: any) => `- ${a.title || a.text || '(untitled)'}`).join('\n');
+}
+
 // ─── Agent Discovery ────────────────────────────────────────────────────────
 
 function discoverAgents(): AgentInfo[] {
@@ -163,15 +177,15 @@ function discoverAgents(): AgentInfo[] {
       } catch {}
       try {
         const soulPath = join(ws, 'SOUL.md');
-        if (existsSync(soulPath)) soul = readFileSync(soulPath, 'utf-8').slice(0, 1500);
+        if (existsSync(soulPath)) soul = readFileSync(soulPath, 'utf-8').slice(0, 4000);
       } catch {}
       try {
         const hbPath = join(ws, 'HEARTBEAT.md');
-        if (existsSync(hbPath)) heartbeat = readFileSync(hbPath, 'utf-8').slice(0, 1500);
+        if (existsSync(hbPath)) heartbeat = readFileSync(hbPath, 'utf-8').slice(0, 3000);
       } catch {}
       try {
         const memPath = join(ws, 'MEMORY.md');
-        if (existsSync(memPath)) memory = readFileSync(memPath, 'utf-8').slice(0, 1500);
+        if (existsSync(memPath)) memory = readFileSync(memPath, 'utf-8').slice(0, 4000);
       } catch {}
 
       let status = 'idle';
@@ -193,7 +207,8 @@ function discoverAgents(): AgentInfo[] {
         }
       } catch {}
 
-      result.push({ id: agent.id, name, role, vibe, creature, soul, heartbeat, memory, status, task });
+      const recentWork = getRecentWorkForAgent(name);
+      result.push({ id: agent.id, name, workspace: ws, role, vibe, creature, soul, heartbeat, memory, recentWork, status, task });
     }
   } catch {}
   return result;
@@ -239,22 +254,28 @@ function buildRoster(allAgents: AgentInfo[], speakerId?: string): string {
 
 function buildSoulBlock(agent: AgentInfo): string {
   const parts: string[] = [];
+  parts.push(`## Identity`);
   parts.push(`Name: ${agent.name}`);
   if (agent.role) parts.push(`Role: ${agent.role}`);
   if (agent.creature) parts.push(`Type: ${agent.creature}`);
   if (agent.vibe) parts.push(`Personality: ${agent.vibe}`);
+  if (agent.workspace) parts.push(`Workspace: ${agent.workspace}`);
 
   if (agent.soul) {
-    parts.push(`\n--- ${agent.name}'s Soul (personality & approach) ---`);
+    parts.push(`\n## ${agent.name}'s Soul (personality, approach, boundaries)`);
     parts.push(agent.soul);
   }
   if (agent.heartbeat) {
-    parts.push(`\n--- ${agent.name}'s Current Focus (real priorities) ---`);
+    parts.push(`\n## ${agent.name}'s Current Priorities (what they're actually doing)`);
     parts.push(agent.heartbeat);
   }
   if (agent.memory) {
-    parts.push(`\n--- ${agent.name}'s Memory (real experience) ---`);
+    parts.push(`\n## ${agent.name}'s Memory (real facts, real people, real data)`);
     parts.push(agent.memory);
+  }
+  if (agent.recentWork) {
+    parts.push(`\n## ${agent.name}'s Recent Accomplishments (actually completed)`);
+    parts.push(agent.recentWork);
   }
 
   return parts.join('\n');
@@ -266,40 +287,47 @@ function buildPrompt(
   allAgents: AgentInfo[],
   thread: ThreadState | null,
   mission?: { goal?: string; priorities?: string[] },
-  accomplishments?: any[],
 ): string {
   const lines: string[] = [];
 
-  // System framing with full identity + real context injection
   lines.push(
-    `THIS IS THE WATER COOLER THREAD — a dedicated space for team brainstorming.`,
+    `WATER COOLER THREAD — team brainstorming space.`,
     '',
-    `You ARE ${speaker.name}. Here is everything about who they are and what they're actually working on:`,
+    `You ARE ${speaker.name}. Below is ${speaker.name}'s COMPLETE context — soul, current`,
+    `priorities, memory, and recent work. This is your ONLY source of truth.`,
     '',
+    `═══════════════════════════════════════════════════`,
     buildSoulBlock(speaker),
+    `═══════════════════════════════════════════════════`,
     '',
-    `CRITICAL: Only reference things from ${speaker.name}'s ACTUAL memory, heartbeat, and soul above.`,
-    `Do NOT make up projects, data, or experiences. If ${speaker.name}'s context doesn't mention`,
-    `something, don't claim they know about it. Stay grounded in what's real.`,
-    `Speak in ${speaker.name}'s voice. Reply with ONLY the message text. No tools, no actions, no markdown.`,
+    `GROUNDING RULES (non-negotiable):`,
+    `• You may ONLY reference projects, data, people, and experiences that appear`,
+    `  in ${speaker.name}'s context above.`,
+    `• If something is NOT in the context above, you do NOT know about it.`,
+    `  Do not speculate about things outside your direct experience.`,
+    `• Do not claim to have done outreach, seen data, talked to users, or shipped`,
+    `  features unless the context above specifically mentions it.`,
+    `• Stay in your lane — ${speaker.role || speaker.creature || speaker.id} is your`,
+    `  actual job. Don't opine on areas you have no context for.`,
+    `• Speak from first-hand experience, not assumptions about what the team does.`,
     '',
   );
 
-  // Phase-specific instructions
   if (phase === 'take') {
     lines.push(
-      'PHASE: TAKE (share an observation)',
-      'Start a new discussion thread. Share something specific you\'ve noticed or',
-      'discovered from your work — a pattern, gap, surprising data point, or connection.',
-      'Be concrete and grounded, not vague. Frame it as an observation.',
+      'PHASE: TAKE (share an observation from YOUR actual work)',
+      `Look at YOUR heartbeat, memory, and recent accomplishments above.`,
+      `Pick ONE specific, concrete thing you noticed or learned from YOUR OWN work.`,
+      `It must be something you can point to in your context. No generic observations.`,
     );
   } else if (phase === 'hunch' && thread) {
     lines.push(
-      'PHASE: HUNCH (build a hypothesis)',
+      'PHASE: HUNCH (build a hypothesis using YOUR knowledge)',
       `${thread.messages[0].from} observed: "${thread.messages[0].text}"`,
       '',
-      'Build on this with a hunch — a hypothesis, intuition, or "what if".',
-      'Connect it to something you know from your own work. Think out loud.',
+      `Respond with a hypothesis that connects this to something from YOUR OWN`,
+      `experience (in your memory/heartbeat above). If you have no relevant context`,
+      `to connect it to, say so honestly rather than making something up.`,
     );
   } else if (phase === 'suggestion' && thread) {
     lines.push(
@@ -307,34 +335,27 @@ function buildPrompt(
       `${thread.messages[0].from} observed: "${thread.messages[0].text}"`,
       `${thread.messages[1].from} hypothesized: "${thread.messages[1].text}"`,
       '',
-      'Close this thread with a specific, actionable suggestion.',
-      'Name the task AND who should do it. Be concrete.',
+      `Close this thread with a specific, actionable suggestion. Name the task AND`,
+      `who should do it based on what each person actually does (see team roster).`,
+      `Only suggest things within the team's actual capabilities and current work.`,
     );
   }
 
   lines.push(
     '',
-    'Rules: 1-2 sentences, under 200 chars. Plain text only. Don\'t prefix with your name.',
+    'Format: 1-2 sentences, under 200 chars. Plain text. No name prefix. No markdown.',
     '',
   );
 
   if (mission?.goal) {
-    lines.push(`Mission: ${mission.goal}`);
+    lines.push(`Team Mission: ${mission.goal}`);
     if (mission.priorities?.length) lines.push(`Priorities: ${mission.priorities.join(', ')}`);
     lines.push('');
   }
 
-  lines.push('Team:', buildRoster(allAgents, speaker.id));
+  lines.push('Team Roster (what each person ACTUALLY does):', buildRoster(allAgents, speaker.id));
 
-  const recent = (accomplishments || [])
-    .sort((a: any, b: any) => (b.timestamp || 0) - (a.timestamp || 0))
-    .slice(0, 5);
-  if (recent.length > 0) {
-    lines.push('', 'Recent accomplishments:');
-    for (const a of recent) lines.push(`- ${a.who}: ${a.title}`);
-  }
-
-  lines.push('', `Now reply as ${speaker.name}. Just the message text, nothing else.`);
+  lines.push('', `Reply as ${speaker.name} now. Only the message text.`);
   return lines.join('\n');
 }
 
@@ -477,8 +498,7 @@ export async function generateChat(): Promise<{ success: boolean; message?: any;
   );
   if (!speaker) return { success: false, error: 'no idle speaker' };
 
-  const accomplishments = readAccomplishments();
-  const prompt = buildPrompt(nextPhase as Phase, speaker, allAgents, thread, config.mission, accomplishments);
+  const prompt = buildPrompt(nextPhase as Phase, speaker, allAgents, thread, config.mission);
 
   const reply = await sendToWatercoolerThread(prompt);
   if (!reply) return { success: false, error: 'agent did not respond' };

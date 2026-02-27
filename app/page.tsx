@@ -21,6 +21,7 @@ import { DemoInstallCTA } from '../components/DemoInstallCTA';
 import { CustomizeDemo } from '../components/CustomizeDemo';
 import { NPCParticles } from '../components/NPCParticles';
 import { ShareCard } from '../components/ShareCard';
+import { ShareWorkflowModal } from '../components/ShareWorkflowModal';
 import { Celebration } from '../components/Celebration';
 import { AchievementToastContainer, AchievementToastData } from '../components/AchievementToast';
 import { BootSequence } from '../components/BootSequence';
@@ -93,6 +94,7 @@ export default function HomePage() {
   const [groupSent, setGroupSent] = useState(false);
   const [showTemplateGallery, setShowTemplateGallery] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
+  const [showWorkflowModal, setShowWorkflowModal] = useState(false);
   const [celebrations, setCelebrations] = useState<{ agentId: string; timestamp: number }[]>([]);
   const [achievementToasts, setAchievementToasts] = useState<AchievementToastData[]>([]);
   const lastAccomplishmentCheck = useRef(0);
@@ -120,6 +122,7 @@ export default function HomePage() {
   const [showBoot, setShowBoot] = useState(false);
   const [nowMs, setNowMs] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [partyMode, setPartyMode] = useState(false);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [agentCardAgent, setAgentCardAgent] = useState<Agent | null>(null);
@@ -291,6 +294,9 @@ export default function HomePage() {
         setArchiveTotal(archiveRes.value.archiveTotal);
       }
       if (autoworkRes.status === 'fulfilled') setAutoworkPolicies(autoworkRes.value.policies || {});
+      
+      // Hide loading screen once data is loaded
+      setIsInitialLoading(false);
     };
     load();
   }, []);
@@ -948,6 +954,79 @@ export default function HomePage() {
       {/* Retro Boot Sequence */}
       {showBoot && <BootSequence onComplete={() => setShowBoot(false)} />}
 
+      {/* Initial Loading Screen */}
+      {isInitialLoading && !showBoot && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          background: '#0a0e14',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 9999,
+        }}>
+          {/* Scanlines */}
+          <div style={{
+            position: 'absolute',
+            inset: 0,
+            background: 'repeating-linear-gradient(0deg, rgba(0,255,65,0.03) 0px, transparent 1px, transparent 2px, rgba(0,255,65,0.03) 3px)',
+            pointerEvents: 'none',
+          }} />
+          
+          <div style={{
+            fontSize: 48,
+            marginBottom: 24,
+            filter: 'drop-shadow(0 0 12px #00ff41)',
+            animation: 'npcBob 2s ease-in-out infinite',
+          }}>
+            🏢
+          </div>
+          
+          <div style={{
+            fontFamily: '"Courier New", monospace',
+            fontSize: 16,
+            color: '#00ff41',
+            textShadow: '0 0 10px rgba(0,255,65,0.5)',
+            letterSpacing: '3px',
+            marginBottom: 16,
+          }}>
+            OPENCLAWFICE
+          </div>
+          
+          <div style={{
+            fontFamily: '"Courier New", monospace',
+            fontSize: 12,
+            color: '#00ff41',
+            opacity: 0.6,
+            letterSpacing: '2px',
+            animation: 'pulse 1.5s ease-in-out infinite',
+          }}>
+            INITIALIZING OFFICE...
+          </div>
+          
+          <div style={{
+            marginTop: 32,
+            display: 'flex',
+            gap: 8,
+          }}>
+            {[0, 1, 2].map((i) => (
+              <div
+                key={i}
+                style={{
+                  width: 8,
+                  height: 8,
+                  background: '#00ff41',
+                  borderRadius: '50%',
+                  boxShadow: '0 0 10px rgba(0,255,65,0.8)',
+                  animation: `pulse 1.5s ease-in-out infinite ${i * 0.2}s`,
+                }}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Demo Mode Banner */}
       {isDemoMode && <DemoBanner />}
       {/* Demo Mode Install CTA — slides in after 30s */}
@@ -1052,9 +1131,26 @@ export default function HomePage() {
               fontSize: 14,
               padding: '2px 4px',
             }}
-            title="Share Your Office"
+            title="Share Screenshot"
           >
             📸
+          </button>
+          <button
+            onClick={() => {
+              sfx.play('click');
+              setShowWorkflowModal(true);
+            }}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: theme.textMuted,
+              cursor: 'pointer',
+              fontSize: 14,
+              padding: '2px 4px',
+            }}
+            title="Share Workflow"
+          >
+            📤
           </button>
           <button
             onClick={() => {
@@ -2871,6 +2967,21 @@ export default function HomePage() {
           pendingActions={pendingActions}
           accomplishments={accomplishments}
           isDemoMode={isDemoMode}
+        />
+      )}
+      {/* Share Workflow Modal */}
+      {showWorkflowModal && (
+        <ShareWorkflowModal
+          isVisible={showWorkflowModal}
+          onClose={() => setShowWorkflowModal(false)}
+          config={{
+            agents,
+            waterCooler: { enabled: true },
+            autowork: { enabled: true },
+          }}
+          onShare={(url) => {
+            console.log('Workflow shared:', url);
+          }}
         />
       )}
       <AchievementToastContainer
