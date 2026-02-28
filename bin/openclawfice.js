@@ -743,6 +743,26 @@ Visit: https://docs.openclaw.ai/openclawfice
   process.exit(0);
 }
 
+// ─── Preflight Dependency Check ─────────────────────────────────────
+
+// Quick check before launch
+const nodeVersion = process.version;
+const nodeMajor = parseInt(nodeVersion.slice(1).split('.')[0]);
+if (nodeMajor < 18) {
+  console.error('\n❌ Node.js version too old');
+  console.error('OpenClawfice requires Node.js 18+');
+  console.error('Current version:', nodeVersion);
+  console.error('\nUpgrade at: https://nodejs.org/\n');
+  process.exit(1);
+}
+
+// Check if node_modules exists
+if (!fs.existsSync(join(packageRoot, 'node_modules'))) {
+  console.error('\n❌ Dependencies not installed');
+  console.error('Please run: npm install\n');
+  process.exit(1);
+}
+
 // ─── Launch Server ──────────────────────────────────────────────────
 
 console.log('🏢 Starting OpenClawfice...\n');
@@ -764,7 +784,29 @@ const child = spawn('npm', args, {
   env: { ...process.env, PORT: port },
 });
 
+child.on('error', (err) => {
+  console.error('\n❌ Failed to start OpenClawfice\n');
+  console.error('Error:', err.message);
+  
+  if (err.code === 'ENOENT') {
+    console.error('\nLooks like npm is not in your PATH.');
+    console.error('Make sure Node.js is installed: https://nodejs.org/\n');
+  }
+  
+  process.exit(1);
+});
+
 child.on('exit', (code) => {
+  if (code !== 0) {
+    // Port conflict is common, give helpful message
+    if (code === 1 || code === 127) {
+      console.error(`\n⚠️  OpenClawfice exited with code ${code}`);
+      console.error(`\nCommon fixes:`);
+      console.error(`  1. Port conflict? Try: openclawfice --port=3334`);
+      console.error(`  2. Build failed? Try: npm install && npm run build`);
+      console.error(`  3. Check doctor: openclawfice doctor\n`);
+    }
+  }
   process.exit(code || 0);
 });
 

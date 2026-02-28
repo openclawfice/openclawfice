@@ -2999,6 +2999,14 @@ export default function HomePage() {
           isDemoMode={isDemoMode}
         />
       )}
+      {/* Discovery Animation — First-run experience */}
+      {showDiscovery && (
+        <DiscoveryAnimation
+          agents={agents}
+          onComplete={() => setShowDiscovery(false)}
+        />
+      )}
+
       {/* Share Workflow Modal */}
       {showWorkflowModal && (
         <ShareWorkflowModal
