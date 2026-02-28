@@ -513,6 +513,30 @@ export async function generateChat(): Promise<{ success: boolean; message?: any;
   if (!reply) return { success: false, error: 'agent did not respond' };
 
   const text = cleanReply(speaker.name, reply);
+
+  // ── DEDUP GUARD (v2): reject messages too similar to recent ones ──
+  // Catches near-duplicates that differ by only a few words (the echo loop problem).
+  // Uses normalized word-set overlap: if >70% of words match any of the last 20 messages, reject.
+  const chat = readChat();
+  const recentMsgs = chat.slice(-20);
+  const normalize = (s: string) => s.toLowerCase().replace(/[^a-z0-9 ]/g, '').split(/\s+/).filter(w => w.length > 2);
+  const newWords = new Set(normalize(text));
+  if (newWords.size > 3) { // skip very short messages
+    for (const prev of recentMsgs) {
+      const prevWords = new Set(normalize(prev.text));
+      if (prevWords.size < 4) continue;
+      const overlap = Array.from(newWords).filter(w => prevWords.has(w)).length;
+      const similarity = overlap / Math.max(newWords.size, prevWords.size);
+      if (similarity > 0.7) {
+        console.log(`[watercooler] ⛔ DEDUP: rejected "${text.slice(0, 50)}…" (${(similarity * 100).toFixed(0)}% similar to "${prev.text.slice(0, 50)}…")`);
+        // Abandon the current thread to break the echo cycle
+        state.currentThread = null;
+        return { success: false, error: `dedup: ${(similarity * 100).toFixed(0)}% similar to recent message` };
+      }
+    }
+  }
+  // ── END DEDUP GUARD ──
+
   const threadId = thread?.threadId || randomUUID().slice(0, 8);
   const msg: ChatMessage = {
     from: speaker.name,
@@ -522,7 +546,7 @@ export async function generateChat(): Promise<{ success: boolean; message?: any;
     threadId,
   };
 
-  const chat = readChat();
+  // chat already loaded above for dedup check
   chat.push(msg);
   writeChat(chat);
 
