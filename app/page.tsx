@@ -3000,10 +3000,10 @@ export default function HomePage() {
         />
       )}
       {/* Discovery Animation — First-run experience */}
-      {showDiscovery && (
-        <DiscoveryAnimation
-          agents={agents}
-          onComplete={() => setShowDiscovery(false)}
+      {showDiscovery && agents.length > 0 && (
+        <DiscoveryAnimation 
+          agents={agents} 
+          onComplete={() => setShowDiscovery(false)} 
         />
       )}
 

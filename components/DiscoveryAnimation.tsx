@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 interface DiscoveryAnimationProps {
   agents: any[];
@@ -11,35 +11,33 @@ export function DiscoveryAnimation({ agents, onComplete }: DiscoveryAnimationPro
   const [stage, setStage] = useState<'loading' | 'discovery' | 'complete'>('loading');
   const [visibleAgents, setVisibleAgents] = useState<number>(0);
   const [isComplete, setIsComplete] = useState(false);
+  const onCompleteRef = useRef(onComplete);
+  onCompleteRef.current = onComplete;
 
   useEffect(() => {
-    // Check if this is first run
     const hasSeenDiscovery = localStorage.getItem('openclawfice_discovery_seen');
     
     if (hasSeenDiscovery || agents.length === 0) {
-      onComplete();
+      onCompleteRef.current();
       return;
     }
 
-    // Stage 1: Loading (1 second)
     const loadingTimer = setTimeout(() => {
       setStage('discovery');
       
-      // Play discovery sound if available
       try {
         const audio = new Audio('/sounds/discovery.mp3');
         audio.volume = 0.3;
-        audio.play().catch(() => {}); // Silent fail if no sound
+        audio.play().catch(() => {});
       } catch {}
     }, 1000);
 
     return () => clearTimeout(loadingTimer);
-  }, [agents.length, onComplete]);
+  }, [agents.length]);
 
   useEffect(() => {
     if (stage !== 'discovery') return;
 
-    // Stage 2: Fade in agents one by one (300ms each)
     let count = 0;
     const interval = setInterval(() => {
       count++;
@@ -48,19 +46,16 @@ export function DiscoveryAnimation({ agents, onComplete }: DiscoveryAnimationPro
       if (count >= agents.length) {
         clearInterval(interval);
         
-        // Stage 3: Hold for 1.5 seconds, then complete
         setTimeout(() => {
           setIsComplete(true);
           localStorage.setItem('openclawfice_discovery_seen', 'true');
-          
-          // Fade out and complete
-          setTimeout(onComplete, 800);
+          setTimeout(() => onCompleteRef.current(), 800);
         }, 1500);
       }
     }, 300);
 
     return () => clearInterval(interval);
-  }, [stage, agents.length, onComplete]);
+  }, [stage, agents.length]);
 
   if (isComplete || (stage === 'loading' && agents.length === 0)) {
     return null;
