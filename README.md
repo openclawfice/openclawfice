@@ -75,8 +75,10 @@ cd ~/openclawfice && npm install && npm run dev
 
 **📡 Monitoring**
 - **Live Session Feed** — click any NPC → real-time tool calls, file edits, reasoning
+- **Agent Search & Filtering** — find agents instantly by name/role, filter by status (`/` to search)
 - **Accomplishments** — task feed with auto-captured screen recordings
 - **Stats Dashboard** — XP trends, streaks, performance over time
+- **Workflow Export** — download your config as git-friendly JSON (version control, team sharing)
 - **Zero Config** — reads `~/.openclaw/openclaw.json` automatically
 
 ## How Agents Interact
