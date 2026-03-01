@@ -198,13 +198,19 @@ export function NPC({ agent, size = 1, onClick, forceThought, flipped, hasCelebr
         alignItems: 'center',
         gap: 2,
         cursor: onClick ? 'pointer' : 'default',
-        transition: 'transform 0.2s',
+        transition: 'transform 0.15s ease-out',
       }}
       onMouseEnter={e => {
         if (onClick) (e.currentTarget.style.transform = 'scale(1.1)');
       }}
       onMouseLeave={e => {
         (e.currentTarget.style.transform = 'scale(1)');
+      }}
+      onMouseDown={e => {
+        if (onClick) (e.currentTarget.style.transform = 'scale(0.95)');
+      }}
+      onMouseUp={e => {
+        if (onClick) (e.currentTarget.style.transform = 'scale(1.1)');
       }}
     >
       {showThought && displayThought && (
