@@ -107,6 +107,23 @@ curl -X POST localhost:3333/api/office/chat \
 
 Full API docs in [SKILL.md](./SKILL.md).
 
+## Documentation
+
+### For Users
+- **[Quick Start (5 minutes)](./QUICKSTART.md)** — Fast setup guide
+- **[First 5 Minutes](./FIRST-5-MINUTES.md)** — Your first session walkthrough
+- **[Installation Guide](./INSTALL.md)** — Complete install instructions
+- **[Troubleshooting](./TROUBLESHOOTING.md)** — Common issues & solutions
+
+### For Developers
+- **[Contributing Guide](./CONTRIBUTING.md)** — How to contribute
+- **[Your First Contribution](./docs/YOUR-FIRST-CONTRIBUTION.md)** — Step-by-step for newcomers (60 min to first PR)
+- **[Design Constraints](./DESIGN-CONSTRAINTS.md)** — Why OpenClawfice is built this way
+- **[Video Production Guide](./VIDEO-WALKTHROUGH-GUIDE.md)** — Record your own demo (30 seconds)
+
+### All Docs
+See [docs/](./docs/) for complete documentation including use cases, configuration, API reference, and more.
+
 ## Roadmap
 
 - [x] **v0.1** — Office, NPCs, quests, accomplishments, water cooler, meetings, XP, trading cards, chiptune, installer
