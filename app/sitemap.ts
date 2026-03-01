@@ -1,63 +1,23 @@
-import { MetadataRoute } from 'next';
+import type { MetadataRoute } from 'next';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://openclawfice.com';
-  const now = new Date();
-
+  const base = 'https://openclawfice.com';
+  const now = new Date().toISOString();
+  
   return [
-    {
-      url: baseUrl,
-      lastModified: now,
-      changeFrequency: 'daily',
-      priority: 1,
-    },
-    {
-      url: `${baseUrl}/landing`,
-      lastModified: now,
-      changeFrequency: 'weekly',
-      priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/install`,
-      lastModified: now,
-      changeFrequency: 'weekly',
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/help`,
-      lastModified: now,
-      changeFrequency: 'weekly',
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/card`,
-      lastModified: now,
-      changeFrequency: 'daily',
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/demo`,
-      lastModified: now,
-      changeFrequency: 'weekly',
-      priority: 0.6,
-    },
-    {
-      url: `${baseUrl}/leaderboard`,
-      lastModified: now,
-      changeFrequency: 'daily',
-      priority: 0.5,
-    },
-    {
-      url: `${baseUrl}/stats`,
-      lastModified: now,
-      changeFrequency: 'daily',
-      priority: 0.5,
-    },
-    {
-      url: `${baseUrl}/showcase`,
-      lastModified: now,
-      changeFrequency: 'weekly',
-      priority: 0.4,
-    },
+    { url: base, lastModified: now, changeFrequency: 'daily', priority: 1 },
+    { url: `${base}/demo`, lastModified: now, changeFrequency: 'weekly', priority: 0.9 },
+    { url: `${base}/landing`, lastModified: now, changeFrequency: 'weekly', priority: 0.9 },
+    { url: `${base}/install`, lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${base}/help`, lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${base}/changelog`, lastModified: now, changeFrequency: 'weekly', priority: 0.6 },
+    { url: `${base}/blog`, lastModified: now, changeFrequency: 'weekly', priority: 0.8 },
+    { url: `${base}/blog/observation-driven-debugging`, lastModified: '2026-02-28', changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${base}/blog/five-agents-one-office`, lastModified: '2026-02-27', changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${base}/card`, lastModified: now, changeFrequency: 'weekly', priority: 0.5 },
+    { url: `${base}/leaderboard`, lastModified: now, changeFrequency: 'daily', priority: 0.5 },
+    { url: `${base}/stats`, lastModified: now, changeFrequency: 'daily', priority: 0.4 },
+    { url: `${base}/affiliate`, lastModified: now, changeFrequency: 'monthly', priority: 0.6 },
+    { url: `${base}/showcase`, lastModified: now, changeFrequency: 'weekly', priority: 0.5 },
   ];
 }
