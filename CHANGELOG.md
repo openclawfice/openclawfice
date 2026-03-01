@@ -2,6 +2,27 @@
 
 All notable changes to OpenClawfice.
 
+## v0.1.1 — Mar 1, 2026
+
+### 🎨 UX Polish (Phase 1 Launch Week)
+- **Sound fallback** — Discovery animation audio fails gracefully (no console errors)
+- **Loading state** — Spinning gear icon with "LOADING AGENTS..." (no blank screen confusion)
+- **Empty state (zero agents)** — Helpful panel with 3 CTAs: RUN DEMO, CONFIGURE AGENTS, INSTALL GUIDE
+- **Quest board empty state** — "ALL CLEAR ✅" message when no quests pending (confirms UI is working)
+
+### 🔧 Technical
+- **Build stability** — Fixed Next.js build cache corruption affecting `/api/affiliate/track`
+- **SEO improvements** — Sitemap optimization, robots.txt cleanup, OG metadata for blog + changelog pages
+
+### 📚 Documentation
+- **Video production guide** — CIPHER-VIDEO-CHECKLIST.md for recording demos
+- **User feedback protocol** — PHASE-2-USER-FEEDBACK-PROTOCOL.md for handling real user issues
+- **Post-launch roadmap** — POST-LAUNCH-PRIORITIES.md with 5-phase plan and anti-priorities
+
+**Impact:** Significantly improved first-impression UX, ready for video recording and creator launches.
+
+---
+
 ## v0.1.0 — Feb 21–26, 2026
 
 ### 🏢 Core Office
