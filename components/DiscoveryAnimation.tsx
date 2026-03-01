@@ -25,11 +25,24 @@ export function DiscoveryAnimation({ agents, onComplete }: DiscoveryAnimationPro
     const loadingTimer = setTimeout(() => {
       setStage('discovery');
       
+      // Play discovery sound with graceful degradation
+      // Animation continues regardless of audio state
       try {
         const audio = new Audio('/sounds/discovery.mp3');
         audio.volume = 0.3;
-        audio.play().catch(() => {});
-      } catch {}
+        
+        // Handle load errors silently (file missing/corrupted)
+        audio.addEventListener('error', () => {
+          // Silent fallback - animation continues without sound
+        });
+        
+        // Catch play() promise rejection silently (autoplay blocked, etc.)
+        audio.play().catch(() => {
+          // Silent fallback - no console errors
+        });
+      } catch {
+        // Silent fallback for any other errors
+      }
     }, 1000);
 
     return () => clearTimeout(loadingTimer);
