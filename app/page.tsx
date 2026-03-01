@@ -455,6 +455,18 @@ export default function HomePage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Auto-scroll water cooler chat to bottom when new messages arrive
+  useEffect(() => {
+    if (chatRef.current && chatLog.length > 0) {
+      const chatEl = chatRef.current;
+      const isNearBottom = chatEl.scrollHeight - chatEl.scrollTop - chatEl.clientHeight < 100;
+      // Only auto-scroll if user was already near bottom (don't interrupt manual scrolling)
+      if (isNearBottom) {
+        chatEl.scrollTop = chatEl.scrollHeight;
+      }
+    }
+  }, [chatLog]);
+
   // Poll actions/accomplishments every 5s (initial load handled above)
   const lastActionsJson = useRef('');
   useEffect(() => {
