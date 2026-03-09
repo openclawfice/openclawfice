@@ -768,21 +768,33 @@ Visit: https://docs.openclaw.ai/openclawfice
 
 // ─── Preflight Dependency Check ─────────────────────────────────────
 
-// Quick check before launch
-const nodeVersion = process.version;
-const nodeMajor = parseInt(nodeVersion.slice(1).split('.')[0]);
-if (nodeMajor < 18) {
-  console.error('\n❌ Node.js version too old');
-  console.error('OpenClawfice requires Node.js 18+');
-  console.error('Current version:', nodeVersion);
-  console.error('\nUpgrade at: https://nodejs.org/\n');
-  process.exit(1);
-}
+// Node.js version already checked at top of file (lines 19-26)
 
 // Check if node_modules exists
 if (!fs.existsSync(join(packageRoot, 'node_modules'))) {
-  console.error('\n❌ Dependencies not installed');
-  console.error('Please run: npm install\n');
+  console.error('\n❌ Dependencies not installed!\n');
+  console.error('📍 Where I looked:');
+  console.error(`   ${join(packageRoot, 'node_modules')}`);
+  console.error('\n🔧 How to fix:');
+  console.error('   cd ~/openclawfice && npm install');
+  console.error('\n💡 This happens when:');
+  console.error('   • Fresh git clone without running npm install');
+  console.error('   • Installing from zip instead of install script\n');
+  console.error('📖 Full instructions: https://github.com/openclawfice/openclawfice#readme\n');
+  process.exit(1);
+}
+
+// Check if .next build directory exists (production mode)
+const nextDir = join(packageRoot, '.next');
+const hasNextBuild = fs.existsSync(nextDir);
+const hasSrcFiles = fs.existsSync(join(packageRoot, 'app', 'page.tsx'));
+
+if (!hasNextBuild && !hasSrcFiles) {
+  console.error('\n❌ OpenClawfice installation corrupted!\n');
+  console.error('Neither production build (.next/) nor source files (app/) found.');
+  console.error('\n🔧 How to fix:');
+  console.error('   1. Fresh install: curl -fsSL https://openclawfice.com/install.sh | bash');
+  console.error('   2. Or rebuild: cd ~/openclawfice && npm run build\n');
   process.exit(1);
 }
 
@@ -808,12 +820,22 @@ const child = spawn('npm', args, {
 });
 
 child.on('error', (err) => {
-  console.error('\n❌ Failed to start OpenClawfice\n');
+  console.error('\n❌ Failed to start OpenClawfice!\n');
   console.error('Error:', err.message);
+  console.error('');
   
   if (err.code === 'ENOENT') {
-    console.error('\nLooks like npm is not in your PATH.');
-    console.error('Make sure Node.js is installed: https://nodejs.org/\n');
+    console.error('🔧 Looks like npm is not in your PATH.');
+    console.error('');
+    console.error('How to fix:');
+    console.error('  1. Install Node.js: https://nodejs.org/');
+    console.error('  2. Restart your terminal');
+    console.error('  3. Verify: npm --version\n');
+  } else {
+    console.error('🔧 Common fixes:');
+    console.error('  1. Check dependencies: cd ~/openclawfice && npm install');
+    console.error('  2. Run diagnostics: openclawfice doctor');
+    console.error('  3. Try fresh install: curl -fsSL https://openclawfice.com/install.sh | bash\n');
   }
   
   process.exit(1);
@@ -821,14 +843,20 @@ child.on('error', (err) => {
 
 child.on('exit', (code) => {
   if (code !== 0) {
-    // Port conflict is common, give helpful message
-    if (code === 1 || code === 127) {
-      console.error(`\n⚠️  OpenClawfice exited with code ${code}`);
-      console.error(`\nCommon fixes:`);
-      console.error(`  1. Port conflict? Try: openclawfice --port=3334`);
-      console.error(`  2. Build failed? Try: npm install && npm run build`);
-      console.error(`  3. Check doctor: openclawfice doctor\n`);
-    }
+    console.error(`\n❌ OpenClawfice exited with code ${code}\n`);
+    console.error('🔧 Common fixes:\n');
+    console.error(`  1. Port ${port} already in use?`);
+    console.error('     → Try: openclawfice --port=3334');
+    console.error('');
+    console.error('  2. Build missing or corrupted?');
+    console.error('     → Run: cd ~/openclawfice && npm install && npm run build');
+    console.error('');
+    console.error('  3. Check system health:');
+    console.error('     → Run: openclawfice doctor');
+    console.error('');
+    console.error('  4. Nuclear option (fresh install):');
+    console.error('     → curl -fsSL https://openclawfice.com/install.sh | bash\n');
+    console.error('📖 Full troubleshooting: https://github.com/openclawfice/openclawfice/blob/main/TROUBLESHOOTING.md\n');
   }
   process.exit(code || 0);
 });
