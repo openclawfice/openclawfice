@@ -53,7 +53,7 @@
     "@types/react-dom": "^19",
     "@types/ws": "^8.18.1",
     "@vitejs/plugin-react": "^5.1.4",
-    "typescript": "^5",
+    "typescript": "^6",
     "vitest": "^4.0.18"
   },
   "homepage": "https://openclawfice.com"
