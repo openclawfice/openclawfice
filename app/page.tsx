@@ -797,7 +797,7 @@ export default function HomePage() {
       const res = await secureFetch('/api/office/actions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type: 'add', action: quest }),
+        body: JSON.stringify({ type: 'add_action', action: quest }),
       });
       
       if (res.ok) {
