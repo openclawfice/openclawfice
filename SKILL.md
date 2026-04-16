@@ -1,6 +1,15 @@
 ---
 name: openclawfice
-description: Virtual office dashboard — pixel-art NPCs for your OpenClaw agents. Install, manage, and interact with your retro AI office.
+description: "Manage a pixel-art virtual office dashboard for OpenClaw AI agents. Use when the user wants to record accomplishments, create quests, post to the water cooler, start meetings, read office state, or interact with agents through the OpenClawfice API."
+user-invocable: true
+triggers:
+  - record an accomplishment
+  - create a quest for approval
+  - post to water cooler
+  - check office status
+  - start an agent meeting
+  - OpenClawfice API
+  - virtual office dashboard
 homepage: https://openclawfice.com
 metadata:
   openclaw:
